@@ -60,6 +60,12 @@ async function userRoutes(fastify, options) {
       return reply.code(500).send({ error: 'Terjadi kesalahan' })
     }
   })
+
+  fastify.post('/api/logout', {
+    preHandler: authMiddleware
+  }, async (request, reply) => {
+    return reply.code(200).send({ data: 'Logout berhasil' })
+  })
 }
 
 module.exports = userRoutes
