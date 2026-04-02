@@ -1,4 +1,4 @@
-const { registerUser, loginUser, getCurrentUser } = require('../services/user-service')
+const { registerUser, loginUser, getCurrentUser, updateUserData } = require('../services/user-service')
 const { authMiddleware } = require('../middlewares/auth-middleware')
 
 async function userRoutes(fastify, options) {
@@ -65,6 +65,28 @@ async function userRoutes(fastify, options) {
     preHandler: authMiddleware
   }, async (request, reply) => {
     return reply.code(200).send({ data: 'Logout berhasil' })
+  })
+
+  fastify.put('/api/me', {
+    preHandler: authMiddleware,
+    schema: {
+      body: {
+        type: 'object',
+        required: ['username', 'email'],
+        properties: {
+          username: { type: 'string', minLength: 1 },
+          email: { type: 'string', format: 'email' }
+        },
+        additionalProperties: false
+      }
+    }
+  }, async (request, reply) => {
+    try {
+      const user = await updateUserData(fastify, request.user.id, request.body)
+      return reply.code(200).send({ data: { message: 'Update data berhasil', user } })
+    } catch (err) {
+      return reply.code(400).send({ error: err.message })
+    }
   })
 }
 
