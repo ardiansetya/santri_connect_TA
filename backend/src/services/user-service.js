@@ -1,5 +1,37 @@
 const bcrypt = require('bcrypt')
 
+async function loginUser(fastify, email, password) {
+  const connection = fastify.mysql
+
+  const [users] = await connection.query(
+    'SELECT id, username, email, password, role FROM users WHERE email = ?',
+    [email]
+  )
+
+  if (users.length === 0) {
+    throw new Error('Kredensial tidak valid')
+  }
+
+  const user = users[0]
+  const isValidPassword = await bcrypt.compare(password, user.password)
+
+  if (!isValidPassword) {
+    throw new Error('Kredensial tidak valid')
+  }
+
+  const token = fastify.jwt.sign({ id: user.id, role: user.role })
+
+  return {
+    message: 'Login berhasil',
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role
+    }
+  }
+}
+
 async function registerUser(fastify, username, email, password) {
   const connection = fastify.mysql
 
@@ -22,4 +54,4 @@ async function registerUser(fastify, username, email, password) {
   return result
 }
 
-module.exports = { registerUser }
+module.exports = { registerUser, loginUser }

@@ -3,6 +3,9 @@ const fastify = require('fastify')({ logger: true })
 
 async function start() {
   await fastify.register(require('@fastify/formbody'))
+  await fastify.register(require('@fastify/jwt'), {
+    secret: process.env.JWT_SECRET || 'santri_connect_secret_key'
+  })
   await fastify.register(require('./plugins/mysql'))
   fastify.register(require('./routes/root'))
   fastify.register(require('./routes/user-routes'))
