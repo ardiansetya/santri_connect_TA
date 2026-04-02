@@ -1,4 +1,4 @@
-async function getPesantrenDetail(fastify, id) {
+async function getpesantrenDetail(fastify, id) {
   const connection = fastify.mysql
 
   const parsedId = parseInt(id, 10)
@@ -9,7 +9,7 @@ async function getPesantrenDetail(fastify, id) {
   )
 
   if (pesantren.length === 0) {
-    throw new Error('Pesantren tidak ditemukan')
+    throw new Error('pesantren tidak ditemukan')
   }
 
   const data = pesantren[0]
@@ -49,7 +49,7 @@ async function getPesantrenDetail(fastify, id) {
   }
 }
 
-async function getPesastrichtList(fastify, filters) {
+async function getpesantrenList(fastify, filters) {
   const connection = fastify.mysql
   
   const { search, provinsi, kota, biaya_min, biaya_max, fasilitas, kurikulum, page = 1, limit = 10, sort = 'terbaru' } = filters
@@ -161,4 +161,4 @@ async function getPesastrichtList(fastify, filters) {
   }
 }
 
-module.exports = { getPesantrenDetail, getPesastrichtList }
+module.exports = { getpesantrenDetail, getpesantrenList }
