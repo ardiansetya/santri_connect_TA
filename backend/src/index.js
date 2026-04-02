@@ -18,6 +18,7 @@ async function start() {
   await fastify.register(require('./plugins/mysql'))
   fastify.register(require('./routes/root'))
   fastify.register(require('./routes/user-routes'))
+  fastify.register(require('./routes/pesantren-routes'))
 
   try {
     await fastify.listen({ port: 3000 })
