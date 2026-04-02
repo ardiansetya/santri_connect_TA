@@ -1,4 +1,5 @@
-const { registerUser, loginUser } = require('../services/user-service')
+const { registerUser, loginUser, getCurrentUser } = require('../services/user-service')
+const { authMiddleware } = require('../middlewares/auth-middleware')
 
 async function userRoutes(fastify, options) {
   fastify.post('/api/register', {
@@ -43,6 +44,20 @@ async function userRoutes(fastify, options) {
       return reply.code(200).send({ data: result })
     } catch (err) {
       return reply.code(401).send({ error: 'Email atau password salah' })
+    }
+  })
+
+  fastify.get('/api/me', {
+    preHandler: authMiddleware
+  }, async (request, reply) => {
+    try {
+      const user = await getCurrentUser(fastify, request.user.id)
+      return reply.code(200).send({ data: user })
+    } catch (err) {
+      if (err.message === 'Data user tidak ditemukan') {
+        return reply.code(404).send({ error: 'Data user tidak ditemukan' })
+      }
+      return reply.code(500).send({ error: 'Terjadi kesalahan' })
     }
   })
 }
