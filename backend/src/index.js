@@ -1,0 +1,19 @@
+require('dotenv').config()
+const fastify = require('fastify')({ logger: true })
+
+async function start() {
+  await fastify.register(require('@fastify/formbody'))
+  await fastify.register(require('./plugins/mysql'))
+  fastify.register(require('./routes/root'))
+  fastify.register(require('./routes/user-routes'))
+
+  try {
+    await fastify.listen({ port: 3000 })
+    console.log('Server running at http://localhost:3000')
+  } catch (err) {
+    fastify.log.error(err)
+    process.exit(1)
+  }
+}
+
+start()
