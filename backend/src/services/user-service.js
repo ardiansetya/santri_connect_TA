@@ -1,5 +1,35 @@
 const bcrypt = require('bcrypt')
 
+async function updateUserData(fastify, userId, { username, email }) {
+  const connection = fastify.mysql
+
+  const [existing] = await connection.query(
+    'SELECT id FROM users WHERE email = ? AND id != ?',
+    [email, userId]
+  )
+
+  if (existing.length > 0) {
+    throw new Error('Email sudah digunakan oleh pengguna lain')
+  }
+
+  await connection.query(
+    'UPDATE users SET username = ?, email = ?, updated_at = NOW() WHERE id = ?',
+    [username, email, userId]
+  )
+
+  const [users] = await connection.query(
+    'SELECT id, username, email, role, created_at, updated_at FROM users WHERE id = ?',
+    [userId]
+  )
+
+  const user = users[0]
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email
+  }
+}
+
 async function getCurrentUser(fastify, userId) {
   const connection = fastify.mysql
 
@@ -77,4 +107,4 @@ async function registerUser(fastify, username, email, password) {
   return result
 }
 
-module.exports = { registerUser, loginUser, getCurrentUser }
+module.exports = { registerUser, loginUser, getCurrentUser, updateUserData }
