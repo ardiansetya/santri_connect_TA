@@ -1,5 +1,28 @@
 const bcrypt = require('bcrypt')
 
+async function getCurrentUser(fastify, userId) {
+  const connection = fastify.mysql
+
+  const [users] = await connection.query(
+    'SELECT id, username, email, role, created_at, updated_at FROM users WHERE id = ?',
+    [userId]
+  )
+
+  if (users.length === 0) {
+    throw new Error('Data user tidak ditemukan')
+  }
+
+  const user = users[0]
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    created_at: user.created_at,
+    updated_at: user.updated_at
+  }
+}
+
 async function loginUser(fastify, email, password) {
   const connection = fastify.mysql
 
@@ -54,4 +77,4 @@ async function registerUser(fastify, username, email, password) {
   return result
 }
 
-module.exports = { registerUser, loginUser }
+module.exports = { registerUser, loginUser, getCurrentUser }
