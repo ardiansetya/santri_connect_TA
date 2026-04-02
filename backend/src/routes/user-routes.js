@@ -8,9 +8,9 @@ async function userRoutes(fastify, options) {
         type: 'object',
         required: ['username', 'email', 'password'],
         properties: {
-          username: { type: 'string' },
-          email: { type: 'string' },
-          password: { type: 'string' }
+          username: { type: 'string', minLength: 1 },
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string', minLength: 6 }
         }
       }
     }
@@ -31,8 +31,8 @@ async function userRoutes(fastify, options) {
         type: 'object',
         required: ['email', 'password'],
         properties: {
-          email: { type: 'string' },
-          password: { type: 'string' }
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string', minLength: 1 }
         }
       }
     }

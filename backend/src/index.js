@@ -1,5 +1,14 @@
 require('dotenv').config()
-const fastify = require('fastify')({ logger: true })
+const fastify = require('fastify')({ 
+  logger: true,
+  ajv: {
+    customOptions: {
+      formats: {
+        email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+      }
+    }
+  }
+})
 
 async function start() {
   await fastify.register(require('@fastify/formbody'))
