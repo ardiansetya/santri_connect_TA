@@ -51,7 +51,8 @@ const Pendaftaran = {
   },
 
   async findAll({ status, pesantren_id, page, limit }) {
-    let query = `SELECT p.id, p.nomor_pendaftaran, p.status, p.created_at,
+    let query = `SELECT p.id, p.nomor_pendaftaran, p.status, p.catatan_admin, p.created_at,
+                        p.nama_lengkap,
                         u.id as user_id, u.email as user_email,
                         pes.id as pesantren_id, pes.nama as pesantren_nama
                  FROM pendaftaran p

@@ -99,6 +99,22 @@ const AdminController = {
         ? reply.code(400).send({ error: err.message })
         : reply.code(500).send({ error: 'Terjadi kesalahan pada server' })
     }
+  },
+
+  async exportPendaftaran(request, reply) {
+    if (request.user.role !== 'superadmin') return reply.code(403).send({ error: 'Akses ditolak, hanya superadmin' })
+
+    try {
+      const buffer = await AdminService.exportPendaftaran(request.query)
+      const filename = `pendaftaran-${new Date().toISOString().split('T')[0]}.xlsx`
+
+      return reply
+        .header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        .header('Content-Disposition', `attachment; filename="${filename}"`)
+        .send(buffer)
+    } catch {
+      return reply.code(500).send({ error: 'Terjadi kesalahan pada server' })
+    }
   }
 }
 

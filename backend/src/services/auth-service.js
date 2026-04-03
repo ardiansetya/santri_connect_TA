@@ -127,6 +127,42 @@ const AdminService = {
     if (!updated) throw new Error('Data pendaftaran tidak ditemukan')
 
     return { message: 'Status pendaftaran berhasil diperbarui' }
+  },
+
+  async exportPendaftaran(filters) {
+    const Pendaftaran = require('../models/Pendaftaran')
+    const { data } = await Pendaftaran.findAll({ ...filters, page: 1, limit: 10000 })
+
+    const ExcelJS = require('exceljs')
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Pendaftaran')
+
+    worksheet.columns = [
+      { header: 'No. Pendaftaran', key: 'nomor_pendaftaran', width: 25 },
+      { header: 'Nama Lengkap', key: 'nama_lengkap', width: 30 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Pesantren', key: 'pesantren', width: 30 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Tanggal Daftar', key: 'created_at', width: 20 },
+      { header: 'Catatan Admin', key: 'catatan_admin', width: 30 }
+    ]
+
+    worksheet.getRow(1).font = { bold: true }
+
+    data.forEach(row => {
+      worksheet.addRow({
+        nomor_pendaftaran: row.nomor_pendaftaran,
+        nama_lengkap: row.nama_lengkap,
+        email: row.user_email,
+        pesantren: row.pesantren_nama,
+        status: row.status,
+        created_at: new Date(row.created_at).toLocaleDateString('id-ID'),
+        catatan_admin: row.catatan_admin || '-'
+      })
+    })
+
+    const buffer = await workbook.xlsx.writeBuffer()
+    return buffer
   }
 }
 
