@@ -56,6 +56,10 @@ const pesantrenRoutes = async (fastify) => {
   fastify.get('/api/pesantren/:id', {
     schema: { params: { type: 'object', properties: { id: { type: 'integer' } }, required: ['id'] } }
   }, (request, reply) => PesantrenController.getDetail(request, reply))
+
+  fastify.get('/api/pesantren/:id/pendaftaran-info', {
+    schema: { params: { type: 'object', properties: { id: { type: 'integer' } }, required: ['id'] } }
+  }, (request, reply) => PesantrenController.getPendaftaranInfo(request, reply))
 }
 
 const rekomendasiRoutes = async (fastify) => {

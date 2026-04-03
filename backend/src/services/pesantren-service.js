@@ -26,6 +26,22 @@ const PesantrenService = {
     }
   },
 
+  async getPendaftaranInfo(id) {
+    const data = await Pesantren.findById(parseInt(id, 10))
+    if (!data) throw new Error('Pesantren tidak ditemukan')
+
+    return {
+      pesantren_id: data.id,
+      nama: data.nama,
+      biaya_pendaftaran: data.biaya_pendaftaran,
+      rekening: {
+        nama_bank: data.nama_bank,
+        nomor_rekening: data.nomor_rekening,
+        atas_nama: data.atas_nama_rekening
+      }
+    }
+  },
+
   async getList(filters) {
     const page = Math.max(1, parseInt(filters.page) || 1)
     const limit = Math.min(50, Math.max(1, parseInt(filters.limit) || 10))
