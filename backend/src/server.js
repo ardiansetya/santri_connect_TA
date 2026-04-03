@@ -18,7 +18,7 @@ async function start() {
   const authMiddleware = require('./middlewares/auth-middleware')
   fastify.decorate('authMiddleware', authMiddleware)
 
-  const { userRoutes, adminRoutes, pesantrenRoutes, rekomendasiRoutes, pendaftaranRoutes, pemilikRoutes, publicRoutes } = require('./routes')
+  const { userRoutes, adminRoutes, pesantrenRoutes, rekomendasiRoutes, pendaftaranRoutes, pemilikRoutes, publicRoutes, wilayahRoutes } = require('./routes')
 
   fastify.get('/', async () => ({ message: 'Santri Connect API' }))
   fastify.get('/health', async () => ({ status: 'ok' }))
@@ -30,6 +30,7 @@ async function start() {
   await fastify.register(pendaftaranRoutes)
   await fastify.register(pemilikRoutes)
   await fastify.register(publicRoutes)
+  await fastify.register(wilayahRoutes)
 
   try {
     await fastify.listen({ port: process.env.PORT || 3000 })
