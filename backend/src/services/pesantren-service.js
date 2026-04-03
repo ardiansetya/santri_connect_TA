@@ -80,6 +80,21 @@ const PesantrenService = {
     }
     if (!data.nama) throw new Error('Nama pesantren wajib diisi')
 
+    const WilayahService = require('./wilayah-service')
+    if (data.province || data.provinsi) {
+      const provinceResult = await WilayahService.validateProvince(data.province || data.provinsi)
+      if (!provinceResult.valid) throw new Error(provinceResult.message)
+      data.province = provinceResult.name
+    }
+    if (data.kota) {
+      const provinceId = data.province ? (await WilayahService.getProvinceByName(data.province))?.id : null
+      if (provinceId) {
+        const regencyResult = await WilayahService.validateRegency(provinceId, data.kota)
+        if (!regencyResult.valid) throw new Error(regencyResult.message)
+        data.kota = regencyResult.name
+      }
+    }
+
     await Pesantren.create({ ...data, user_id: userId })
     return { message: 'Pesantren berhasil ditambahkan' }
   },
@@ -93,6 +108,21 @@ const PesantrenService = {
     const existing = await Pesantren.findById(parseInt(id, 10))
     if (!existing) throw new Error('Pesantren tidak ditemukan')
     if (existing.user_id !== userId) throw new Error('Akses ditolak, bukan pesantren Anda')
+
+    const WilayahService = require('./wilayah-service')
+    if (data.province || data.provinsi) {
+      const provinceResult = await WilayahService.validateProvince(data.province || data.provinsi)
+      if (!provinceResult.valid) throw new Error(provinceResult.message)
+      data.province = provinceResult.name
+    }
+    if (data.kota) {
+      const provinceId = data.province ? (await WilayahService.getProvinceByName(data.province))?.id : existing.province ? (await WilayahService.getProvinceByName(existing.province))?.id : null
+      if (provinceId) {
+        const regencyResult = await WilayahService.validateRegency(provinceId, data.kota)
+        if (!regencyResult.valid) throw new Error(regencyResult.message)
+        data.kota = regencyResult.name
+      }
+    }
 
     const updated = await Pesantren.update(parseInt(id, 10), data)
     if (!updated) throw new Error('Pesantren tidak ditemukan')
