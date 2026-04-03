@@ -95,6 +95,27 @@ const AdminService = {
       data: mappedData,
       meta: { page, limit, total_data: total, total_page: Math.ceil(total / limit) }
     }
+  },
+
+  async getPendaftaranDetail(id) {
+    const Pendaftaran = require('../models/Pendaftaran')
+    const data = await Pendaftaran.findById(parseInt(id, 10))
+    if (!data) throw new Error('Data pendaftaran tidak ditemukan')
+
+    return {
+      id: data.id,
+      nomor_pendaftaran: data.nomor_pendaftaran,
+      status: data.status,
+      catatan_admin: data.catatan_admin,
+      created_at: data.created_at,
+      user: { id: data.user_id, email: data.user_email },
+      pesantren: { id: data.pesantren_id, nama: data.pesantren_nama },
+      dokumen: {
+        foto_ktp: data.foto_ktp,
+        pas_foto: data.pas_foto,
+        kartu_keluarga: data.kartu_keluarga
+      }
+    }
   }
 }
 
