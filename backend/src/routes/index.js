@@ -54,6 +54,7 @@ const adminRoutes = async (fastify) => {
   fastify.get('/api/admin/pendaftaran/export', { preHandler: authMiddleware }, (request, reply) => AdminController.exportPendaftaran(request, reply))
   fastify.post('/api/admin/pesantren', { preHandler: authMiddleware }, (request, reply) => AdminController.createPesantren(request, reply))
   fastify.put('/api/admin/pesantren/:id', { preHandler: authMiddleware }, (request, reply) => AdminController.updatePesantren(request, reply))
+  fastify.delete('/api/admin/pesantren/:id', { preHandler: authMiddleware }, (request, reply) => AdminController.deletePesantren(request, reply))
 }
 
 const pesantrenRoutes = async (fastify) => {
