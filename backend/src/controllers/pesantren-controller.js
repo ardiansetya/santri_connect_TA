@@ -44,6 +44,21 @@ const PesantrenController = {
     } catch (err) {
       return reply.code(400).send({ error: err.message })
     }
+  },
+
+  async updateByPemilik(request, reply) {
+    try {
+      const result = await PesantrenService.updateByPemilik(request.user.id, request.params.id, request.body)
+      return reply.code(200).send(result)
+    } catch (err) {
+      if (err.message === 'Pesantren tidak ditemukan') {
+        return reply.code(404).send({ error: 'Pesantren tidak ditemukan' })
+      }
+      if (err.message === 'Akses ditolak, bukan pesantren Anda') {
+        return reply.code(403).send({ error: 'Akses ditolak' })
+      }
+      return reply.code(400).send({ error: err.message })
+    }
   }
 }
 
