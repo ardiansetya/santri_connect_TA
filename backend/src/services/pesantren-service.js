@@ -71,6 +71,17 @@ const PesantrenService = {
       data,
       meta: { page, limit, total_data: total, total_page: Math.ceil(total / limit) }
     }
+  },
+
+  async createByPemilik(userId, data) {
+    const validKurikulum = ['modern', 'salaf', 'campuran']
+    if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
+      throw new Error('Kurikulum tidak valid')
+    }
+    if (!data.nama) throw new Error('Nama pesantren wajib diisi')
+
+    await Pesantren.create({ ...data, user_id: userId })
+    return { message: 'Pesantren berhasil ditambahkan' }
   }
 }
 
