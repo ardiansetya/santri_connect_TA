@@ -1,4 +1,5 @@
 const authMiddleware = require('../middlewares/auth-middleware')
+const validateWilayah = require('../middlewares/validate-wilayah')
 const { AuthController, UserController, AdminController } = require('../controllers/auth-controller')
 const PesantrenController = require('../controllers/pesantren-controller')
 const PesantrenService = require('../services/pesantren-service')
@@ -53,8 +54,36 @@ const adminRoutes = async (fastify) => {
   fastify.get('/api/admin/pendaftaran/:id', { preHandler: authMiddleware }, (request, reply) => AdminController.getPendaftaranDetail(request, reply))
   fastify.put('/api/admin/pendaftaran/:id/status', { preHandler: authMiddleware }, (request, reply) => AdminController.updatePendaftaranStatus(request, reply))
   fastify.get('/api/admin/pendaftaran/export', { preHandler: authMiddleware }, (request, reply) => AdminController.exportPendaftaran(request, reply))
-  fastify.post('/api/admin/pesantren', { preHandler: authMiddleware }, (request, reply) => AdminController.createPesantren(request, reply))
-  fastify.put('/api/admin/pesantren/:id', { preHandler: authMiddleware }, (request, reply) => AdminController.updatePesantren(request, reply))
+  fastify.post('/api/admin/pesantren', {
+    preHandler: [authMiddleware, validateWilayah],
+    schema: {
+      body: {
+        type: 'object',
+        required: ['nama', 'province', 'kota'],
+        properties: {
+          nama: { type: 'string', minLength: 1 },
+          province: { type: 'string' },
+          kota: { type: 'string' },
+          kurikulum: { type: 'string', enum: ['modern', 'salaf', 'campuran'] }
+        }
+      }
+    }
+  }, (request, reply) => AdminController.createPesantren(request, reply))
+
+  fastify.put('/api/admin/pesantren/:id', {
+    preHandler: [authMiddleware, validateWilayah],
+    schema: {
+      body: {
+        type: 'object',
+        properties: {
+          nama: { type: 'string', minLength: 1 },
+          province: { type: 'string' },
+          kota: { type: 'string' },
+          kurikulum: { type: 'string', enum: ['modern', 'salaf', 'campuran'] }
+        }
+      }
+    }
+  }, (request, reply) => AdminController.updatePesantren(request, reply))
   fastify.delete('/api/admin/pesantren/:id', { preHandler: authMiddleware }, (request, reply) => AdminController.deletePesantren(request, reply))
 }
 
@@ -90,7 +119,21 @@ const pemilikRoutes = async (fastify) => {
     }
   })
 
-  fastify.post('/api/pemilik/pesantren', { preHandler: authMiddleware }, async (request, reply) => {
+  fastify.post('/api/pemilik/pesantren', {
+    preHandler: [authMiddleware, validateWilayah],
+    schema: {
+      body: {
+        type: 'object',
+        required: ['nama', 'province', 'kota'],
+        properties: {
+          nama: { type: 'string', minLength: 1 },
+          province: { type: 'string' },
+          kota: { type: 'string' },
+          kurikulum: { type: 'string', enum: ['modern', 'salaf', 'campuran'] }
+        }
+      }
+    }
+  }, async (request, reply) => {
     if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
     try {
       const result = await PesantrenService.createByPemilik(request.user.id, request.body)
@@ -100,7 +143,20 @@ const pemilikRoutes = async (fastify) => {
     }
   })
 
-  fastify.put('/api/pemilik/pesantren/:id', { preHandler: authMiddleware }, async (request, reply) => {
+  fastify.put('/api/pemilik/pesantren/:id', {
+    preHandler: [authMiddleware, validateWilayah],
+    schema: {
+      body: {
+        type: 'object',
+        properties: {
+          nama: { type: 'string', minLength: 1 },
+          province: { type: 'string' },
+          kota: { type: 'string' },
+          kurikulum: { type: 'string', enum: ['modern', 'salaf', 'campuran'] }
+        }
+      }
+    }
+  }, async (request, reply) => {
     if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
     try {
       const result = await PesantrenService.updateByPemilik(request.user.id, request.params.id, request.body)
