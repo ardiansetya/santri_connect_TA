@@ -163,6 +163,17 @@ const AdminService = {
 
     const buffer = await workbook.xlsx.writeBuffer()
     return buffer
+  },
+
+  async createPesantren(data) {
+    const validKurikulum = ['modern', 'salaf', 'campuran']
+    if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
+      throw new Error('Kurikulum tidak valid')
+    }
+
+    const Pesantren = require('../models/Pesantren')
+    await Pesantren.create(data)
+    return { message: 'Pesantren berhasil ditambahkan' }
   }
 }
 
