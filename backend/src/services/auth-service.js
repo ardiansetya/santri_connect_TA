@@ -74,6 +74,27 @@ const AdminService = {
       data,
       meta: { page, limit, total_data: total, total_page: Math.ceil(total / limit) }
     }
+  },
+
+  async getAllPendaftaran(filters) {
+    const page = Math.max(1, parseInt(filters.page) || 1)
+    const limit = Math.min(50, Math.max(1, parseInt(filters.limit) || 10))
+    const Pendaftaran = require('../models/Pendaftaran')
+    const { data, total } = await Pendaftaran.findAll({ ...filters, page, limit })
+
+    const mappedData = data.map(row => ({
+      id: row.id,
+      nomor_pendaftaran: row.nomor_pendaftaran,
+      status: row.status,
+      created_at: row.created_at,
+      user: { id: row.user_id, email: row.user_email },
+      pesantren: { id: row.pesantren_id, nama: row.pesantren_nama }
+    }))
+
+    return {
+      data: mappedData,
+      meta: { page, limit, total_data: total, total_page: Math.ceil(total / limit) }
+    }
   }
 }
 

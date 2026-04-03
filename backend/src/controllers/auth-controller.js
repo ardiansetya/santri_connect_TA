@@ -62,6 +62,16 @@ const AdminController = {
     } catch {
       return reply.code(500).send({ error: 'Terjadi kesalahan pada server' })
     }
+  },
+
+  async getAllPendaftaran(request, reply) {
+    if (request.user.role !== 'superadmin') return reply.code(403).send({ error: 'Akses ditolak, hanya superadmin' })
+    try {
+      const result = await AdminService.getAllPendaftaran(request.query)
+      return reply.code(200).send({ data: result.data, meta: result.meta })
+    } catch {
+      return reply.code(500).send({ error: 'Terjadi kesalahan pada server' })
+    }
   }
 }
 
