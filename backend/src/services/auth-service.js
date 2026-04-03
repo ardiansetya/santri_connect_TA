@@ -116,6 +116,17 @@ const AdminService = {
         kartu_keluarga: data.kartu_keluarga
       }
     }
+  },
+
+  async updatePendaftaranStatus(id, { status, catatan_admin }) {
+    const validStatuses = ['pending', 'diproses', 'diterima', 'ditolak']
+    if (!validStatuses.includes(status)) throw new Error('Status tidak valid')
+
+    const Pendaftaran = require('../models/Pendaftaran')
+    const updated = await Pendaftaran.updateStatus(parseInt(id, 10), { status, catatan_admin })
+    if (!updated) throw new Error('Data pendaftaran tidak ditemukan')
+
+    return { message: 'Status pendaftaran berhasil diperbarui' }
   }
 }
 

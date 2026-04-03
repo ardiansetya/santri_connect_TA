@@ -102,6 +102,14 @@ const Pendaftaran = {
       [id]
     )
     return rows[0]
+  },
+
+  async updateStatus(id, { status, catatan_admin }) {
+    const [result] = await require('../config/db').getPool().query(
+      'UPDATE pendaftaran SET status = ?, catatan_admin = ?, updated_at = NOW() WHERE id = ?',
+      [status, catatan_admin || null, id]
+    )
+    return result.affectedRows > 0
   }
 }
 

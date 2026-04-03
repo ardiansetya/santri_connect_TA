@@ -50,6 +50,7 @@ const adminRoutes = async (fastify) => {
   fastify.get('/api/admin/users', { preHandler: authMiddleware }, (request, reply) => AdminController.getAllUsers(request, reply))
   fastify.get('/api/admin/pendaftaran', { preHandler: authMiddleware }, (request, reply) => AdminController.getAllPendaftaran(request, reply))
   fastify.get('/api/admin/pendaftaran/:id', { preHandler: authMiddleware }, (request, reply) => AdminController.getPendaftaranDetail(request, reply))
+  fastify.put('/api/admin/pendaftaran/:id/status', { preHandler: authMiddleware }, (request, reply) => AdminController.updatePendaftaranStatus(request, reply))
 }
 
 const pesantrenRoutes = async (fastify) => {
