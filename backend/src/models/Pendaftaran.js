@@ -85,6 +85,23 @@ const Pendaftaran = {
     const [countResult] = await require('../config/db').getPool().query(countQuery, countParams)
 
     return { data: rows, total: countResult[0].total }
+  },
+
+  async findById(id) {
+    const [rows] = await require('../config/db').getPool().query(
+      `SELECT p.id, p.nomor_pendaftaran, p.status, p.catatan_admin, p.created_at,
+              p.nama_lengkap, p.nik, p.tempat_lahir, p.tanggal_lahir, p.jenis_kelamin,
+              p.alamat, p.no_hp, p.nama_ayah, p.nama_ibu, p.no_hp_ortu, p.pekerjaan_ortu,
+              p.foto_ktp, p.pas_foto, p.kartu_keluarga,
+              u.id as user_id, u.email as user_email,
+              pes.id as pesantren_id, pes.nama as pesantren_nama
+       FROM pendaftaran p
+       LEFT JOIN users u ON p.user_id = u.id
+       LEFT JOIN pesantren pes ON p.pesantren_id = pes.id
+       WHERE p.id = ?`,
+      [id]
+    )
+    return rows[0]
   }
 }
 
