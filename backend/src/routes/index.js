@@ -118,5 +118,6 @@ const pemilikRoutes = async (fastify) => {
 }
 
 const publicRoutes = require('./public-routes')
+const wilayahRoutes = require('./wilayah-routes')
 
-module.exports = { userRoutes, adminRoutes, pesantrenRoutes, rekomendasiRoutes, pendaftaranRoutes, pemilikRoutes, publicRoutes }
+module.exports = { userRoutes, adminRoutes, pesantrenRoutes, rekomendasiRoutes, pendaftaranRoutes, pemilikRoutes, publicRoutes, wilayahRoutes }
