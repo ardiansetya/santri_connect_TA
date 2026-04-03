@@ -35,6 +35,15 @@ const PesantrenController = {
     } catch {
       return reply.code(500).send({ success: false, error: 'Terjadi kesalahan pada server' })
     }
+  },
+
+  async createByPemilik(request, reply) {
+    try {
+      const result = await PesantrenService.createByPemilik(request.user.id, request.body)
+      return reply.code(201).send(result)
+    } catch (err) {
+      return reply.code(400).send({ error: err.message })
+    }
   }
 }
 

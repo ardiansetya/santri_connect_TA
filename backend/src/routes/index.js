@@ -89,6 +89,16 @@ const pemilikRoutes = async (fastify) => {
       return reply.code(500).send({ success: false, error: 'Terjadi kesalahan pada server' })
     }
   })
+
+  fastify.post('/api/pemilik/pesantren', { preHandler: authMiddleware }, async (request, reply) => {
+    if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
+    try {
+      const result = await PesantrenService.createByPemilik(request.user.id, request.body)
+      return reply.code(201).send(result)
+    } catch (err) {
+      return reply.code(400).send({ error: err.message })
+    }
+  })
 }
 
 module.exports = { userRoutes, adminRoutes, pesantrenRoutes, rekomendasiRoutes, pendaftaranRoutes, pemilikRoutes }
