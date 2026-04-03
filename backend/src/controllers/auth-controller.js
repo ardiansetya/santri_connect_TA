@@ -84,6 +84,21 @@ const AdminController = {
         ? reply.code(404).send({ error: 'Data pendaftaran tidak ditemukan' })
         : reply.code(500).send({ error: 'Terjadi kesalahan pada server' })
     }
+  },
+
+  async updatePendaftaranStatus(request, reply) {
+    if (request.user.role !== 'superadmin') return reply.code(403).send({ error: 'Akses ditolak, hanya superadmin' })
+    const { status, catatan_admin } = request.body
+    if (!status) return reply.code(400).send({ error: 'Input tidak valid' })
+
+    try {
+      const result = await AdminService.updatePendaftaranStatus(request.params.id, { status, catatan_admin })
+      return reply.code(200).send(result)
+    } catch (err) {
+      return err.message === 'Status tidak valid' || err.message === 'Data pendaftaran tidak ditemukan'
+        ? reply.code(400).send({ error: err.message })
+        : reply.code(500).send({ error: 'Terjadi kesalahan pada server' })
+    }
   }
 }
 
