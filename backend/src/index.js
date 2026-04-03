@@ -19,6 +19,7 @@ async function start() {
   fastify.register(require('./routes/root'))
   fastify.register(require('./routes/user-routes'))
   fastify.register(require('./routes/pesantren-routes'))
+  fastify.register(require('./routes/rekomendasi-routes'))
 
   try {
     await fastify.listen({ port: 3000 })
