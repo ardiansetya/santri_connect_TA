@@ -53,7 +53,7 @@ async function createPendaftaran(fastify, userId, data, files) {
 
   await connection.query(
     `INSERT INTO pendaftaran (
-      nomor_pendaftaran, user_id, pesatren_id, status,
+      nomor_pendaftaran, user_id, pesantren_id, status,
       nama_lengkap, nik, tempat_lahir, tanggal_lahir, jenis_kelamin,
       alamat, no_hp, nama_ayah, nama_ibu, no_hp_ortu, pekerjaan_ortu,
       foto_ktp, pas_foto, kartu_keluarga
