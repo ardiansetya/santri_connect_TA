@@ -142,6 +142,14 @@ const Pesantren = {
       ]
     )
     return result.affectedRows > 0
+  },
+
+  async delete(id) {
+    const [result] = await require('../config/db').getPool().query(
+      'DELETE FROM pesantren WHERE id = ?',
+      [id]
+    )
+    return result.affectedRows > 0
   }
 }
 

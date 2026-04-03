@@ -190,6 +190,17 @@ const AdminService = {
     if (!updated) throw new Error('Pesantren tidak ditemukan')
 
     return { message: 'Data pesantren berhasil diperbarui' }
+  },
+
+  async deletePesantren(id) {
+    const Pesantren = require('../models/Pesantren')
+    const existing = await Pesantren.findById(parseInt(id, 10))
+    if (!existing) throw new Error('Pesantren tidak ditemukan')
+
+    const deleted = await Pesantren.delete(parseInt(id, 10))
+    if (!deleted) throw new Error('Pesantren tidak ditemukan')
+
+    return { message: 'Pesantren berhasil dihapus' }
   }
 }
 

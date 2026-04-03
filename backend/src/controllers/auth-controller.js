@@ -140,6 +140,19 @@ const AdminController = {
         ? reply.code(404).send({ error: 'Pesantren tidak ditemukan' })
         : reply.code(400).send({ error: err.message })
     }
+  },
+
+  async deletePesantren(request, reply) {
+    if (request.user.role !== 'superadmin') return reply.code(403).send({ error: 'Akses ditolak, hanya superadmin' })
+
+    try {
+      const result = await AdminService.deletePesantren(request.params.id)
+      return reply.code(200).send(result)
+    } catch (err) {
+      return err.message === 'Pesantren tidak ditemukan'
+        ? reply.code(404).send({ error: 'Pesantren tidak ditemukan' })
+        : reply.code(500).send({ error: 'Terjadi kesalahan pada server' })
+    }
   }
 }
 
