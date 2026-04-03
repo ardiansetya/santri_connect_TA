@@ -1,0 +1,54 @@
+const Pendaftaran = {
+  async create(data) {
+    const [result] = await require('../config/db').getPool().query(
+      `INSERT INTO pendaftaran (
+        nomor_pendaftaran, user_id, pesantren_id, status,
+        nama_lengkap, nik, tempat_lahir, tanggal_lahir, jenis_kelamin,
+        alamat, no_hp, nama_ayah, nama_ibu, no_hp_ortu, pekerjaan_ortu,
+        foto_ktp, pas_foto, kartu_keluarga
+      ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.nomor_pendaftaran, data.user_id, data.pesantren_id,
+        data.nama_lengkap, data.nik, data.tempat_lahir, data.tanggal_lahir,
+        data.jenis_kelamin, data.alamat, data.no_hp, data.nama_ayah,
+        data.nama_ibu, data.no_hp_ortu, data.pekerjaan_ortu,
+        data.foto_ktp, data.pas_foto, data.kartu_keluarga
+      ]
+    )
+    return result
+  },
+
+  async findByNomor(nomor) {
+    const [rows] = await require('../config/db').getPool().query(
+      `SELECT p.nomor_pendaftaran, p.status, p.catatan_admin, p.created_at,
+              pes.id as pesantren_id, pes.nama as pesantren_nama
+       FROM pendaftaran p
+       LEFT JOIN pesantren pes ON p.pesantren_id = pes.id
+       WHERE p.nomor_pendaftaran = ?`,
+      [nomor]
+    )
+    return rows[0]
+  },
+
+  async checkNomorExists(nomor) {
+    const [rows] = await require('../config/db').getPool().query(
+      'SELECT id FROM pendaftaran WHERE nomor_pendaftaran = ?',
+      [nomor]
+    )
+    return rows.length > 0
+  },
+
+  async countAll() {
+    const [rows] = await require('../config/db').getPool().query('SELECT COUNT(*) as total FROM pendaftaran')
+    return rows[0].total
+  },
+
+  async countByStatus() {
+    const [rows] = await require('../config/db').getPool().query(
+      'SELECT status, COUNT(*) as total FROM pendaftaran GROUP BY status'
+    )
+    return rows
+  }
+}
+
+module.exports = Pendaftaran
