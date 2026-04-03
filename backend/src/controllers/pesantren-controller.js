@@ -26,6 +26,15 @@ const PesantrenController = {
     } catch {
       return reply.code(404).send({ success: false, error: 'Pesantren tidak ditemukan' })
     }
+  },
+
+  async getByPemilik(request, reply) {
+    try {
+      const result = await PesantrenService.getByUserId(request.user.id, request.query)
+      return reply.code(200).send({ success: true, data: result.data, meta: result.meta })
+    } catch {
+      return reply.code(500).send({ success: false, error: 'Terjadi kesalahan pada server' })
+    }
   }
 }
 

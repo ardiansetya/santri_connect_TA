@@ -1,6 +1,7 @@
 const authMiddleware = require('../middlewares/auth-middleware')
 const { AuthController, UserController, AdminController } = require('../controllers/auth-controller')
 const PesantrenController = require('../controllers/pesantren-controller')
+const PesantrenService = require('../services/pesantren-service')
 const RekomendasiController = require('../controllers/rekomendasi-controller')
 const PendaftaranController = require('../controllers/pendaftaran-controller')
 
@@ -78,4 +79,16 @@ const pendaftaranRoutes = async (fastify) => {
   fastify.get('/api/pendaftaran/status/:nomor', (request, reply) => PendaftaranController.getTrackingStatus(request, reply))
 }
 
-module.exports = { userRoutes, adminRoutes, pesantrenRoutes, rekomendasiRoutes, pendaftaranRoutes }
+const pemilikRoutes = async (fastify) => {
+  fastify.get('/api/pemilik/pesantren', { preHandler: authMiddleware }, async (request, reply) => {
+    if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
+    try {
+      const result = await PesantrenService.getByUserId(request.user.id, request.query)
+      return reply.code(200).send({ success: true, data: result.data, meta: result.meta })
+    } catch {
+      return reply.code(500).send({ success: false, error: 'Terjadi kesalahan pada server' })
+    }
+  })
+}
+
+module.exports = { userRoutes, adminRoutes, pesantrenRoutes, rekomendasiRoutes, pendaftaranRoutes, pemilikRoutes }
