@@ -175,5 +175,20 @@ const pemilikRoutes = async (fastify) => {
 
 const publicRoutes = require('./public-routes')
 const wilayahRoutes = require('./wilayah-routes')
+const CompareController = require('../controllers/compare-controller')
 
-module.exports = { userRoutes, adminRoutes, pesantrenRoutes, rekomendasiRoutes, pendaftaranRoutes, pemilikRoutes, publicRoutes, wilayahRoutes }
+const compareRoutes = async (fastify) => {
+  fastify.post('/api/compare', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['pesantren_ids'],
+        properties: {
+          pesantren_ids: { type: 'array', items: { type: 'integer' }, minItems: 1, maxItems: 3 }
+        }
+      }
+    }
+  }, (request, reply) => CompareController.comparePesantren(request, reply))
+}
+
+module.exports = { userRoutes, adminRoutes, pesantrenRoutes, rekomendasiRoutes, pendaftaranRoutes, pemilikRoutes, publicRoutes, wilayahRoutes, compareRoutes }
