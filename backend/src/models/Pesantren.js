@@ -108,6 +108,40 @@ const Pesantren = {
       ]
     )
     return result
+  },
+
+  async update(id, data) {
+    const [result] = await require('../config/db').getPool().query(
+      `UPDATE pesantren SET
+        nama = ?, province = ?, kota = ?, alamat = ?, tahun_berdiri = ?,
+        jumlah_santri = ?, jumlah_pengajar = ?, biaya_pendaftaran = ?,
+        biaya_bulanan = ?, fasilitas = ?, kurikulum = ?, email = ?,
+        telepon = ?, website = ?, deskripsi = ?, nama_bank = ?,
+        nomor_rekening = ?, atas_nama_rekening = ?, updated_at = NOW()
+      WHERE id = ?`,
+      [
+        data.nama,
+        data.province || data.provinsi,
+        data.kota,
+        data.alamat,
+        data.tahun_berdiri || null,
+        data.jumlah_santri || null,
+        data.jumlah_pengajar || null,
+        data.biaya_pendaftaran || null,
+        data.biaya_bulanan || null,
+        data.fasilitas ? JSON.stringify(data.fasilitas) : null,
+        data.kurikulum || null,
+        data.email || null,
+        data.telepon || null,
+        data.website || null,
+        data.deskripsi || null,
+        data.nama_bank || null,
+        data.nomor_rekening || null,
+        data.atas_nama_rekening || null,
+        id
+      ]
+    )
+    return result.affectedRows > 0
   }
 }
 
