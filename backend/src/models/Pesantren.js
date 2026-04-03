@@ -168,6 +168,20 @@ const Pesantren = {
     const [countResult] = await require('../config/db').getPool().query(countQuery, countParams)
 
     return { data: rows, total: countResult[0].total }
+  },
+
+  async countUniqueProvinces() {
+    const [rows] = await require('../config/db').getPool().query(
+      'SELECT COUNT(DISTINCT province) as total FROM pesantren WHERE province IS NOT NULL'
+    )
+    return rows[0].total
+  },
+
+  async countUniqueCities() {
+    const [rows] = await require('../config/db').getPool().query(
+      'SELECT COUNT(DISTINCT kota) as total FROM pesantren WHERE kota IS NOT NULL'
+    )
+    return rows[0].total
   }
 }
 
