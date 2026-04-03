@@ -1,5 +1,5 @@
 const { authMiddleware } = require('../middlewares/auth-middleware')
-const { createPendaftaran } = require('../services/pendaftaran-service')
+const { createPendaftaran, getTrackingStatus } = require('../services/pendaftaran-service')
 
 async function pendaftaranRoutes(fastify, options) {
   fastify.post('/api/pendaftaran', {
@@ -26,9 +26,6 @@ async function pendaftaranRoutes(fastify, options) {
       return reply.code(400).send({ error: 'Input tidak valid' })
     }
 
-    console.log('Received data:', data)
-    console.log('Received files:', Object.keys(files))
-
     const requiredFields = ['pesantren_id', 'nama_lengkap', 'nik', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'alamat', 'no_hp', 'nama_ayah', 'nama_ibu']
     for (const field of requiredFields) {
       if (!data[field]) {
@@ -41,6 +38,17 @@ async function pendaftaranRoutes(fastify, options) {
       return reply.code(201).send({ data: result })
     } catch (err) {
       return reply.code(400).send({ error: err.message })
+    }
+  })
+
+  fastify.get('/api/pendaftaran/status/:nomor', async (request, reply) => {
+    const { nomor } = request.params
+
+    try {
+      const result = await getTrackingStatus(fastify, nomor)
+      return reply.code(200).send({ data: result })
+    } catch (err) {
+      return reply.code(404).send({ error: 'Data pendaftaran tidak ditemukan' })
     }
   })
 }
