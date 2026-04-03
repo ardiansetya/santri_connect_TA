@@ -115,6 +115,18 @@ const AdminController = {
     } catch {
       return reply.code(500).send({ error: 'Terjadi kesalahan pada server' })
     }
+  },
+
+  async createPesantren(request, reply) {
+    if (request.user.role !== 'superadmin') return reply.code(403).send({ error: 'Akses ditolak, hanya superadmin' })
+    if (!request.body.nama) return reply.code(400).send({ error: 'Input tidak valid' })
+
+    try {
+      const result = await AdminService.createPesantren(request.body)
+      return reply.code(201).send(result)
+    } catch (err) {
+      return reply.code(400).send({ error: err.message })
+    }
   }
 }
 
