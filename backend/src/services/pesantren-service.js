@@ -61,6 +61,16 @@ const PesantrenService = {
       data: mappedData,
       meta: { page, limit, total_data: total, total_page: Math.ceil(total / limit) }
     }
+  },
+
+  async getByUserId(userId, filters) {
+    const page = Math.max(1, parseInt(filters.page) || 1)
+    const limit = Math.min(50, Math.max(1, parseInt(filters.limit) || 10))
+    const { data, total } = await Pesantren.findByUserId(userId, { page, limit })
+    return {
+      data,
+      meta: { page, limit, total_data: total, total_page: Math.ceil(total / limit) }
+    }
   }
 }
 

@@ -150,6 +150,24 @@ const Pesantren = {
       [id]
     )
     return result.affectedRows > 0
+  },
+
+  async findByUserId(userId, { page, limit }) {
+    let query = 'SELECT id, nama, province, kota, biaya_bulanan, created_at FROM pesantren WHERE user_id = ?'
+    let countQuery = 'SELECT COUNT(*) as total FROM pesantren WHERE user_id = ?'
+    const params = [userId]
+    const countParams = [userId]
+
+    query += ' ORDER BY created_at DESC'
+
+    const offset = (page - 1) * limit
+    query += ' LIMIT ? OFFSET ?'
+    params.push(limit, offset)
+
+    const [rows] = await require('../config/db').getPool().query(query, params)
+    const [countResult] = await require('../config/db').getPool().query(countQuery, countParams)
+
+    return { data: rows, total: countResult[0].total }
   }
 }
 
