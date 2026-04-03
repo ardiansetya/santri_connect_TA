@@ -11,6 +11,7 @@ const fastify = require('fastify')({
 })
 
 async function start() {
+  await fastify.register(require('@fastify/multipart'))
   await fastify.register(require('@fastify/formbody'))
   await fastify.register(require('@fastify/jwt'), {
     secret: process.env.JWT_SECRET || 'santri_connect_secret_key'
@@ -21,6 +22,7 @@ async function start() {
   fastify.register(require('./routes/pesantren-routes'))
   fastify.register(require('./routes/rekomendasi-routes'))
   fastify.register(require('./routes/admin-routes'))
+  fastify.register(require('./routes/pendaftaran-routes'))
 
   try {
     await fastify.listen({ port: 3000 })
