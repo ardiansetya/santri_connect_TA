@@ -171,6 +171,21 @@ const AdminService = {
       throw new Error('Kurikulum tidak valid')
     }
 
+    const WilayahService = require('./wilayah-service')
+    if (data.province || data.provinsi) {
+      const provinceResult = await WilayahService.validateProvince(data.province || data.provinsi)
+      if (!provinceResult.valid) throw new Error(provinceResult.message)
+      data.province = provinceResult.name
+    }
+    if (data.kota) {
+      const provinceId = data.province ? (await WilayahService.getProvinceByName(data.province))?.id : null
+      if (provinceId) {
+        const regencyResult = await WilayahService.validateRegency(provinceId, data.kota)
+        if (!regencyResult.valid) throw new Error(regencyResult.message)
+        data.kota = regencyResult.name
+      }
+    }
+
     const Pesantren = require('../models/Pesantren')
     await Pesantren.create(data)
     return { message: 'Pesantren berhasil ditambahkan' }
@@ -185,6 +200,21 @@ const AdminService = {
     const Pesantren = require('../models/Pesantren')
     const existing = await Pesantren.findById(parseInt(id, 10))
     if (!existing) throw new Error('Pesantren tidak ditemukan')
+
+    const WilayahService = require('./wilayah-service')
+    if (data.province || data.provinsi) {
+      const provinceResult = await WilayahService.validateProvince(data.province || data.provinsi)
+      if (!provinceResult.valid) throw new Error(provinceResult.message)
+      data.province = provinceResult.name
+    }
+    if (data.kota) {
+      const provinceId = data.province ? (await WilayahService.getProvinceByName(data.province))?.id : existing.province ? (await WilayahService.getProvinceByName(existing.province))?.id : null
+      if (provinceId) {
+        const regencyResult = await WilayahService.validateRegency(provinceId, data.kota)
+        if (!regencyResult.valid) throw new Error(regencyResult.message)
+        data.kota = regencyResult.name
+      }
+    }
 
     const updated = await Pesantren.update(parseInt(id, 10), data)
     if (!updated) throw new Error('Pesantren tidak ditemukan')
