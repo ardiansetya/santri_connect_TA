@@ -182,6 +182,18 @@ const Pesantren = {
       'SELECT COUNT(DISTINCT kota) as total FROM pesantren WHERE kota IS NOT NULL'
     )
     return rows[0].total
+  },
+
+  async findByIds(ids) {
+    const placeholders = ids.map(() => '?').join(',')
+    const [rows] = await require('../config/db').getPool().query(
+      `SELECT id, nama, province, kota, alamat, tahun_berdiri, jumlah_santri,
+              jumlah_pengajar, biaya_pendaftaran, biaya_bulanan, fasilitas,
+              kurikulum, email, telepon, website, deskripsi
+       FROM pesantren WHERE id IN (${placeholders})`,
+      ids
+    )
+    return rows
   }
 }
 
