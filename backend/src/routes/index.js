@@ -48,6 +48,7 @@ const userRoutes = async (fastify) => {
 const adminRoutes = async (fastify) => {
   fastify.get('/api/admin/stats', { preHandler: authMiddleware }, (request, reply) => AdminController.getDashboardStats(request, reply))
   fastify.get('/api/admin/users', { preHandler: authMiddleware }, (request, reply) => AdminController.getAllUsers(request, reply))
+  fastify.get('/api/admin/pendaftaran', { preHandler: authMiddleware }, (request, reply) => AdminController.getAllPendaftaran(request, reply))
 }
 
 const pesantrenRoutes = async (fastify) => {

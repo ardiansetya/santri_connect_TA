@@ -48,6 +48,43 @@ const Pendaftaran = {
       'SELECT status, COUNT(*) as total FROM pendaftaran GROUP BY status'
     )
     return rows
+  },
+
+  async findAll({ status, pesantren_id, page, limit }) {
+    let query = `SELECT p.id, p.nomor_pendaftaran, p.status, p.created_at,
+                        u.id as user_id, u.email as user_email,
+                        pes.id as pesantren_id, pes.nama as pesantren_nama
+                 FROM pendaftaran p
+                 LEFT JOIN users u ON p.user_id = u.id
+                 LEFT JOIN pesantren pes ON p.pesantren_id = pes.id
+                 WHERE 1=1`
+    let countQuery = 'SELECT COUNT(*) as total FROM pendaftaran WHERE 1=1'
+    const params = []
+    const countParams = []
+
+    if (status) {
+      query += ' AND p.status = ?'
+      countQuery += ' AND status = ?'
+      params.push(status)
+      countParams.push(status)
+    }
+    if (pesantren_id) {
+      query += ' AND p.pesantren_id = ?'
+      countQuery += ' AND pesantren_id = ?'
+      params.push(parseInt(pesantren_id))
+      countParams.push(parseInt(pesantren_id))
+    }
+
+    query += ' ORDER BY p.created_at DESC'
+
+    const offset = (page - 1) * limit
+    query += ' LIMIT ? OFFSET ?'
+    params.push(limit, offset)
+
+    const [rows] = await require('../config/db').getPool().query(query, params)
+    const [countResult] = await require('../config/db').getPool().query(countQuery, countParams)
+
+    return { data: rows, total: countResult[0].total }
   }
 }
 
