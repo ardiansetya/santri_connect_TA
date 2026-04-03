@@ -127,6 +127,19 @@ const AdminController = {
     } catch (err) {
       return reply.code(400).send({ error: err.message })
     }
+  },
+
+  async updatePesantren(request, reply) {
+    if (request.user.role !== 'superadmin') return reply.code(403).send({ error: 'Akses ditolak, hanya superadmin' })
+
+    try {
+      const result = await AdminService.updatePesantren(request.params.id, request.body)
+      return reply.code(200).send(result)
+    } catch (err) {
+      return err.message === 'Pesantren tidak ditemukan'
+        ? reply.code(404).send({ error: 'Pesantren tidak ditemukan' })
+        : reply.code(400).send({ error: err.message })
+    }
   }
 }
 

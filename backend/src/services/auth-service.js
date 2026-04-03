@@ -174,6 +174,22 @@ const AdminService = {
     const Pesantren = require('../models/Pesantren')
     await Pesantren.create(data)
     return { message: 'Pesantren berhasil ditambahkan' }
+  },
+
+  async updatePesantren(id, data) {
+    const validKurikulum = ['modern', 'salaf', 'campuran']
+    if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
+      throw new Error('Kurikulum tidak valid')
+    }
+
+    const Pesantren = require('../models/Pesantren')
+    const existing = await Pesantren.findById(parseInt(id, 10))
+    if (!existing) throw new Error('Pesantren tidak ditemukan')
+
+    const updated = await Pesantren.update(parseInt(id, 10), data)
+    if (!updated) throw new Error('Pesantren tidak ditemukan')
+
+    return { message: 'Data pesantren berhasil diperbarui' }
   }
 }
 
