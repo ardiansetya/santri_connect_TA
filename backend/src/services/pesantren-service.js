@@ -74,10 +74,21 @@ const PesantrenService = {
   },
 
   async createByPemilik(userId, data) {
-    const validKurikulum = ['modern', 'salaf', 'campuran']
-    if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
-      throw new Error('Kurikulum tidak valid')
-    }
+    await Pesantren.create({ ...data, user_id: userId })
+    return { message: 'Pesantren berhasil ditambahkan' }
+  },
+
+  async updateByPemilik(userId, id, data) {
+    const existing = await Pesantren.findById(parseInt(id, 10))
+    if (!existing) throw new Error('Pesantren tidak ditemukan')
+    if (existing.user_id !== userId) throw new Error('Akses ditolak, bukan pesantren Anda')
+
+    const updated = await Pesantren.update(parseInt(id, 10), data)
+    if (!updated) throw new Error('Pesantren tidak ditemukan')
+
+    return { message: 'Data pesantren berhasil diperbarui' }
+  }
+}
     if (!data.nama) throw new Error('Nama pesantren wajib diisi')
 
     await Pesantren.create({ ...data, user_id: userId })
