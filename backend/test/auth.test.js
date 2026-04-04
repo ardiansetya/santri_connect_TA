@@ -73,6 +73,69 @@ describe('Authentication API', () => {
 
       expect(response.statusCode).toBe(400)
     })
+
+    it('should register as pendaftar by default', async () => {
+      const uniqueEmail = `default_${Date.now()}@example.com`
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/register',
+        payload: {
+          username: 'defaultuser',
+          email: uniqueEmail,
+          password: 'password123'
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+    })
+
+    it('should register as pemilik when role specified', async () => {
+      const uniqueEmail = `pemilik_${Date.now()}@example.com`
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/register',
+        payload: {
+          username: 'pemilikuser',
+          email: uniqueEmail,
+          password: 'password123',
+          role: 'pemilik'
+        }
+      })
+
+      expect(response.statusCode).toBe(201)
+    })
+
+    it('should reject registration with superadmin role', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/register',
+        payload: {
+          username: 'superadminuser',
+          email: `superadmin_${Date.now()}@example.com`,
+          password: 'password123',
+          role: 'superadmin'
+        }
+      })
+
+      // Schema validation rejects role not in enum
+      expect(response.statusCode).toBe(400)
+    })
+
+    it('should reject registration with invalid role', async () => {
+      const uniqueEmail = `invalid_${Date.now()}@example.com`
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/register',
+        payload: {
+          username: 'invalidrole',
+          email: uniqueEmail,
+          password: 'password123',
+          role: 'invalid_role'
+        }
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
   })
 
   describe('POST /api/login', () => {
