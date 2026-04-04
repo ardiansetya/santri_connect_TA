@@ -1,13 +1,27 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/User')
 
+const ALLOWED_ROLES = ['pendaftar', 'pemilik']
+const FORBIDDEN_ROLES = ['superadmin']
+
 const AuthService = {
-  async register({ username, email, password }) {
+  async register({ username, email, password, role }) {
+    // SECURITY: Hardcoded block - NEVER allow forbidden roles
+    if (FORBIDDEN_ROLES.includes(role)) {
+      throw new Error('Role tidak valid')
+    }
+
+    // SECURITY: Only allow explicitly permitted roles
+    const userRole = role || 'pendaftar'
+    if (!ALLOWED_ROLES.includes(userRole)) {
+      throw new Error('Role tidak valid')
+    }
+
     const exists = await User.checkEmailExists(email)
     if (exists) throw new Error('Email sudah terdaftar')
 
     const hashedPassword = await bcrypt.hash(password, 10)
-    await User.create({ username, email, password: hashedPassword })
+    await User.create({ username, email, password: hashedPassword, role: userRole })
     return { message: 'Registrasi berhasil' }
   },
 

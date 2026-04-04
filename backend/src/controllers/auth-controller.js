@@ -5,7 +5,10 @@ const AuthController = {
     try {
       await AuthService.register(request.body)
       return reply.code(201).send({ data: 'Registrasi berhasil' })
-    } catch {
+    } catch (err) {
+      if (err.message === 'Role tidak valid') {
+        return reply.code(400).send({ error: 'Role tidak valid' })
+      }
       return reply.code(400).send({ error: 'Registrasi gagal' })
     }
   },
