@@ -4,21 +4,39 @@
       <h1 class="auth-card__title">Masuk ke Santri Connect</h1>
       <p class="auth-card__subtitle">Masukkan email dan password Anda</p>
 
-      <form class="auth-form" @submit.prevent="handleLogin">
+      <form class="auth-form" @submit="onSubmit">
         <div class="form-group">
           <label class="form-label" for="email">Email</label>
-          <input class="form-input" id="email" type="email" v-model="email" required placeholder="email@contoh.com" />
+          <input
+            id="email"
+            type="email"
+            v-model="email"
+            v-bind="emailProps"
+            class="form-input"
+            :class="{ 'form-input--error': errors.email }"
+            placeholder="email@contoh.com"
+          />
+          <span v-if="errors.email" class="form-error">{{ errors.email }}</span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="password">Password</label>
-          <input class="form-input" id="password" type="password" v-model="password" required placeholder="Masukkan password" />
+          <input
+            id="password"
+            type="password"
+            v-model="password"
+            v-bind="passwordProps"
+            class="form-input"
+            :class="{ 'form-input--error': errors.password }"
+            placeholder="Masukkan password"
+          />
+          <span v-if="errors.password" class="form-error">{{ errors.password }}</span>
         </div>
 
-        <div v-if="error" class="alert alert--error">{{ error }}</div>
+        <div v-if="serverError" class="alert alert--error">{{ serverError }}</div>
 
-        <button type="submit" class="btn btn--primary btn--full" :disabled="loading">
-          <span v-if="loading">Memproses...</span>
+        <button type="submit" class="btn btn--primary btn--full" :disabled="isSubmitting || !meta.valid">
+          <span v-if="isSubmitting">Memproses...</span>
           <span v-else>Masuk</span>
         </button>
       </form>
@@ -32,28 +50,40 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useForm } from 'vee-validate'
+import * as yup from 'yup'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 const router = useRouter()
-const email = ref('')
-const password = ref('')
-const error = ref('')
-const loading = ref(false)
+const serverError = ref('')
 
-async function handleLogin() {
-  error.value = ''
-  loading.value = true
+const schema = yup.object({
+  email: yup.string().required('Email harus diisi').email('Format email tidak valid'),
+  password: yup.string().required('Password harus diisi').min(6, 'Password minimal 6 karakter')
+})
+
+const { defineField, handleSubmit, errors, meta, isSubmitting } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    email: '',
+    password: ''
+  }
+})
+
+const [email, emailProps] = defineField('email')
+const [password, passwordProps] = defineField('password')
+
+const onSubmit = handleSubmit(async (values) => {
+  serverError.value = ''
   try {
-    await authStore.login(email.value, password.value)
+    await authStore.login(values.email, values.password)
     router.push('/dashboard')
   } catch (e) {
-    error.value = e.response?.data?.error || 'Email atau password salah'
-  } finally {
-    loading.value = false
+    serverError.value = e.response?.data?.error || 'Email atau password salah'
   }
-}
+})
 </script>
 
 <style scoped>
@@ -108,10 +138,24 @@ async function handleLogin() {
   background: var(--color-surface);
 }
 
+.form-input--error {
+  border-color: var(--color-error);
+}
+
 .form-input:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.form-input--error:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px var(--color-error-bg);
+}
+
+.form-error {
+  font-size: 0.75rem;
+  color: var(--color-error);
 }
 
 .btn {
