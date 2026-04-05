@@ -18,6 +18,7 @@
 
         <template v-if="authStore.isAuthenticated">
           <router-link to="/dashboard" class="navbar__link navbar__link--accent" @click="isOpen = false">Dashboard</router-link>
+          <router-link to="/profile" class="navbar__link" @click="isOpen = false" title="Profil">👤 {{ authStore.user?.username || 'Profil' }}</router-link>
           <button class="navbar__link navbar__link--logout" @click="handleLogout">Keluar</button>
         </template>
         <template v-else>
