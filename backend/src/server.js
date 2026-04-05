@@ -1,4 +1,5 @@
 require('dotenv').config()
+const path = require('path')
 const fastify = require('fastify')({
   logger: process.env.NODE_ENV === 'production',
   ajv: {
@@ -13,6 +14,26 @@ async function start() {
   await fastify.register(require('@fastify/formbody'))
   await fastify.register(require('@fastify/jwt'), {
     secret: process.env.JWT_SECRET || 'santri_connect_secret_key'
+  })
+
+  await fastify.register(require('@fastify/swagger'), {
+    mode: 'static',
+    specification: {
+      path: path.join(__dirname, '..', 'swagger.json'),
+      postProcessor: function (swaggerObject) {
+        return swaggerObject
+      }
+    }
+  })
+
+  await fastify.register(require('@fastify/swagger-ui'), {
+    routePrefix: '/documentation',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: false
+    },
+    staticCSP: true,
+    transformSpecificationClone: true
   })
 
   const authMiddleware = require('./middlewares/auth-middleware')
@@ -36,6 +57,7 @@ async function start() {
   try {
     await fastify.listen({ port: process.env.PORT || 3000 })
     console.log(`Server running at http://localhost:${process.env.PORT || 3000}`)
+    console.log(`Swagger UI available at http://localhost:${process.env.PORT || 3000}/documentation`)
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)
