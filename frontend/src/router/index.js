@@ -30,6 +30,12 @@ const routes = [
     component: () => import('../views/PesantrenDetailView.vue')
   },
   {
+    path: '/pesantren/:id/daftar',
+    name: 'pendaftaran-form',
+    component: () => import('../views/PendaftaranFormView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/rekomendasi',
     name: 'rekomendasi',
     component: () => import('../views/RekomendasiView.vue')
@@ -67,7 +73,9 @@ router.beforeEach(async (to, from, next) => {
     await auth.fetchUser()
   }
 
-  if (to.meta.guest && auth.isAuthenticated) {
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    next({ name: 'login', query: { redirect: to.fullPath } })
+  } else if (to.meta.guest && auth.isAuthenticated) {
     next('/')
   } else {
     next()

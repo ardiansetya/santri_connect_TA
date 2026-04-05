@@ -37,6 +37,10 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.token = null
       localStorage.removeItem('token')
+    },
+    async updateProfile(data) {
+      const res = await auth.updateMe(data)
+      this.user = res.data.data
     }
   }
 })
