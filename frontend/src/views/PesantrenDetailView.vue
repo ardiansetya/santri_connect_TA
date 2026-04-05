@@ -138,6 +138,9 @@
               <div class="card-body p-4">
                 <h6 class="fw-semibold mb-3">Aksi</h6>
                 <div class="d-grid gap-2">
+                  <router-link :to="`/pesantren/${pesantren.id}/daftar`" class="btn btn-success">
+                    📝 Daftar ke Pesantren Ini
+                  </router-link>
                   <button
                     class="btn"
                     :class="compareStore.isSelected(pesantren.id) ? 'btn-primary' : 'btn-outline-primary'"
