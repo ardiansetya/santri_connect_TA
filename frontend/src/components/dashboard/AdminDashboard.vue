@@ -21,7 +21,7 @@
         <div class="card shadow-sm border-start border-warning border-3">
           <div class="card-body">
             <p class="text-muted small mb-1">Pending</p>
-            <h3 class="fw-bold mb-0">{{ stats.pending || 0 }}</h3>
+            <h3 class="fw-bold mb-0">{{ pendingCount }}</h3>
           </div>
         </div>
       </div>
@@ -29,67 +29,86 @@
         <div class="card shadow-sm border-start border-info border-3">
           <div class="card-body">
             <p class="text-muted small mb-1">Diproses</p>
-            <h3 class="fw-bold mb-0">{{ stats.diproses || 0 }}</h3>
+            <h3 class="fw-bold mb-0">{{ diprosesCount }}</h3>
           </div>
         </div>
       </div>
     </div>
 
     <div class="card shadow-sm">
-      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="fw-semibold mb-0">Manajemen Pendaftaran</h5>
-        <button class="btn btn-outline-success btn-sm" @click="exportData" :disabled="exporting">
-          <span v-if="exporting" class="spinner-border spinner-border-sm me-2"></span>
-          📥 Export Excel
-        </button>
+      <div class="card-header bg-white py-3">
+        <ul class="nav nav-tabs card-header-tabs">
+          <li class="nav-item">
+            <button class="nav-link" :class="{ active: activeTab === 'pendaftaran' }" @click="activeTab = 'pendaftaran'">
+              Manajemen Pendaftaran
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" :class="{ active: activeTab === 'pesantren' }" @click="activeTab = 'pesantren'">
+              Manajemen Pesantren
+            </button>
+          </li>
+        </ul>
       </div>
-      <div class="card-body p-0">
-        <div v-if="loading" class="text-center py-4">
-          <div class="spinner-border text-primary" role="status"></div>
-          <p class="mt-2 text-muted small">Memuat data...</p>
+      <div class="card-body">
+        <div v-if="activeTab === 'pendaftaran'">
+          <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-outline-success btn-sm" @click="exportData" :disabled="exporting">
+              <span v-if="exporting" class="spinner-border spinner-border-sm me-2"></span>
+              📥 Export Excel
+            </button>
+          </div>
+          <div v-if="loadingPendaftaran" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted small">Memuat data...</p>
+          </div>
+          <div v-else-if="pendaftaran.length === 0" class="text-center py-5">
+            <p class="fs-3 mb-3">📭</p>
+            <h6 class="fw-semibold">Belum ada pendaftaran</h6>
+            <p class="text-muted small">Data pendaftaran akan muncul saat ada yang mendaftar</p>
+          </div>
+          <div v-else class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>No. Pendaftaran</th>
+                  <th>Nama</th>
+                  <th>Pesantren</th>
+                  <th>Status</th>
+                  <th>Tanggal</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="p in pendaftaran" :key="p.id">
+                  <td><code>{{ p.nomor_pendaftaran }}</code></td>
+                  <td>{{ p.nama_lengkap }}</td>
+                  <td>{{ p.pesantren?.nama || '-' }}</td>
+                  <td>
+                    <select
+                      class="form-select form-select-sm"
+                      :value="p.status"
+                      @change="updateStatus(p.id, $event.target.value)"
+                      style="width: auto; display: inline-block;"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="diproses">Diproses</option>
+                      <option value="diterima">Diterima</option>
+                      <option value="ditolak">Ditolak</option>
+                    </select>
+                  </td>
+                  <td>{{ formatDate(p.created_at) }}</td>
+                  <td>
+                    <button class="btn btn-outline-primary btn-sm" @click="viewDetail(p)">Detail</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div v-else-if="pendaftaran.length === 0" class="text-center py-5">
-          <p class="fs-3 mb-3">📭</p>
-          <h6 class="fw-semibold">Belum ada pendaftaran</h6>
-          <p class="text-muted small">Data pendaftaran akan muncul saat ada yang mendaftar</p>
-        </div>
-        <div v-else class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>No. Pendaftaran</th>
-                <th>Nama</th>
-                <th>Pesantren</th>
-                <th>Status</th>
-                <th>Tanggal</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="p in pendaftaran" :key="p.id">
-                <td><code>{{ p.nomor_pendaftaran }}</code></td>
-                <td>{{ p.nama_lengkap }}</td>
-                <td>{{ p.pesantren?.nama || '-' }}</td>
-                <td>
-                  <select
-                    class="form-select form-select-sm"
-                    :value="p.status"
-                    @change="updateStatus(p.id, $event.target.value)"
-                    style="width: auto; display: inline-block;"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="diproses">Diproses</option>
-                    <option value="diterima">Diterima</option>
-                    <option value="ditolak">Ditolak</option>
-                  </select>
-                </td>
-                <td>{{ formatDate(p.created_at) }}</td>
-                <td>
-                  <button class="btn btn-outline-primary btn-sm" @click="viewDetail(p)">Detail</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+        <div v-if="activeTab === 'pesantren'">
+          <AdminPesantrenManagement @refresh="loadData" />
         </div>
       </div>
     </div>
@@ -161,14 +180,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { admin } from '../../services'
+import AdminPesantrenManagement from './AdminPesantrenManagement.vue'
 
+const activeTab = ref('pendaftaran')
 const stats = ref({})
 const pendaftaran = ref([])
-const loading = ref(true)
+const loadingPendaftaran = ref(true)
 const selectedItem = ref(null)
 const exporting = ref(false)
+
+const pendingCount = computed(() => pendaftaran.value.filter(p => p.status === 'pending').length)
+const diprosesCount = computed(() => pendaftaran.value.filter(p => p.status === 'diproses').length)
 
 function statusBadge(status) {
   const map = {
@@ -228,7 +252,7 @@ async function exportData() {
 }
 
 async function loadData() {
-  loading.value = true
+  loadingPendaftaran.value = true
   try {
     const [statsRes, pendaftaranRes] = await Promise.all([
       admin.getStats(),
@@ -240,7 +264,7 @@ async function loadData() {
     stats.value = {}
     pendaftaran.value = []
   } finally {
-    loading.value = false
+    loadingPendaftaran.value = false
   }
 }
 
@@ -248,3 +272,15 @@ onMounted(async () => {
   await loadData()
 })
 </script>
+
+<style scoped>
+.nav-link {
+  color: var(--bs-body-color);
+  cursor: pointer;
+}
+.nav-link.active {
+  color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  background-color: transparent;
+}
+</style>
