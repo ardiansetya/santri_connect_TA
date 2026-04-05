@@ -1,0 +1,1457 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Santri Connect API",
+    "description": "RESTful API untuk sistem informasi pesantren dengan fitur manajemen pesantren, pendaftaran santri, rekomendasi berbasis scoring, dan integrasi data wilayah Indonesia.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Ardian Setya",
+      "url": "https://github.com/ardiansetya/santri_connect_TA"
+    },
+    "license": {
+      "name": "ISC"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:{port}",
+      "description": "Development server",
+      "variables": {
+        "port": {
+          "default": "3000",
+          "description": "Server port"
+        }
+      }
+    }
+  ],
+  "tags": [
+    { "name": "Health", "description": "Health check dan info API" },
+    { "name": "Auth", "description": "Autentikasi dan manajemen user" },
+    { "name": "Pesantren", "description": "Endpoint publik pesantren" },
+    { "name": "Pendaftaran", "description": "Pendaftaran santri baru" },
+    { "name": "Rekomendasi", "description": "Rekomendasi pesantren berbasis scoring" },
+    { "name": "Compare", "description": "Perbandingan pesantren" },
+    { "name": "Public", "description": "Data publik dan statistik" },
+    { "name": "Wilayah", "description": "Data wilayah Indonesia" },
+    { "name": "Admin", "description": "Endpoint khusus superadmin" },
+    { "name": "Pemilik", "description": "Endpoint khusus pemilik pesantren" }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "API info",
+        "description": "Menampilkan informasi API",
+        "responses": {
+          "200": {
+            "description": "Informasi API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                },
+                "example": { "message": "Santri Connect API" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check",
+        "description": "Memeriksa status server",
+        "responses": {
+          "200": {
+            "description": "Server berjalan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" }
+                  }
+                },
+                "example": { "status": "ok" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register user baru",
+        "description": "Mendaftarkan user baru dengan role pendaftar atau pemilik. Role superadmin tidak diperbolehkan.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "email", "password"],
+                "properties": {
+                  "username": { "type": "string", "minLength": 1 },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 6 },
+                  "role": { "type": "string", "enum": ["pendaftar", "pemilik"], "default": "pendaftar" }
+                }
+              },
+              "example": {
+                "username": "john_doe",
+                "email": "john@example.com",
+                "password": "password123",
+                "role": "pendaftar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User berhasil didaftarkan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "username": { "type": "string" },
+                        "email": { "type": "string" },
+                        "role": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validasi gagal atau email sudah terdaftar"
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login user",
+        "description": "Login dengan email dan password untuk mendapatkan JWT token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                }
+              },
+              "example": {
+                "email": "john@example.com",
+                "password": "password123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "username": { "type": "string" },
+                        "email": { "type": "string" },
+                        "role": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Email atau password salah"
+          }
+        }
+      }
+    },
+    "/api/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get current user",
+        "description": "Mendapatkan data user yang sedang login",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Data user saat ini",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "username": { "type": "string" },
+                    "email": { "type": "string" },
+                    "role": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "put": {
+        "tags": ["Auth"],
+        "summary": "Update user data",
+        "description": "Memperbarui data user (username dan email)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "email"],
+                "properties": {
+                  "username": { "type": "string", "minLength": 1 },
+                  "email": { "type": "string", "format": "email" }
+                },
+                "additionalProperties": false
+              },
+              "example": {
+                "username": "john_updated",
+                "email": "john.updated@example.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User berhasil diupdate" },
+          "400": { "description": "Validasi gagal" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/api/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Logout",
+        "description": "Logout user yang sedang login",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Logout berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "string" }
+                  }
+                },
+                "example": { "data": "Logout berhasil" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/api/pesantren": {
+      "get": {
+        "tags": ["Pesantren"],
+        "summary": "List semua pesantren",
+        "description": "Mendapatkan daftar pesantren dengan fitur filter, pagination, dan sorting",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Nomor halaman",
+            "required": false,
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Jumlah data per halaman",
+            "required": false,
+            "schema": { "type": "integer", "default": 10 }
+          },
+          {
+            "name": "province",
+            "in": "query",
+            "description": "Filter berdasarkan provinsi",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "kota",
+            "in": "query",
+            "description": "Filter berdasarkan kota",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "kurikulum",
+            "in": "query",
+            "description": "Filter berdasarkan kurikulum",
+            "required": false,
+            "schema": { "type": "string", "enum": ["modern", "salaf", "campuran"] }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Field untuk sorting",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Urutan sorting (asc/desc)",
+            "required": false,
+            "schema": { "type": "string", "enum": ["asc", "desc"], "default": "asc" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar pesantren",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Pesantren" }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": { "type": "integer" },
+                        "limit": { "type": "integer" },
+                        "total": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pesantren/{id}": {
+      "get": {
+        "tags": ["Pesantren"],
+        "summary": "Detail pesantren",
+        "description": "Mendapatkan detail informasi sebuah pesantren",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID pesantren",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail pesantren",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/Pesantren" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Pesantren tidak ditemukan" }
+        }
+      }
+    },
+    "/api/pesantren/{id}/pendaftaran-info": {
+      "get": {
+        "tags": ["Pesantren"],
+        "summary": "Info pendaftaran pesantren",
+        "description": "Mendapatkan informasi pendaftaran untuk sebuah pesantren",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID pesantren",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Info pendaftaran pesantren",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "pesantren": { "$ref": "#/components/schemas/Pesantren" },
+                        "pendaftaran_info": { "type": "object" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Pesantren tidak ditemukan" }
+        }
+      }
+    },
+    "/api/pendaftaran": {
+      "post": {
+        "tags": ["Pendaftaran"],
+        "summary": "Submit pendaftaran santri",
+        "description": "Mendaftarkan santri ke pesantren dengan upload dokumen (multipart/form-data)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["pesantren_id", "nama_lengkap", "nik", "jenis_kelamin"],
+                "properties": {
+                  "pesantren_id": { "type": "integer" },
+                  "nama_lengkap": { "type": "string" },
+                  "nik": { "type": "string", "maxLength": 16 },
+                  "tempat_lahir": { "type": "string" },
+                  "tanggal_lahir": { "type": "string", "format": "date" },
+                  "jenis_kelamin": { "type": "string", "enum": ["L", "P"] },
+                  "alamat": { "type": "string" },
+                  "no_hp": { "type": "string" },
+                  "nama_ayah": { "type": "string" },
+                  "nama_ibu": { "type": "string" },
+                  "no_hp_ortu": { "type": "string" },
+                  "pekerjaan_ortu": { "type": "string" },
+                  "foto_ktp": { "type": "string", "format": "binary" },
+                  "pas_foto": { "type": "string", "format": "binary" },
+                  "kartu_keluarga": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pendaftaran berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "nomor_pendaftaran": { "type": "string" },
+                        "status": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Validasi gagal" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya role pendaftar" }
+        }
+      }
+    },
+    "/api/pendaftaran/status/{nomor}": {
+      "get": {
+        "tags": ["Pendaftaran"],
+        "summary": "Cek status pendaftaran",
+        "description": "Melacak status pendaftaran berdasarkan nomor pendaftaran",
+        "parameters": [
+          {
+            "name": "nomor",
+            "in": "path",
+            "description": "Nomor pendaftaran (format: REG-YYYY-XXXXXX)",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status pendaftaran",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "nomor_pendaftaran": { "type": "string" },
+                        "status": { "type": "string", "enum": ["pending", "diproses", "diterima", "ditolak"] },
+                        "pesantren": { "$ref": "#/components/schemas/Pesantren" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Pendaftaran tidak ditemukan" }
+        }
+      }
+    },
+    "/api/rekomendasi": {
+      "post": {
+        "tags": ["Rekomendasi"],
+        "summary": "Dapatkan rekomendasi pesantren",
+        "description": "Mendapatkan rekomendasi pesantren berdasarkan budget, lokasi, dan fasilitas dengan algoritma scoring",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["budget"],
+                "properties": {
+                  "budget": { "type": "number", "description": "Budget dalam rupiah" },
+                  "provinsi": { "type": "string", "description": "Provinsi yang diinginkan" },
+                  "fasilitas": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Daftar fasilitas yang diinginkan"
+                  }
+                }
+              },
+              "example": {
+                "budget": 5000000,
+                "provinsi": "Jawa Barat",
+                "fasilitas": ["masjid", "asrama", "lab komputer"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Daftar rekomendasi pesantren",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "pesantren": { "$ref": "#/components/schemas/Pesantren" },
+                          "score": { "type": "number" },
+                          "budget_score": { "type": "number" },
+                          "location_score": { "type": "number" },
+                          "facilities_score": { "type": "number" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/compare": {
+      "post": {
+        "tags": ["Compare"],
+        "summary": "Bandingkan pesantren",
+        "description": "Membandingkan hingga 3 pesantren secara bersamaan",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["pesantren_ids"],
+                "properties": {
+                  "pesantren_ids": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+                    "minItems": 1,
+                    "maxItems": 3
+                  }
+                }
+              },
+              "example": {
+                "pesantren_ids": [1, 2, 3]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hasil perbandingan pesantren",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Pesantren" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Validasi gagal (max 3 pesantren)" }
+        }
+      }
+    },
+    "/api/public/stats": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "Statistik publik",
+        "description": "Mendapatkan statistik umum pesantren dan pendaftaran",
+        "responses": {
+          "200": {
+            "description": "Statistik publik",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "total_pesantren": { "type": "integer" },
+                        "total_pendaftaran": { "type": "integer" },
+                        "total_santri": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/wilayah/provinces": {
+      "get": {
+        "tags": ["Wilayah"],
+        "summary": "List provinsi",
+        "description": "Mendapatkan daftar semua provinsi di Indonesia",
+        "responses": {
+          "200": {
+            "description": "Daftar provinsi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/wilayah/regencies/{provinceId}": {
+      "get": {
+        "tags": ["Wilayah"],
+        "summary": "List kabupaten/kota",
+        "description": "Mendapatkan daftar kabupaten/kota dalam sebuah provinsi",
+        "parameters": [
+          {
+            "name": "provinceId",
+            "in": "path",
+            "description": "ID provinsi",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar kabupaten/kota",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "province_id": { "type": "string" },
+                          "name": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Provinsi tidak ditemukan" }
+        }
+      }
+    },
+    "/api/wilayah/province/{id}": {
+      "get": {
+        "tags": ["Wilayah"],
+        "summary": "Detail provinsi",
+        "description": "Mendapatkan detail sebuah provinsi",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID provinsi",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail provinsi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "name": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Provinsi tidak ditemukan" }
+        }
+      }
+    },
+    "/api/wilayah/regency/{provinceId}/{regencyId}": {
+      "get": {
+        "tags": ["Wilayah"],
+        "summary": "Detail kabupaten/kota",
+        "description": "Mendapatkan detail sebuah kabupaten/kota",
+        "parameters": [
+          {
+            "name": "provinceId",
+            "in": "path",
+            "description": "ID provinsi",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "regencyId",
+            "in": "path",
+            "description": "ID kabupaten/kota",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail kabupaten/kota",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "province_id": { "type": "string" },
+                        "name": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Kabupaten/kota tidak ditemukan" }
+        }
+      }
+    },
+    "/api/admin/stats": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Statistik dashboard admin",
+        "description": "Mendapatkan statistik untuk dashboard admin (superadmin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Statistik dashboard",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "total_users": { "type": "integer" },
+                        "total_pesantren": { "type": "integer" },
+                        "total_pendaftaran": { "type": "integer" },
+                        "pendaftaran_by_status": {
+                          "type": "object",
+                          "properties": {
+                            "pending": { "type": "integer" },
+                            "diproses": { "type": "integer" },
+                            "diterima": { "type": "integer" },
+                            "ditolak": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya superadmin" }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "List semua user",
+        "description": "Mendapatkan daftar semua user terdaftar (superadmin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Daftar semua user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer" },
+                          "username": { "type": "string" },
+                          "email": { "type": "string" },
+                          "role": { "type": "string" },
+                          "created_at": { "type": "string", "format": "date-time" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya superadmin" }
+        }
+      }
+    },
+    "/api/admin/pesantren": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Buat pesantren baru",
+        "description": "Membuat data pesantren baru (superadmin only)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nama", "province", "kota"],
+                "properties": {
+                  "nama": { "type": "string", "minLength": 1 },
+                  "province": { "type": "string" },
+                  "kota": { "type": "string" },
+                  "alamat": { "type": "string" },
+                  "tahun_berdiri": { "type": "integer" },
+                  "jumlah_santri": { "type": "integer" },
+                  "jumlah_pengajar": { "type": "integer" },
+                  "biaya_pendaftaran": { "type": "number" },
+                  "biaya_bulanan": { "type": "number" },
+                  "fasilitas": { "type": "array", "items": { "type": "string" } },
+                  "kurikulum": { "type": "string", "enum": ["modern", "salaf", "campuran"] },
+                  "email": { "type": "string" },
+                  "telepon": { "type": "string" },
+                  "website": { "type": "string" },
+                  "deskripsi": { "type": "string" },
+                  "nama_bank": { "type": "string" },
+                  "nomor_rekening": { "type": "string" },
+                  "atas_nama_rekening": { "type": "string" }
+                }
+              },
+              "example": {
+                "nama": "Pesantren Modern Al-Hikmah",
+                "province": "Jawa Barat",
+                "kota": "Bandung",
+                "alamat": "Jl. Pesantren No. 1",
+                "kurikulum": "modern",
+                "email": "info@alhikmah.com",
+                "telepon": "022-1234567"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pesantren berhasil dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/Pesantren" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Validasi gagal" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya superadmin" }
+        }
+      }
+    },
+    "/api/admin/pesantren/{id}": {
+      "put": {
+        "tags": ["Admin"],
+        "summary": "Update pesantren",
+        "description": "Memperbarui data pesantren (superadmin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID pesantren",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nama": { "type": "string", "minLength": 1 },
+                  "province": { "type": "string" },
+                  "kota": { "type": "string" },
+                  "alamat": { "type": "string" },
+                  "tahun_berdiri": { "type": "integer" },
+                  "jumlah_santri": { "type": "integer" },
+                  "jumlah_pengajar": { "type": "integer" },
+                  "biaya_pendaftaran": { "type": "number" },
+                  "biaya_bulanan": { "type": "number" },
+                  "fasilitas": { "type": "array", "items": { "type": "string" } },
+                  "kurikulum": { "type": "string", "enum": ["modern", "salaf", "campuran"] },
+                  "email": { "type": "string" },
+                  "telepon": { "type": "string" },
+                  "website": { "type": "string" },
+                  "deskripsi": { "type": "string" },
+                  "nama_bank": { "type": "string" },
+                  "nomor_rekening": { "type": "string" },
+                  "atas_nama_rekening": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pesantren berhasil diupdate"
+          },
+          "400": { "description": "Validasi gagal" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya superadmin" },
+          "404": { "description": "Pesantren tidak ditemukan" }
+        }
+      },
+      "delete": {
+        "tags": ["Admin"],
+        "summary": "Hapus pesantren",
+        "description": "Menghapus data pesantren (superadmin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID pesantren",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pesantren berhasil dihapus"
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya superadmin" },
+          "404": { "description": "Pesantren tidak ditemukan" }
+        }
+      }
+    },
+    "/api/admin/pendaftaran": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "List semua pendaftaran",
+        "description": "Mendapatkan daftar semua pendaftaran santri (superadmin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Daftar semua pendaftaran",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Pendaftaran" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya superadmin" }
+        }
+      }
+    },
+    "/api/admin/pendaftaran/{id}": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Detail pendaftaran",
+        "description": "Mendapatkan detail sebuah pendaftaran (superadmin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID pendaftaran",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail pendaftaran",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/Pendaftaran" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya superadmin" },
+          "404": { "description": "Pendaftaran tidak ditemukan" }
+        }
+      }
+    },
+    "/api/admin/pendaftaran/{id}/status": {
+      "put": {
+        "tags": ["Admin"],
+        "summary": "Update status pendaftaran",
+        "description": "Memperbarui status pendaftaran (superadmin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID pendaftaran",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": { "type": "string", "enum": ["pending", "diproses", "diterima", "ditolak"] },
+                  "catatan_admin": { "type": "string" }
+                }
+              },
+              "example": {
+                "status": "diterima",
+                "catatan_admin": "Selamat, Anda diterima!"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status pendaftaran berhasil diupdate"
+          },
+          "400": { "description": "Validasi gagal" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya superadmin" },
+          "404": { "description": "Pendaftaran tidak ditemukan" }
+        }
+      }
+    },
+    "/api/admin/pendaftaran/export": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Export pendaftaran ke Excel",
+        "description": "Mengekspor data pendaftaran ke format Excel (superadmin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "File Excel berisi data pendaftaran",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya superadmin" }
+        }
+      }
+    },
+    "/api/pemilik/pesantren": {
+      "get": {
+        "tags": ["Pemilik"],
+        "summary": "List pesantren milik sendiri",
+        "description": "Mendapatkan daftar pesantren yang dimiliki oleh user (pemilik only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Nomor halaman",
+            "required": false,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Jumlah data per halaman",
+            "required": false,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar pesantren milik user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Pesantren" }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": { "type": "integer" },
+                        "limit": { "type": "integer" },
+                        "total": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya pemilik" }
+        }
+      },
+      "post": {
+        "tags": ["Pemilik"],
+        "summary": "Buat pesantren baru",
+        "description": "Membuat pesantren baru dengan user sebagai pemilik (pemilik only)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nama", "province", "kota"],
+                "properties": {
+                  "nama": { "type": "string", "minLength": 1 },
+                  "province": { "type": "string" },
+                  "kota": { "type": "string" },
+                  "alamat": { "type": "string" },
+                  "tahun_berdiri": { "type": "integer" },
+                  "jumlah_santri": { "type": "integer" },
+                  "jumlah_pengajar": { "type": "integer" },
+                  "biaya_pendaftaran": { "type": "number" },
+                  "biaya_bulanan": { "type": "number" },
+                  "fasilitas": { "type": "array", "items": { "type": "string" } },
+                  "kurikulum": { "type": "string", "enum": ["modern", "salaf", "campuran"] },
+                  "email": { "type": "string" },
+                  "telepon": { "type": "string" },
+                  "website": { "type": "string" },
+                  "deskripsi": { "type": "string" },
+                  "nama_bank": { "type": "string" },
+                  "nomor_rekening": { "type": "string" },
+                  "atas_nama_rekening": { "type": "string" }
+                }
+              },
+              "example": {
+                "nama": "Pesantren Darul Falah",
+                "province": "Jawa Timur",
+                "kota": "Surabaya",
+                "kurikulum": "salaf"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pesantren berhasil dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": { "$ref": "#/components/schemas/Pesantren" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Validasi gagal" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Hanya pemilik" }
+        }
+      }
+    },
+    "/api/pemilik/pesantren/{id}": {
+      "put": {
+        "tags": ["Pemilik"],
+        "summary": "Update pesantren milik sendiri",
+        "description": "Memperbarui pesantren yang dimiliki (pemilik only, ownership check)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID pesantren",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nama": { "type": "string", "minLength": 1 },
+                  "province": { "type": "string" },
+                  "kota": { "type": "string" },
+                  "alamat": { "type": "string" },
+                  "tahun_berdiri": { "type": "integer" },
+                  "jumlah_santri": { "type": "integer" },
+                  "jumlah_pengajar": { "type": "integer" },
+                  "biaya_pendaftaran": { "type": "number" },
+                  "biaya_bulanan": { "type": "number" },
+                  "fasilitas": { "type": "array", "items": { "type": "string" } },
+                  "kurikulum": { "type": "string", "enum": ["modern", "salaf", "campuran"] },
+                  "email": { "type": "string" },
+                  "telepon": { "type": "string" },
+                  "website": { "type": "string" },
+                  "deskripsi": { "type": "string" },
+                  "nama_bank": { "type": "string" },
+                  "nomor_rekening": { "type": "string" },
+                  "atas_nama_rekening": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pesantren berhasil diupdate"
+          },
+          "400": { "description": "Validasi gagal" },
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Akses ditolak, bukan pesantren Anda" },
+          "404": { "description": "Pesantren tidak ditemukan" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token yang didapatkan dari endpoint /api/login. Format: Bearer <token>"
+      }
+    },
+    "schemas": {
+      "Pesantren": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "user_id": { "type": "integer" },
+          "nama": { "type": "string" },
+          "province": { "type": "string" },
+          "kota": { "type": "string" },
+          "alamat": { "type": "string" },
+          "tahun_berdiri": { "type": "integer" },
+          "jumlah_santri": { "type": "integer" },
+          "jumlah_pengajar": { "type": "integer" },
+          "biaya_pendaftaran": { "type": "number" },
+          "biaya_bulanan": { "type": "number" },
+          "fasilitas": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "kurikulum": { "type": "string", "enum": ["modern", "salaf", "campuran"] },
+          "email": { "type": "string" },
+          "telepon": { "type": "string" },
+          "website": { "type": "string" },
+          "deskripsi": { "type": "string" },
+          "nama_bank": { "type": "string" },
+          "nomor_rekening": { "type": "string" },
+          "atas_nama_rekening": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Pendaftaran": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "nomor_pendaftaran": { "type": "string" },
+          "user_id": { "type": "integer" },
+          "pesantren_id": { "type": "integer" },
+          "status": { "type": "string", "enum": ["pending", "diproses", "diterima", "ditolak"] },
+          "nama_lengkap": { "type": "string" },
+          "nik": { "type": "string" },
+          "tempat_lahir": { "type": "string" },
+          "tanggal_lahir": { "type": "string", "format": "date" },
+          "jenis_kelamin": { "type": "string", "enum": ["L", "P"] },
+          "alamat": { "type": "string" },
+          "no_hp": { "type": "string" },
+          "nama_ayah": { "type": "string" },
+          "nama_ibu": { "type": "string" },
+          "no_hp_ortu": { "type": "string" },
+          "pekerjaan_ortu": { "type": "string" },
+          "foto_ktp": { "type": "string" },
+          "pas_foto": { "type": "string" },
+          "kartu_keluarga": { "type": "string" },
+          "catatan_admin": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "username": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { "type": "string", "enum": ["superadmin", "pemilik", "pendaftar"] },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "message": { "type": "string" },
+          "statusCode": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
