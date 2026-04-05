@@ -48,6 +48,11 @@
               Manajemen Pesantren
             </button>
           </li>
+          <li class="nav-item">
+            <button class="nav-link" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">
+              Manajemen User
+            </button>
+          </li>
         </ul>
       </div>
       <div class="card-body">
@@ -109,6 +114,37 @@
 
         <div v-if="activeTab === 'pesantren'">
           <AdminPesantrenManagement @refresh="loadData" />
+        </div>
+
+        <div v-if="activeTab === 'users'">
+          <div v-if="usersLoading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted small">Memuat data...</p>
+          </div>
+          <div v-else-if="users.length === 0" class="text-center py-5">
+            <p class="fs-3 mb-3">👤</p>
+            <h6 class="fw-semibold">Belum ada user</h6>
+          </div>
+          <div v-else class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Terdaftar</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="u in users" :key="u.id">
+                  <td class="fw-medium">{{ u.username }}</td>
+                  <td>{{ u.email }}</td>
+                  <td><span class="badge" :class="roleBadge(u.role)">{{ roleLabel(u.role) }}</span></td>
+                  <td>{{ formatDate(u.created_at) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -190,6 +226,8 @@ const pendaftaran = ref([])
 const loadingPendaftaran = ref(true)
 const selectedItem = ref(null)
 const exporting = ref(false)
+const users = ref([])
+const usersLoading = ref(true)
 
 const pendingCount = computed(() => pendaftaran.value.filter(p => p.status === 'pending').length)
 const diprosesCount = computed(() => pendaftaran.value.filter(p => p.status === 'diproses').length)
@@ -212,6 +250,16 @@ function statusLabel(status) {
     ditolak: 'Ditolak'
   }
   return map[status] || status
+}
+
+function roleBadge(role) {
+  const map = { superadmin: 'bg-danger', pemilik: 'bg-warning text-dark', pendaftar: 'bg-success' }
+  return map[role] || 'bg-secondary'
+}
+
+function roleLabel(role) {
+  const map = { superadmin: 'Super Admin', pemilik: 'Pemilik', pendaftar: 'Pendaftar' }
+  return map[role] || role
 }
 
 function formatDate(dateStr) {
@@ -268,8 +316,20 @@ async function loadData() {
   }
 }
 
+async function loadUsers() {
+  usersLoading.value = true
+  try {
+    const { data } = await admin.getUsers()
+    users.value = data.data || []
+  } catch {
+    users.value = []
+  } finally {
+    usersLoading.value = false
+  }
+}
+
 onMounted(async () => {
-  await loadData()
+  await Promise.all([loadData(), loadUsers()])
 })
 </script>
 

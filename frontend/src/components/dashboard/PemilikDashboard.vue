@@ -85,7 +85,7 @@
                 </div>
                 <div class="col-md-3">
                   <label class="form-label fw-medium">Provinsi *</label>
-                  <select v-model="province" v-bind="provinceProps" class="form-select" :class="{ 'is-invalid': errors.province }">
+                  <select v-model="province" v-bind="provinceProps" class="form-select" :class="{ 'is-invalid': errors.province }" @change="onProvinceChange">
                     <option value="">Pilih Provinsi</option>
                     <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
                   </select>
@@ -93,7 +93,10 @@
                 </div>
                 <div class="col-md-3">
                   <label class="form-label fw-medium">Kota *</label>
-                  <input v-model="kota" v-bind="kotaProps" type="text" class="form-control" :class="{ 'is-invalid': errors.kota }" />
+                  <select v-model="kota" v-bind="kotaProps" class="form-select" :class="{ 'is-invalid': errors.kota }" :disabled="!cities.length && province">
+                    <option value="">Pilih Kota</option>
+                    <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
+                  </select>
                   <div class="invalid-feedback" v-if="errors.kota">{{ errors.kota }}</div>
                 </div>
                 <div class="col-12">
@@ -177,6 +180,7 @@ const loading = ref(true)
 const showForm = ref(false)
 const editingId = ref(null)
 const provinces = ref([])
+const cities = ref([])
 const fasilitasInput = ref('')
 const serverError = ref('')
 
@@ -253,9 +257,33 @@ function kurikulumBadge(kurikulum) {
   return map[kurikulum] || 'bg-secondary'
 }
 
-function openForm(p) {
+function closeForm() {
+  showForm.value = false
+  editingId.value = null
+  serverError.value = ''
+  cities.value = []
+  resetForm()
+}
+
+async function onProvinceChange() {
+  kota.value = ''
+  cities.value = []
+  if (!province.value) return
+  try {
+    const prov = provinces.value.find(p => p.name === province.value)
+    if (prov) {
+      const { data } = await wilayah.getRegencies(prov.id)
+      cities.value = (data.data || []).map(r => r.name)
+    }
+  } catch {
+    cities.value = []
+  }
+}
+
+async function openForm(p) {
   serverError.value = ''
   editingId.value = p?.id || null
+  cities.value = []
   if (p) {
     setValues({
       nama: p.nama || '',
@@ -277,18 +305,22 @@ function openForm(p) {
       atas_nama_rekening: p.atas_nama_rekening || ''
     })
     fasilitasInput.value = Array.isArray(p.fasilitas) ? p.fasilitas.join(', ') : ''
+    if (p.province) {
+      try {
+        const prov = provinces.value.find(pr => pr.name === p.province)
+        if (prov) {
+          const { data } = await wilayah.getRegencies(prov.id)
+          cities.value = (data.data || []).map(r => r.name)
+        }
+      } catch {
+        cities.value = []
+      }
+    }
   } else {
     resetForm()
     fasilitasInput.value = ''
   }
   showForm.value = true
-}
-
-function closeForm() {
-  showForm.value = false
-  editingId.value = null
-  serverError.value = ''
-  resetForm()
 }
 
 const onSubmit = handleSubmit(async (values) => {

@@ -11,9 +11,16 @@
           <div class="row g-3">
             <div class="col-md-3 col-6">
               <label class="form-label small text-muted mb-1">Provinsi</label>
-              <select class="form-select form-select-sm" v-model="filters.province" @change="fetchData">
+              <select class="form-select form-select-sm" v-model="filters.province" @change="onProvinceChange">
                 <option value="">Semua Provinsi</option>
                 <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
+              </select>
+            </div>
+            <div class="col-md-3 col-6">
+              <label class="form-label small text-muted mb-1">Kota</label>
+              <select class="form-select form-select-sm" v-model="filters.kota" @change="fetchData" :disabled="!cities.length">
+                <option value="">Semua Kota</option>
+                <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
               </select>
             </div>
             <div class="col-md-3 col-6">
@@ -141,6 +148,7 @@ const compareStore = useCompareStore()
 const pesantren = ref([])
 const loading = ref(false)
 const provinces = ref([])
+const cities = ref([])
 const currentPage = ref(1)
 const limit = ref(12)
 const totalRecords = ref(0)
@@ -149,6 +157,7 @@ const sortOrder = ref('asc')
 
 const filters = ref({
   province: '',
+  kota: '',
   kurikulum: ''
 })
 
@@ -188,6 +197,25 @@ async function fetchProvinces() {
   }
 }
 
+async function onProvinceChange() {
+  filters.value.kota = ''
+  cities.value = []
+  if (!filters.value.province) {
+    await fetchData()
+    return
+  }
+  try {
+    const province = provinces.value.find(p => p.name === filters.value.province)
+    if (province) {
+      const { data } = await wilayah.getRegencies(province.id)
+      cities.value = (data.data || []).map(r => r.name)
+    }
+  } catch {
+    cities.value = []
+  }
+  await fetchData()
+}
+
 async function fetchData() {
   loading.value = true
   currentPage.value = 1
@@ -199,6 +227,7 @@ async function fetchData() {
       order: sortOrder.value
     }
     if (filters.value.province) params.province = filters.value.province
+    if (filters.value.kota) params.kota = filters.value.kota
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
 
     const { data } = await pesantrenApi.list(params)
@@ -224,6 +253,7 @@ async function changePage(page) {
       order: sortOrder.value
     }
     if (filters.value.province) params.province = filters.value.province
+    if (filters.value.kota) params.kota = filters.value.kota
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
 
     const { data } = await pesantrenApi.list(params)
