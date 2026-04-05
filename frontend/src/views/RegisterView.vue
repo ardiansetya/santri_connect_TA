@@ -4,35 +4,83 @@
       <h1 class="auth-card__title">Daftar Akun Baru</h1>
       <p class="auth-card__subtitle">Pilih role dan isi data Anda</p>
 
-      <form class="auth-form" @submit.prevent="handleRegister">
+      <form class="auth-form" @submit="onSubmit">
         <div class="form-group">
           <label class="form-label" for="username">Username</label>
-          <input class="form-input" id="username" v-model="form.username" required placeholder="Username Anda" />
+          <input
+            id="username"
+            type="text"
+            v-model="username"
+            v-bind="usernameProps"
+            class="form-input"
+            :class="{ 'form-input--error': errors.username }"
+            placeholder="Username Anda"
+          />
+          <span v-if="errors.username" class="form-error">{{ errors.username }}</span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="email">Email</label>
-          <input class="form-input" id="email" type="email" v-model="form.email" required placeholder="email@contoh.com" />
+          <input
+            id="email"
+            type="email"
+            v-model="email"
+            v-bind="emailProps"
+            class="form-input"
+            :class="{ 'form-input--error': errors.email }"
+            placeholder="email@contoh.com"
+          />
+          <span v-if="errors.email" class="form-error">{{ errors.email }}</span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="password">Password</label>
-          <input class="form-input" id="password" type="password" v-model="form.password" required minlength="6" placeholder="Minimal 6 karakter" />
+          <input
+            id="password"
+            type="password"
+            v-model="password"
+            v-bind="passwordProps"
+            class="form-input"
+            :class="{ 'form-input--error': errors.password }"
+            placeholder="Minimal 6 karakter"
+          />
+          <span v-if="errors.password" class="form-error">{{ errors.password }}</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirmPassword">Konfirmasi Password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            v-model="confirmPassword"
+            v-bind="confirmPasswordProps"
+            class="form-input"
+            :class="{ 'form-input--error': errors.confirmPassword }"
+            placeholder="Ulangi password"
+          />
+          <span v-if="errors.confirmPassword" class="form-error">{{ errors.confirmPassword }}</span>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="role">Role</label>
-          <select class="form-input" id="role" v-model="form.role">
+          <select
+            id="role"
+            v-model="role"
+            v-bind="roleProps"
+            class="form-input"
+            :class="{ 'form-input--error': errors.role }"
+          >
             <option value="pendaftar">Pendaftar (Calon Santri)</option>
             <option value="pemilik">Pemilik Pesantren</option>
           </select>
+          <span v-if="errors.role" class="form-error">{{ errors.role }}</span>
         </div>
 
-        <div v-if="error" class="alert alert--error">{{ error }}</div>
+        <div v-if="serverError" class="alert alert--error">{{ serverError }}</div>
         <div v-if="success" class="alert alert--success">{{ success }}</div>
 
-        <button type="submit" class="btn btn--primary btn--full" :disabled="loading">
-          <span v-if="loading">Memproses...</span>
+        <button type="submit" class="btn btn--primary btn--full" :disabled="isSubmitting || !meta.valid">
+          <span v-if="isSubmitting">Memproses...</span>
           <span v-else>Daftar</span>
         </button>
       </form>
@@ -45,31 +93,70 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
+import { useForm } from 'vee-validate'
+import * as yup from 'yup'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 const router = useRouter()
-const form = reactive({ username: '', email: '', password: '', role: 'pendaftar' })
-const error = ref('')
+const serverError = ref('')
 const success = ref('')
-const loading = ref(false)
 
-async function handleRegister() {
-  error.value = ''
+const schema = yup.object({
+  username: yup.string()
+    .required('Username harus diisi')
+    .min(3, 'Username minimal 3 karakter')
+    .max(30, 'Username maksimal 30 karakter')
+    .matches(/^[a-zA-Z0-9_]+$/, 'Username hanya boleh berisi huruf, angka, dan underscore'),
+  email: yup.string()
+    .required('Email harus diisi')
+    .email('Format email tidak valid'),
+  password: yup.string()
+    .required('Password harus diisi')
+    .min(6, 'Password minimal 6 karakter'),
+  confirmPassword: yup.string()
+    .required('Konfirmasi password harus diisi')
+    .oneOf([yup.ref('password')], 'Password tidak cocok'),
+  role: yup.string()
+    .required('Role harus dipilih')
+    .oneOf(['pendaftar', 'pemilik'], 'Role tidak valid')
+})
+
+const { defineField, handleSubmit, errors, meta, isSubmitting } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: 'pendaftar'
+  }
+})
+
+const [username, usernameProps] = defineField('username')
+const [email, emailProps] = defineField('email')
+const [password, passwordProps] = defineField('password')
+const [confirmPassword, confirmPasswordProps] = defineField('confirmPassword')
+const [role, roleProps] = defineField('role')
+
+const onSubmit = handleSubmit(async (values) => {
+  serverError.value = ''
   success.value = ''
-  loading.value = true
   try {
-    await authStore.register(form)
+    await authStore.register({
+      username: values.username,
+      email: values.email,
+      password: values.password,
+      role: values.role
+    })
     success.value = 'Registrasi berhasil! Silakan login.'
     setTimeout(() => router.push('/login'), 1500)
   } catch (e) {
-    error.value = e.response?.data?.error || 'Registrasi gagal'
-  } finally {
-    loading.value = false
+    serverError.value = e.response?.data?.error || 'Registrasi gagal'
   }
-}
+})
 </script>
 
 <style scoped>
@@ -124,10 +211,24 @@ async function handleRegister() {
   background: var(--color-surface);
 }
 
+.form-input--error {
+  border-color: var(--color-error);
+}
+
 .form-input:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.form-input--error:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px var(--color-error-bg);
+}
+
+.form-error {
+  font-size: 0.75rem;
+  color: var(--color-error);
 }
 
 .btn {
