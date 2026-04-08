@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <div class="container mx-auto px-4 pt-10 pb-8">
+    <div class="container mx-auto px-4 pt-16 pb-8">
       <!-- Header Section -->
       <div class="text-center mb-8">
-        <h1 class="font-bold text-3xl mb-2 text-primary">
+        <h1 class="font-bold text-3xl mb-2 text-foreground">
           Jelajahi Pesantren
         </h1>
         <p class="text-muted text-base">Temukan pesantren terbaik untuk masa depan putra-putri Anda</p>
