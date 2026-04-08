@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <div class="container mx-auto px-4 pt-16 pb-8">
+  <div class="py-4 md:py-5">
+    <div class="container">
       <!-- Header Section -->
-      <div class="text-center mb-8">
-        <h1 class="font-bold text-3xl mb-2 text-foreground">
+      <div class="text-center mb-4 md:mb-5">
+        <h1 class="font-bold text-3xl">
           Jelajahi Pesantren
         </h1>
-        <p class="text-muted text-base">Temukan pesantren terbaik untuk masa depan putra-putri Anda</p>
+        <p class="text-muted mt-2">Temukan pesantren terbaik untuk masa depan putra-putri Anda</p>
       </div>
 
       <!-- Main Layout: Sidebar + Content -->
@@ -210,7 +210,6 @@
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script setup>

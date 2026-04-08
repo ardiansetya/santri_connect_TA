@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <div class="container mx-auto px-4 pt-10 pb-8">
+  <div class="py-4 md:py-5">
+    <div class="container">
       <!-- Hero Header -->
       <div class="text-center mb-8">
-        <h1 class="font-bold text-3xl mb-2 text-purple-600">
+        <h1 class="font-bold text-3xl text-purple-600 mb-2">
           Rekomendasi Pesantren Pintar
         </h1>
-        <p class="text-muted text-base max-w-2xl mx-auto">Dapatkan rekomendasi pesantren terbaik yang sesuai dengan budget dan preferensi Anda</p>
+        <p class="text-muted mt-2 text-base max-w-2xl mx-auto">Dapatkan rekomendasi pesantren terbaik yang sesuai dengan budget dan preferensi Anda</p>
       </div>
 
       <!-- Main Layout -->
