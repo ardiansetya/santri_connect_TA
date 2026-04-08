@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-purple-50/50 via-blue-50/30 to-white">
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 pt-6 pb-8">
       <!-- Hero Header -->
       <div class="text-center mb-8">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl mb-3 shadow-lg">
