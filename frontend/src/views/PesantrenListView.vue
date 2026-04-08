@@ -119,92 +119,63 @@
         <!-- Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div v-for="p in pesantren" :key="p.id" 
-               class="group card border-0 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-            <div class="relative">
-              <!-- Foto Utama -->
-              <div v-if="p.foto_utama" class="aspect-video overflow-hidden">
+               class="card group block overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+            <router-link :to="`/pesantren/${p.id}`" class="block">
+              <div class="relative aspect-video overflow-hidden">
                 <img
+                  v-if="p.foto_utama"
                   :src="`/uploads/pesantrenImages/${p.foto_utama}`"
                   :alt="p.nama"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-              </div>
-              <div v-else class="aspect-video bg-gray-100 flex items-center justify-center">
-                <div class="text-center">
-                  <div class="text-4xl mb-2">🏫</div>
-                  <span class="text-muted text-sm">Foto belum tersedia</span>
+                <div v-else class="h-full w-full bg-gray-100 flex items-center justify-center">
+                  <div class="text-center">
+                    <div class="text-4xl mb-2">🏫</div>
+                    <span class="text-muted text-sm">Foto belum tersedia</span>
+                  </div>
                 </div>
-              </div>
-              
-              <!-- Badge Overlay -->
-              <div class="absolute top-3 right-3">
-                <span class="badge px-3 py-1.5 text-xs font-semibold shadow-md" :class="kurikulumBadge(p.kurikulum)">
+                <span class="badge badge-primary absolute left-3 top-3">
                   {{ p.kurikulum || 'Umum' }}
                 </span>
               </div>
-            </div>
-
-            <div class="p-5">
-              <h3 class="font-bold text-lg mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                {{ p.nama }}
-              </h3>
-              
-              <div class="flex items-center gap-1 text-muted text-sm mb-4">
-                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.5l-4.95-4.55a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+              <div class="p-5">
+                <h3 class="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                  {{ p.nama }}
+                </h3>
+                <div class="mt-2 flex items-center gap-1.5 text-sm text-muted">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span class="line-clamp-1">{{ p.kota }}, {{ p.province }}</span>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                  <span class="text-lg font-bold text-primary">{{ p.biaya_bulanan ? formatCurrency(p.biaya_bulanan) : '-' }}</span>
+                </div>
+                <div v-if="p.fasilitas && p.fasilitas.length" class="mt-3 flex flex-wrap gap-1.5">
+                  <span v-for="f in p.fasilitas.slice(0, 4)" :key="f" class="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted">
+                    {{ f }}
+                  </span>
+                  <span v-if="p.fasilitas.length > 4" class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary font-semibold">
+                    +{{ p.fasilitas.length - 4 }}
+                  </span>
+                </div>
+              </div>
+            </router-link>
+            
+            <!-- Compare Button (outside router-link) -->
+            <div class="px-5 pb-4">
+              <button
+                class="btn w-full text-sm py-2 transition-all"
+                :class="compareStore.isSelected(p.id) ? 'bg-primary text-white' : 'btn-outline'"
+                @click="toggleCompare(p.id)"
+                :title="compareStore.isSelected(p.id) ? 'Hapus dari perbandingan' : 'Tambahkan ke perbandingan'"
+              >
+                <svg v-if="compareStore.isSelected(p.id)" class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                 </svg>
-                <span class="truncate">{{ p.kota }}, {{ p.province }}</span>
-              </div>
-
-              <!-- Stats Grid -->
-              <div class="grid grid-cols-3 gap-3 mb-4">
-                <div v-if="p.jumlah_santri" class="text-center p-2 bg-blue-50 rounded-lg">
-                  <div class="font-bold text-sm text-primary">{{ formatNumber(p.jumlah_santri) }}</div>
-                  <div class="text-xs text-muted">Santri</div>
-                </div>
-                <div v-if="p.jumlah_pengajar" class="text-center p-2 bg-green-50 rounded-lg">
-                  <div class="font-bold text-sm text-green-600">{{ formatNumber(p.jumlah_pengajar) }}</div>
-                  <div class="text-xs text-muted">Pengajar</div>
-                </div>
-                <div v-if="p.biaya_bulanan" class="text-center p-2 bg-orange-50 rounded-lg">
-                  <div class="font-bold text-xs text-orange-600 truncate">{{ formatCurrencyShort(p.biaya_bulanan) }}</div>
-                  <div class="text-xs text-muted">/bulan</div>
-                </div>
-              </div>
-
-              <!-- Fasilitas -->
-              <div v-if="p.fasilitas && p.fasilitas.length" class="flex flex-wrap gap-1.5 mb-4 min-h-[2rem]">
-                <span v-for="f in p.fasilitas.slice(0, 3)" :key="f" class="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs font-medium">
-                  {{ f }}
-                </span>
-                <span v-if="p.fasilitas.length > 3" class="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-semibold">
-                  +{{ p.fasilitas.length - 3 }}
-                </span>
-              </div>
-
-              <!-- Actions -->
-              <div class="flex gap-2">
-                <router-link :to="`/pesantren/${p.id}`" class="btn btn-primary flex-1 text-sm py-2">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                  Detail
-                </router-link>
-                <button
-                  class="btn px-3 py-2 transition-all"
-                  :class="compareStore.isSelected(p.id) ? 'bg-primary text-white' : 'btn-outline'"
-                  @click="toggleCompare(p.id)"
-                  :title="compareStore.isSelected(p.id) ? 'Hapus dari perbandingan' : 'Bandingkan'"
-                >
-                  <svg v-if="compareStore.isSelected(p.id)" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                  </svg>
-                  <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
-                  </svg>
-                </button>
-              </div>
+                <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
+                </svg>
+                {{ compareStore.isSelected(p.id) ? '✓ Dibandingkan' : '⚖️ Bandingkan' }}
+              </button>
             </div>
           </div>
         </div>
