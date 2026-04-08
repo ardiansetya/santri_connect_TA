@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <div class="card border-l-4 border-l-primary">
+      <div class="card border-l-[4px] border-l-[hsl(231 84% 60%)]">
         <div class="p-4">
           <div class="flex justify-between items-center">
             <div>
@@ -12,7 +12,7 @@
           </div>
         </div>
       </div>
-      <div class="card border-l-4 border-l-green-500">
+      <div class="card border-l-[4px] border-l-[#22c55e]">
         <div class="p-4">
           <div class="flex justify-between items-center">
             <div>
@@ -23,7 +23,7 @@
           </div>
         </div>
       </div>
-      <div class="card border-l-4 border-l-blue-500">
+      <div class="card border-l-[4px] border-l-[#3b82f6]">
         <div class="p-4">
           <div class="flex justify-between items-center">
             <div>
@@ -118,12 +118,12 @@ const loading = ref(true)
 
 function statusBadge(status) {
   const map = {
-    pending: 'bg-warning text-dark',
-    diproses: 'bg-info',
-    diterima: 'bg-success',
-    ditolak: 'bg-danger'
+    pending: 'bg-[#fef9c3] text-[#854d0e]',
+    diproses: 'bg-[#dbeafe] text-[#1e40af]',
+    diterima: 'bg-[#dcfce7] text-[#166534]',
+    ditolak: 'bg-[#fee2e2] text-[#991b1b]'
   }
-  return map[status] || 'bg-secondary'
+  return map[status] || 'bg-[#f3f4f6] text-[#1f2937]'
 }
 
 function statusLabel(status) {
@@ -161,61 +161,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.border-l-4 {
-  border-left-width: 4px;
-}
-.border-l-primary {
-  border-left-color: hsl(231 84% 60%);
-}
-.border-l-green-500 {
-  border-left-color: #22c55e;
-}
-.border-l-blue-500 {
-  border-left-color: #3b82f6;
-}
-.text-green-500 {
-  color: #22c55e;
-}
-.text-blue-500 {
-  color: #3b82f6;
-}
-.border-b {
-  border-bottom: 1px solid hsl(var(--border));
-}
-.text-right {
-  text-align: right;
-}
-.text-left {
-  text-align: left;
-}
-.bg-yellow-100 {
-  background-color: #fef9c3 !important;
-}
-.text-yellow-800 {
-  color: #854d0e !important;
-}
-.bg-blue-100 {
-  background-color: #dbeafe !important;
-}
-.text-blue-800 {
-  color: #1e40af !important;
-}
-.bg-green-100 {
-  background-color: #dcfce7 !important;
-}
-.text-green-800 {
-  color: #166534 !important;
-}
-.bg-red-100 {
-  background-color: #fee2e2 !important;
-}
-.text-red-800 {
-  color: #991b1b !important;
-}
-.bg-gray-100 {
-  background-color: #f3f4f6 !important;
-}
-.text-gray-800 {
-  color: #1f2937 !important;
-}
+/* All styles using Tailwind CSS */
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <div class="card border-l-4 border-l-primary">
+      <div class="card border-l-[4px] border-l-[hsl(231 84% 60%)]">
         <div class="p-4">
           <div class="flex justify-between items-center">
             <div>
@@ -12,7 +12,7 @@
           </div>
         </div>
       </div>
-      <div class="card border-l-4 border-l-blue-500">
+      <div class="card border-l-[4px] border-l-[#3b82f6]">
         <div class="p-4">
           <div class="flex justify-between items-center">
             <div>
@@ -216,11 +216,11 @@ const canAdd = computed(() => {
 
 function kurikulumBadge(kurikulum) {
   const map = {
-    modern: 'badge-primary',
-    salaf: 'bg-green-100 text-green-800',
-    campuran: 'bg-yellow-100 text-yellow-800'
+    modern: 'bg-[hsl(231 84% 60%)] text-white',
+    salaf: 'bg-[#dcfce7] text-[#166534]',
+    campuran: 'bg-[#fef9c3] text-[#854d0e]'
   }
-  return map[kurikulum] || 'bg-gray-100 text-gray-800'
+  return map[kurikulum] || 'bg-[#f3f4f6] text-[#1f2937]'
 }
 
 async function fetchProvinces() {
@@ -360,31 +360,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.border-l-4 {
-  border-left-width: 4px;
-}
-.border-l-primary {
-  border-left-color: hsl(231 84% 60%);
-}
-.border-l-blue-500 {
-  border-left-color: #3b82f6;
-}
-.fixed {
-  position: fixed;
-}
-.inset-0 {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-.z-50 {
-  z-index: 50;
-}
-.overflow-y-auto {
-  overflow-y: auto;
-}
-.max-h-\[90vh\] {
-  max-height: 90vh;
-}
+/* All styles using Tailwind CSS */
 </style>

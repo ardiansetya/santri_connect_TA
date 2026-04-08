@@ -172,47 +172,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.p-6 {
-  padding: 1.5rem;
-}
-.p-5 {
-  padding: 1.25rem;
-}
-.mb-6 {
-  margin-bottom: 1.5rem;
-}
-.mb-5 {
-  margin-bottom: 1.25rem;
-}
-.max-w-3xl {
-  max-width: 48rem;
-}
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
-.border-b {
-  border-bottom: 1px solid hsl(var(--border));
-}
-.text-3xl {
-  font-size: 1.875rem;
-}
-.text-lg {
-  font-size: 1.125rem;
-}
-.alert--error {
-  background: hsl(0 84% 60% / 0.1);
-  color: hsl(0 84% 60%);
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-}
-.alert--success {
-  background: hsl(160 84% 39% / 0.1);
-  color: hsl(160 84% 39%);
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-}
-.bg-muted {
-  background: hsl(214 32% 91%);
-}
+/* All styles using Tailwind CSS */
 </style>
