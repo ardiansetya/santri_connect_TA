@@ -1,74 +1,70 @@
 <template>
-  <div class="py-4">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-lg-6">
-          <h1 class="fw-bold mb-4">Profil Saya</h1>
+  <div class="p-6">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl font-bold mb-6">Profil Saya</h1>
 
-          <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white py-3">
-              <h5 class="fw-semibold mb-0">Informasi Akun</h5>
+      <div class="card mb-6">
+        <div class="p-5 border-b border-border">
+          <h5 class="text-lg font-semibold mb-0">Informasi Akun</h5>
+        </div>
+        <div class="p-6">
+          <form @submit="onSubmit">
+            <div class="mb-5">
+              <label class="form-label font-medium">Username</label>
+              <input v-model="username" v-bind="usernameProps" type="text" class="form-input" :class="{ 'border-red-500': errors.username }" />
+              <p v-if="errors.username" class="text-red-500 text-sm mt-1">{{ errors.username }}</p>
             </div>
-            <div class="card-body p-4">
-              <form @submit="onSubmit">
-                <div class="mb-3">
-                  <label class="form-label fw-medium">Username</label>
-                  <input v-model="username" v-bind="usernameProps" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
-                  <div class="invalid-feedback" v-if="errors.username">{{ errors.username }}</div>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label fw-medium">Email</label>
-                  <input v-model="email" v-bind="emailProps" type="email" class="form-control" :class="{ 'is-invalid': errors.email }" />
-                  <div class="invalid-feedback" v-if="errors.email">{{ errors.email }}</div>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label fw-medium">Role</label>
-                  <input type="text" class="form-control" :value="roleLabel" disabled />
-                </div>
-
-                <div v-if="serverError" class="alert alert-danger">{{ serverError }}</div>
-                <div v-if="success" class="alert alert-success">{{ success }}</div>
-
-                <button type="submit" class="btn btn-primary" :disabled="isSubmitting || !meta.dirty">
-                  <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
-                  {{ isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan' }}
-                </button>
-              </form>
+            <div class="mb-5">
+              <label class="form-label font-medium">Email</label>
+              <input v-model="email" v-bind="emailProps" type="email" class="form-input" :class="{ 'border-red-500': errors.email }" />
+              <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
             </div>
-          </div>
-
-          <div class="card shadow-sm">
-            <div class="card-header bg-white py-3">
-              <h5 class="fw-semibold mb-0">Ubah Password</h5>
+            <div class="mb-5">
+              <label class="form-label font-medium">Role</label>
+              <input type="text" class="form-input bg-muted" :value="roleLabel" disabled />
             </div>
-            <div class="card-body p-4">
-              <form @submit="onPasswordSubmit">
-                <div class="mb-3">
-                  <label class="form-label fw-medium">Password Saat Ini</label>
-                  <input v-model="currentPassword" v-bind="currentPasswordProps" type="password" class="form-control" :class="{ 'is-invalid': passwordErrors.currentPassword }" />
-                  <div class="invalid-feedback" v-if="passwordErrors.currentPassword">{{ passwordErrors.currentPassword }}</div>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label fw-medium">Password Baru</label>
-                  <input v-model="newPassword" v-bind="newPasswordProps" type="password" class="form-control" :class="{ 'is-invalid': passwordErrors.newPassword }" />
-                  <div class="invalid-feedback" v-if="passwordErrors.newPassword">{{ passwordErrors.newPassword }}</div>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label fw-medium">Konfirmasi Password Baru</label>
-                  <input v-model="confirmPassword" v-bind="confirmPasswordProps" type="password" class="form-control" :class="{ 'is-invalid': passwordErrors.confirmPassword }" />
-                  <div class="invalid-feedback" v-if="passwordErrors.confirmPassword">{{ passwordErrors.confirmPassword }}</div>
-                </div>
 
-                <div v-if="passwordServerError" class="alert alert-danger">{{ passwordServerError }}</div>
-                <div v-if="passwordSuccess" class="alert alert-success">{{ passwordSuccess }}</div>
+            <div v-if="serverError" class="alert alert--error mb-4">{{ serverError }}</div>
+            <div v-if="success" class="alert alert--success mb-4">{{ success }}</div>
 
-                <button type="submit" class="btn btn-warning" :disabled="isPasswordSubmitting || !passwordMeta.valid">
-                  <span v-if="isPasswordSubmitting" class="spinner-border spinner-border-sm me-2"></span>
-                  {{ isPasswordSubmitting ? 'Mengubah...' : 'Ubah Password' }}
-                </button>
-              </form>
+            <button type="submit" class="btn btn-primary" :disabled="isSubmitting || !meta.dirty">
+              <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+              {{ isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan' }}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="p-5 border-b border-border">
+          <h5 class="text-lg font-semibold mb-0">Ubah Password</h5>
+        </div>
+        <div class="p-6">
+          <form @submit="onPasswordSubmit">
+            <div class="mb-5">
+              <label class="form-label font-medium">Password Saat Ini</label>
+              <input v-model="currentPassword" v-bind="currentPasswordProps" type="password" class="form-input" :class="{ 'border-red-500': passwordErrors.currentPassword }" />
+              <p v-if="passwordErrors.currentPassword" class="text-red-500 text-sm mt-1">{{ passwordErrors.currentPassword }}</p>
             </div>
-          </div>
+            <div class="mb-5">
+              <label class="form-label font-medium">Password Baru</label>
+              <input v-model="newPassword" v-bind="newPasswordProps" type="password" class="form-input" :class="{ 'border-red-500': passwordErrors.newPassword }" />
+              <p v-if="passwordErrors.newPassword" class="text-red-500 text-sm mt-1">{{ passwordErrors.newPassword }}</p>
+            </div>
+            <div class="mb-5">
+              <label class="form-label font-medium">Konfirmasi Password Baru</label>
+              <input v-model="confirmPassword" v-bind="confirmPasswordProps" type="password" class="form-input" :class="{ 'border-red-500': passwordErrors.confirmPassword }" />
+              <p v-if="passwordErrors.confirmPassword" class="text-red-500 text-sm mt-1">{{ passwordErrors.confirmPassword }}</p>
+            </div>
+
+            <div v-if="passwordServerError" class="alert alert--error mb-4">{{ passwordServerError }}</div>
+            <div v-if="passwordSuccess" class="alert alert--success mb-4">{{ passwordSuccess }}</div>
+
+            <button type="submit" class="btn btn-warning" :disabled="isPasswordSubmitting || !passwordMeta.valid">
+              <span v-if="isPasswordSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+              {{ isPasswordSubmitting ? 'Mengubah...' : 'Ubah Password' }}
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -174,3 +170,49 @@ onMounted(() => {
   }
 })
 </script>
+
+<style scoped>
+.p-6 {
+  padding: 1.5rem;
+}
+.p-5 {
+  padding: 1.25rem;
+}
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+.max-w-3xl {
+  max-width: 48rem;
+}
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+.border-b {
+  border-bottom: 1px solid hsl(var(--border));
+}
+.text-3xl {
+  font-size: 1.875rem;
+}
+.text-lg {
+  font-size: 1.125rem;
+}
+.alert--error {
+  background: hsl(0 84% 60% / 0.1);
+  color: hsl(0 84% 60%);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+.alert--success {
+  background: hsl(160 84% 39% / 0.1);
+  color: hsl(160 84% 39%);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+.bg-muted {
+  background: hsl(214 32% 91%);
+}
+</style>
