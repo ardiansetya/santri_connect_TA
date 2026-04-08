@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
-    <div class="container mx-auto px-4 pt-6 pb-8">
+  <div class="min-h-screen bg-gray-50">
+    <div class="container mx-auto px-4 pt-10 pb-8">
       <!-- Header Section -->
       <div class="text-center mb-8">
-        <h1 class="font-bold text-3xl mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+        <h1 class="font-bold text-3xl mb-2 text-primary">
           Jelajahi Pesantren
         </h1>
         <p class="text-muted text-base">Temukan pesantren terbaik untuk masa depan putra-putri Anda</p>
@@ -129,7 +129,7 @@
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <div v-else class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <div v-else class="aspect-video bg-gray-100 flex items-center justify-center">
                 <div class="text-center">
                   <div class="text-4xl mb-2">🏫</div>
                   <span class="text-muted text-sm">Foto belum tersedia</span>
