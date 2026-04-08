@@ -41,9 +41,7 @@ export const pendaftaran = {
     return api.get(`/pendaftaran/status/${nomor}`)
   },
   create(formData) {
-    return api.post('/pendaftaran', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+    return api.post('/pendaftaran', formData)
   }
 }
 
@@ -107,5 +105,8 @@ export const wilayah = {
 export const publicApi = {
   getStats() {
     return api.get('/public/stats')
+  },
+  getPesantren(params) {
+    return api.get('/pesantren', { params })
   }
 }

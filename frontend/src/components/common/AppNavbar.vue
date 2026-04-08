@@ -1,30 +1,74 @@
 <template>
-  <nav class="navbar">
-    <div class="container navbar__container">
-      <router-link to="/" class="navbar__brand">
-        <span class="navbar__logo">🕌</span>
-        <span class="navbar__title">Santri Connect</span>
+  <nav class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
+    <div class="container flex h-16 items-center justify-between">
+      <router-link to="/" class="flex items-center gap-2">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <span class="font-heading text-xl font-bold text-foreground">
+          Santri<span class="text-primary">Connect</span>
+        </span>
       </router-link>
 
-      <button class="navbar__toggle" @click="isOpen = !isOpen" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
+      <!-- Desktop -->
+      <div class="hidden items-center gap-1 md:flex">
+        <router-link
+          v-for="link in navLinks"
+          :key="link.to"
+          :to="link.to"
+          class="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+          :class="$route.path === link.to ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'"
+        >
+          {{ link.label }}
+        </router-link>
+      </div>
 
-      <div class="navbar__menu" :class="{ 'navbar__menu--open': isOpen }">
-        <router-link to="/pesantren" class="navbar__link" @click="isOpen = false">Pesantren</router-link>
-        <router-link to="/rekomendasi" class="navbar__link" @click="isOpen = false">Rekomendasi</router-link>
-        <router-link to="/compare" class="navbar__link" @click="isOpen = false">Bandingkan</router-link>
-        <router-link to="/track" class="navbar__link" @click="isOpen = false">Cek Status</router-link>
-
+      <div class="hidden items-center gap-2 md:flex">
         <template v-if="authStore.isAuthenticated">
-          <router-link to="/dashboard" class="navbar__link navbar__link--accent" @click="isOpen = false">Dashboard</router-link>
-          <router-link to="/profile" class="navbar__link" @click="isOpen = false" title="Profil">👤 {{ authStore.user?.username || 'Profil' }}</router-link>
-          <button class="navbar__link navbar__link--logout" @click="handleLogout">Keluar</button>
+          <router-link to="/dashboard" class="btn btn-ghost btn-sm gap-2">
+            Dashboard
+          </router-link>
+          <router-link to="/profile" class="btn btn-ghost btn-sm gap-2">
+            👤 {{ authStore.user?.username || 'Profil' }}
+          </router-link>
+          <button @click="handleLogout" class="btn btn-ghost btn-sm text-destructive">Keluar</button>
         </template>
         <template v-else>
-          <router-link to="/login" class="navbar__link navbar__link--btn" @click="isOpen = false">Masuk</router-link>
-          <router-link to="/register" class="navbar__link navbar__link--btn navbar__link--primary" @click="isOpen = false">Daftar</router-link>
+          <router-link to="/login" class="btn btn-ghost btn-sm gap-2">Masuk</router-link>
+          <router-link to="/register" class="btn btn-primary btn-sm gap-2">Daftar</router-link>
         </template>
+      </div>
+
+      <!-- Mobile toggle -->
+      <button class="md:hidden p-2 rounded-lg hover:bg-muted" @click="isOpen = !isOpen">
+        <svg v-if="!isOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div v-if="isOpen" class="border-t border-border bg-surface p-4 md:hidden animate-fade-in">
+      <div class="flex flex-col gap-1">
+        <router-link
+          v-for="link in navLinks"
+          :key="link.to"
+          :to="link.to"
+          @click="isOpen = false"
+          class="rounded-lg px-4 py-3 text-sm font-medium transition-colors"
+          :class="$route.path === link.to ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'"
+        >
+          {{ link.label }}
+        </router-link>
+        <div class="mt-3 flex gap-2 border-t border-border pt-3">
+          <template v-if="authStore.isAuthenticated">
+            <router-link to="/dashboard" class="btn btn-outline btn-sm flex-1" @click="isOpen = false">Dashboard</router-link>
+            <button @click="handleLogout" class="btn btn-outline btn-sm flex-1 text-destructive">Keluar</button>
+          </template>
+          <template v-else>
+            <router-link to="/login" class="btn btn-outline btn-sm flex-1" @click="isOpen = false">Masuk</router-link>
+            <router-link to="/register" class="btn btn-primary btn-sm flex-1" @click="isOpen = false">Daftar</router-link>
+          </template>
+        </div>
       </div>
     </div>
   </nav>
@@ -32,12 +76,20 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useAuthStore } from '../../stores/auth'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../../stores/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()
 const isOpen = ref(false)
+
+const navLinks = [
+  { to: '/', label: 'Beranda' },
+  { to: '/pesantren', label: 'Pesantren' },
+  { to: '/rekomendasi', label: 'Rekomendasi' },
+  { to: '/compare', label: 'Bandingkan' },
+  { to: '/track', label: 'Cek Status' },
+]
 
 async function handleLogout() {
   await authStore.logout()
@@ -45,87 +97,3 @@ async function handleLogout() {
   isOpen.value = false
 }
 </script>
-
-<style scoped>
-.navbar {
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  height: var(--navbar-height);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.navbar__container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
-}
-
-.navbar__brand {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: var(--color-text-primary);
-}
-
-.navbar__logo { font-size: 1.5rem; }
-
-.navbar__menu {
-  display: none;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.navbar__menu--open { display: flex; }
-
-.navbar__link {
-  color: var(--color-text-secondary);
-  font-weight: 500;
-  font-size: 0.9375rem;
-  transition: color var(--transition-fast);
-}
-
-.navbar__link:hover,
-.navbar__link.router-link-active { color: var(--color-primary); }
-
-.navbar__link--accent { color: var(--color-primary); font-weight: 600; }
-.navbar__link--logout { color: var(--color-error); }
-
-.navbar__link--btn {
-  padding: 0.5rem 1.25rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-}
-
-.navbar__link--primary {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-.navbar__link--primary:hover { background: var(--color-primary-dark); }
-
-.navbar__toggle {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 0.5rem;
-}
-
-.navbar__toggle span {
-  display: block;
-  width: 22px;
-  height: 2px;
-  background: var(--color-text-primary);
-  border-radius: 2px;
-}
-
-@media (min-width: 768px) {
-  .navbar__toggle { display: none; }
-  .navbar__menu { display: flex; }
-}
-</style>

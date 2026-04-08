@@ -150,14 +150,18 @@ function formatDate(dateStr) {
 }
 
 onMounted(async () => {
+  loading.value = true
   try {
     const { data } = await admin.getPendaftaran()
     pendaftaran.value = data.data || []
-    stats.value.total = pendaftaran.value.length
-    stats.value.pending = pendaftaran.value.filter(p => p.status === 'pending').length
-    stats.value.diterima = pendaftaran.value.filter(p => p.status === 'diterima').length
-  } catch {
-    pendaftaran.value = []
+    // Update stats based on fetched data
+    stats.value = {
+      pending: pendaftaran.value.filter(p => p.status === 'pending').length,
+      diterima: pendaftaran.value.filter(p => p.status === 'diterima').length,
+      total: pendaftaran.value.length
+    }
+  } catch (error) {
+    console.error('Failed to load pendaftaran data:', error)
   } finally {
     loading.value = false
   }

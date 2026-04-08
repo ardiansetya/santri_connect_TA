@@ -1,139 +1,124 @@
 <template>
-  <div class="py-4 py-md-5">
+  <div class="py-4 md:py-5">
     <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <div class="text-center mb-4 mb-md-5">
-            <h1 class="fw-bold">Cek Status Pendaftaran</h1>
-            <p class="text-muted">Masukkan nomor pendaftaran untuk melacak status Anda</p>
-          </div>
+      <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-4 md:mb-5">
+          <h1 class="font-bold text-3xl">Cek Status Pendaftaran</h1>
+          <p class="text-muted mt-2">Masukkan nomor pendaftaran untuk melacak status Anda</p>
+        </div>
 
-          <div class="card shadow-sm mb-4">
-            <div class="card-body p-4">
-              <form class="row g-3 align-items-end" @submit.prevent="cekStatus">
-                <div class="col-md-8">
-                  <label class="form-label fw-medium">Nomor Pendaftaran</label>
-                  <input
-                    v-model="nomor"
-                    type="text"
-                    class="form-control"
-                    placeholder="Contoh: REG-2024-000001"
-                    required
-                  />
-                </div>
-                <div class="col-md-4">
-                  <button type="submit" class="btn btn-primary w-100" :disabled="loading">
-                    <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-                    {{ loading ? 'Memeriksa...' : 'Cek Status' }}
-                  </button>
-                </div>
-              </form>
+        <div class="card mb-4">
+          <div class="p-4">
+            <form class="flex flex-col md:flex-row gap-3 items-end" @submit.prevent="cekStatus">
+              <div class="flex-1">
+                <label class="form-label font-medium">Nomor Pendaftaran</label>
+                <input
+                  v-model="nomor"
+                  type="text"
+                  class="form-input"
+                  placeholder="Contoh: REG-2024-000001"
+                  required
+                />
+              </div>
+              <div class="md:w-40">
+                <button type="submit" class="btn btn-primary w-full" :disabled="loading">
+                  <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                  {{ loading ? 'Memeriksa...' : 'Cek Status' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div v-if="loading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-3 text-muted">Memeriksa status pendaftaran...</p>
+        </div>
+
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700" role="alert">
+          <strong>Gagal!</strong> {{ error }}
+        </div>
+
+        <div v-else-if="data" class="card">
+          <div class="p-4">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h5 class="font-semibold mb-1">{{ data.nama_lengkap }}</h5>
+                <p class="text-muted mb-0">No: <strong>{{ data.nomor_pendaftaran }}</strong></p>
+              </div>
+              <span class="badge text-base px-3 py-1" :class="statusBadge(data.status)">
+                {{ statusLabel(data.status) }}
+              </span>
             </div>
-          </div>
 
-          <div v-if="loading" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-3 text-muted">Memeriksa status pendaftaran...</p>
-          </div>
-
-          <div v-else-if="error" class="alert alert-danger" role="alert">
-            <strong>Gagal!</strong> {{ error }}
-          </div>
-
-          <div v-else-if="data" class="card shadow-sm">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-start mb-4">
-                <div>
-                  <h5 class="fw-semibold mb-1">{{ data.nama_lengkap }}</h5>
-                  <p class="text-muted mb-0">No: <strong>{{ data.nomor_pendaftaran }}</strong></p>
+            <div class="mb-4">
+              <h6 class="font-semibold mb-3">Detail Pendaftaran</h6>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="p-3 bg-muted rounded">
+                  <small class="text-muted block">Pesantren</small>
+                  <strong>{{ data.pesantren?.nama || '-' }}</strong>
                 </div>
-                <span class="badge" :class="statusBadge(data.status)" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
-                  {{ statusLabel(data.status) }}
-                </span>
-              </div>
-
-              <div class="mb-4">
-                <h6 class="fw-semibold mb-3">Detail Pendaftaran</h6>
-                <div class="row g-3">
-                  <div class="col-sm-6">
-                    <div class="p-3 bg-light rounded">
-                      <small class="text-muted d-block">Pesantren</small>
-                      <strong>{{ data.pesantren?.nama || '-' }}</strong>
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="p-3 bg-light rounded">
-                      <small class="text-muted d-block">NIK</small>
-                      <strong>{{ data.nik || '-' }}</strong>
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="p-3 bg-light rounded">
-                      <small class="text-muted d-block">Tempat, Tanggal Lahir</small>
-                      <strong>{{ data.tempat_lahir || '-' }}, {{ formatDate(data.tanggal_lahir) }}</strong>
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="p-3 bg-light rounded">
-                      <small class="text-muted d-block">Jenis Kelamin</small>
-                      <strong>{{ data.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</strong>
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="p-3 bg-light rounded">
-                      <small class="text-muted d-block">No. HP</small>
-                      <strong>{{ data.no_hp || '-' }}</strong>
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="p-3 bg-light rounded">
-                      <small class="text-muted d-block">Nama Orang Tua</small>
-                      <strong>{{ data.nama_ayah || '-' }} & {{ data.nama_ibu || '-' }}</strong>
-                    </div>
-                  </div>
+                <div class="p-3 bg-muted rounded">
+                  <small class="text-muted block">NIK</small>
+                  <strong>{{ data.nik || '-' }}</strong>
+                </div>
+                <div class="p-3 bg-muted rounded">
+                  <small class="text-muted block">Tempat, Tanggal Lahir</small>
+                  <strong>{{ data.tempat_lahir || '-' }}, {{ formatDate(data.tanggal_lahir) }}</strong>
+                </div>
+                <div class="p-3 bg-muted rounded">
+                  <small class="text-muted block">Jenis Kelamin</small>
+                  <strong>{{ data.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</strong>
+                </div>
+                <div class="p-3 bg-muted rounded">
+                  <small class="text-muted block">No. HP</small>
+                  <strong>{{ data.no_hp || '-' }}</strong>
+                </div>
+                <div class="p-3 bg-muted rounded">
+                  <small class="text-muted block">Nama Orang Tua</small>
+                  <strong>{{ data.nama_ayah || '-' }} & {{ data.nama_ibu || '-' }}</strong>
                 </div>
               </div>
+            </div>
 
-              <div class="mb-4">
-                <h6 class="fw-semibold mb-3">Timeline Proses</h6>
-                <div class="d-flex align-items-center justify-content-between position-relative">
-                  <div class="position-absolute top-50 start-0 end-0 translate-middle-y" style="height: 3px; background: #e9ecef; z-index: 0;"></div>
+            <div class="mb-4">
+              <h6 class="font-semibold mb-3">Timeline Proses</h6>
+              <div class="flex items-center justify-between relative">
+                <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-muted -translate-y-1/2 z-0"></div>
+                <div
+                  v-for="(step, index) in timelineSteps"
+                  :key="step.key"
+                  class="text-center relative z-10 flex-1"
+                >
                   <div
-                    v-for="(step, index) in timelineSteps"
-                    :key="step.key"
-                    class="text-center position-relative"
-                    style="z-index: 1; flex: 1;"
+                    class="rounded-full mx-auto mb-2 flex items-center justify-content-center"
+                    :class="isStepActive(data.status, index) ? 'bg-primary text-white' : 'bg-muted text-muted border'"
+                    style="width: 40px; height: 40px;"
                   >
-                    <div
-                      class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                      :class="isStepActive(data.status, index) ? 'bg-primary text-white' : 'bg-light text-muted border'"
-                      style="width: 40px; height: 40px;"
-                    >
-                      <span v-if="isStepActive(data.status, index)">&#10003;</span>
-                      <span v-else class="small">{{ index + 1 }}</span>
-                    </div>
-                    <small class="d-block" :class="isStepActive(data.status, index) ? 'fw-semibold text-primary' : 'text-muted'">
-                      {{ step.label }}
-                    </small>
+                    <span v-if="isStepActive(data.status, index)">✓</span>
+                    <span v-else class="text-sm">{{ index + 1 }}</span>
                   </div>
+                  <small class="block" :class="isStepActive(data.status, index) ? 'font-semibold text-primary' : 'text-muted'">
+                    {{ step.label }}
+                  </small>
                 </div>
               </div>
+            </div>
 
-              <div v-if="data.catatan_admin" class="alert alert-info mb-0">
-                <strong>Catatan Admin:</strong> {{ data.catatan_admin }}
-              </div>
+            <div v-if="data.catatan_admin" class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-700 mb-0">
+              <strong>Catatan Admin:</strong> {{ data.catatan_admin }}
+            </div>
 
-              <div class="mt-3 text-muted small">
-                Terdaftar sejak: {{ formatDateTime(data.created_at) }}
-              </div>
+            <div class="mt-3 text-muted text-sm">
+              Terdaftar sejak: {{ formatDateTime(data.created_at) }}
             </div>
           </div>
+        </div>
 
-          <div v-else class="text-center py-5">
-            <p class="fs-1 mb-3">📋</p>
-            <h5 class="fw-semibold">Masukkan Nomor Pendaftaran</h5>
-            <p class="text-muted">Nomor pendaftaran diberikan saat Anda mendaftar secara online</p>
-          </div>
+        <div v-else class="text-center py-5">
+          <p class="text-5xl mb-3">📋</p>
+          <h5 class="font-semibold text-xl">Masukkan Nomor Pendaftaran</h5>
+          <p class="text-muted mt-2">Nomor pendaftaran diberikan saat Anda mendaftar secara online</p>
         </div>
       </div>
     </div>
@@ -157,20 +142,20 @@ const timelineSteps = [
 
 function statusBadge(status) {
   const map = {
-    pending: 'bg-warning text-dark',
-    diproses: 'bg-info text-white',
-    diterima: 'bg-success',
-    ditolak: 'bg-danger'
+    pending: 'bg-yellow-100 text-yellow-800',
+    diproses: 'bg-blue-100 text-blue-800',
+    diterima: 'bg-green-100 text-green-800',
+    ditolak: 'bg-red-100 text-red-800'
   }
-  return map[status] || 'bg-secondary'
+  return map[status] || 'bg-gray-100 text-gray-800'
 }
 
 function statusLabel(status) {
   const map = {
-    pending: '\u23F3 Pending',
-    diproses: '\uD83D\uDD04 Diproses',
-    diterima: '\u2705 Diterima',
-    ditolak: '\u274C Ditolak'
+    pending: '⏳ Pending',
+    diproses: '🔄 Diproses',
+    diterima: '✅ Diterima',
+    ditolak: '❌ Ditolak'
   }
   return map[status] || status
 }
@@ -207,3 +192,73 @@ async function cekStatus() {
   }
 }
 </script>
+
+<style scoped>
+.bg-red-50 {
+  background-color: #fef2f2 !important;
+}
+.border-red-200 {
+  border-color: #fecaca !important;
+}
+.text-red-700 {
+  color: #b91c1c !important;
+}
+.bg-red-100 {
+  background-color: #fee2e2 !important;
+}
+.text-red-800 {
+  color: #991b1b !important;
+}
+
+.bg-blue-50 {
+  background-color: #eff6ff !important;
+}
+.border-blue-200 {
+  border-color: #bfdbfe !important;
+}
+.text-blue-700 {
+  color: #1d4ed8 !important;
+}
+.bg-blue-100 {
+  background-color: #dbeafe !important;
+}
+.text-blue-800 {
+  color: #1e40af !important;
+}
+
+.bg-green-100 {
+  background-color: #dcfce7 !important;
+}
+.text-green-800 {
+  color: #166534 !important;
+}
+
+.bg-yellow-100 {
+  background-color: #fef9c3 !important;
+}
+.text-yellow-800 {
+  color: #854d0e !important;
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+.text-gray-800 {
+  color: #1f2937 !important;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: white;
+}
+.form-input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+}
+</style>

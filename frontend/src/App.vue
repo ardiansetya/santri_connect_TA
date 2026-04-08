@@ -4,30 +4,27 @@ import AppFooter from './components/common/AppFooter.vue'
 </script>
 
 <template>
-  <AppNavbar />
-  <main>
-    <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </router-view>
-  </main>
-  <AppFooter />
+  <div class="app-container">
+    <AppNavbar />
+    <main class="main-content">
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </main>
+    <AppFooter />
+  </div>
 </template>
 
 <style>
-.page-placeholder {
-  min-height: calc(100vh - var(--navbar-height) - 120px);
+.app-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1.5rem;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-.page-placeholder h1 {
-  font-size: 1.875rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 0.5rem;
+.main-content {
+  flex: 1;
 }
 </style>

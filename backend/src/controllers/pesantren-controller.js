@@ -38,8 +38,33 @@ const PesantrenController = {
   },
 
   async createByPemilik(request, reply) {
+    const data = {}
+    const files = {}
+    
+    // Handle multipart or JSON payload
+    if (request.isMultipart()) {
+      try {
+        for await (const part of request.parts()) {
+          if (part.file) files[part.fieldname] = part
+          else data[part.fieldname] = part.value
+        }
+      } catch {
+        return reply.code(400).send({ error: 'Input tidak valid' })
+      }
+    } else {
+      Object.assign(data, request.body)
+    }
+
+    // Normalize province/provinsi
+    const { normalizeWilayahData } = require('../middlewares/normalize-wilayah')
+    const normalizedData = normalizeWilayahData(data)
+    
+    if (!normalizedData.nama) return reply.code(400).send({ error: 'Nama pesantren wajib diisi' })
+    if (!normalizedData.province) return reply.code(400).send({ error: 'Provinsi wajib diisi' })
+    if (!normalizedData.kota) return reply.code(400).send({ error: 'Kota wajib diisi' })
+
     try {
-      const result = await PesantrenService.createByPemilik(request.user.id, request.body)
+      const result = await PesantrenService.createByPemilik(request.user.id, normalizedData, files)
       return reply.code(201).send(result)
     } catch (err) {
       return reply.code(400).send({ error: err.message })
@@ -47,8 +72,19 @@ const PesantrenController = {
   },
 
   async updateByPemilik(request, reply) {
+    const data = {}
+    const files = {}
     try {
-      const result = await PesantrenService.updateByPemilik(request.user.id, request.params.id, request.body)
+      for await (const part of request.parts()) {
+        if (part.file) files[part.fieldname] = part
+        else data[part.fieldname] = part.value
+      }
+    } catch {
+      return reply.code(400).send({ error: 'Input tidak valid' })
+    }
+
+    try {
+      const result = await PesantrenService.updateByPemilik(request.user.id, request.params.id, data, files)
       return reply.code(200).send(result)
     } catch (err) {
       if (err.message === 'Pesantren tidak ditemukan') {

@@ -1,110 +1,96 @@
 <template>
   <div>
-    <div class="row g-4 mb-4">
-      <div class="col-md-3">
-        <div class="card shadow-sm border-start border-primary border-3">
-          <div class="card-body">
-            <p class="text-muted small mb-1">Total Pesantren</p>
-            <h3 class="fw-bold mb-0">{{ stats.total_pesantren || 0 }}</h3>
-          </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div class="card border-l-4 border-l-primary">
+        <div class="p-4">
+          <p class="text-muted text-sm mb-1">Total Universitas</p>
+          <h3 class="font-bold mb-0">{{ stats.total_pesantren || 0 }}</h3>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="card shadow-sm border-start border-success border-3">
-          <div class="card-body">
-            <p class="text-muted small mb-1">Total Pendaftaran</p>
-            <h3 class="fw-bold mb-0">{{ stats.total_pendaftaran || 0 }}</h3>
-          </div>
+      <div class="card border-l-4 border-l-green-500">
+        <div class="p-4">
+          <p class="text-muted text-sm mb-1">Total Pendaftaran</p>
+          <h3 class="font-bold mb-0">{{ stats.total_pendaftaran || 0 }}</h3>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="card shadow-sm border-start border-warning border-3">
-          <div class="card-body">
-            <p class="text-muted small mb-1">Pending</p>
-            <h3 class="fw-bold mb-0">{{ pendingCount }}</h3>
-          </div>
+      <div class="card border-l-4 border-l-yellow-500">
+        <div class="p-4">
+          <p class="text-muted text-sm mb-1">Pending</p>
+          <h3 class="font-bold mb-0">{{ pendingCount }}</h3>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="card shadow-sm border-start border-info border-3">
-          <div class="card-body">
-            <p class="text-muted small mb-1">Diproses</p>
-            <h3 class="fw-bold mb-0">{{ diprosesCount }}</h3>
-          </div>
+      <div class="card border-l-4 border-l-blue-500">
+        <div class="p-4">
+          <p class="text-muted text-sm mb-1">Diproses</p>
+          <h3 class="font-bold mb-0">{{ diprosesCount }}</h3>
         </div>
       </div>
     </div>
 
-    <div class="card shadow-sm">
-      <div class="card-header bg-white py-3">
-        <ul class="nav nav-tabs card-header-tabs">
-          <li class="nav-item">
-            <button class="nav-link" :class="{ active: activeTab === 'pendaftaran' }" @click="activeTab = 'pendaftaran'">
-              Manajemen Pendaftaran
-            </button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" :class="{ active: activeTab === 'pesantren' }" @click="activeTab = 'pesantren'">
-              Manajemen Pesantren
-            </button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">
-              Manajemen User
-            </button>
-          </li>
-        </ul>
+    <div class="card">
+      <div class="border-b border-border">
+        <div class="flex">
+          <button 
+            class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors" 
+            :class="activeTab === 'pendaftaran' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'"
+            @click="activeTab = 'pendaftaran'"
+          >
+            Manajemen Pendaftaran
+          </button>
+          <button 
+            class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors" 
+            :class="activeTab === 'pesantren' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'"
+            @click="activeTab = 'pesantren'"
+          >
+            Manajemen Universitas
+          </button>
+          <button 
+            class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors" 
+            :class="activeTab === 'users' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'"
+            @click="activeTab = 'users'"
+          >
+            Manajemen User
+          </button>
+        </div>
       </div>
-      <div class="card-body">
+      <div class="p-4">
         <div v-if="activeTab === 'pendaftaran'">
-          <div class="d-flex justify-content-end mb-3">
-            <button class="btn btn-outline-success btn-sm" @click="exportData" :disabled="exporting">
+          <div class="flex justify-end mb-3">
+            <button class="btn btn-sm bg-green-100 text-green-800 hover:bg-green-200" @click="exportData" :disabled="exporting">
               <span v-if="exporting" class="spinner-border spinner-border-sm me-2"></span>
               📥 Export Excel
             </button>
           </div>
           <div v-if="loadingPendaftaran" class="text-center py-4">
             <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-2 text-muted small">Memuat data...</p>
+            <p class="mt-2 text-muted text-sm">Memuat data...</p>
           </div>
           <div v-else-if="pendaftaran.length === 0" class="text-center py-5">
-            <p class="fs-3 mb-3">📭</p>
-            <h6 class="fw-semibold">Belum ada pendaftaran</h6>
-            <p class="text-muted small">Data pendaftaran akan muncul saat ada yang mendaftar</p>
+            <p class="text-3xl mb-3">📭</p>
+            <h6 class="font-semibold">Belum ada pendaftaran</h6>
+            <p class="text-muted text-sm">Data pendaftaran akan muncul saat ada yang mendaftar</p>
           </div>
-          <div v-else class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead class="table-light">
+          <div v-else class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-muted">
                 <tr>
-                  <th>No. Pendaftaran</th>
-                  <th>Nama</th>
-                  <th>Pesantren</th>
-                  <th>Status</th>
-                  <th>Tanggal</th>
-                  <th>Aksi</th>
+                  <th class="text-left p-3 text-sm font-medium">No. Pendaftaran</th>
+                  <th class="text-left p-3 text-sm font-medium">Nama</th>
+                  <th class="text-left p-3 text-sm font-medium">Universitas</th>
+                  <th class="text-left p-3 text-sm font-medium">Status</th>
+                  <th class="text-left p-3 text-sm font-medium">Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="p in pendaftaran" :key="p.id">
-                  <td><code>{{ p.nomor_pendaftaran }}</code></td>
-                  <td>{{ p.nama_lengkap }}</td>
-                  <td>{{ p.pesantren?.nama || '-' }}</td>
-                  <td>
-                    <select
-                      class="form-select form-select-sm"
-                      :value="p.status"
-                      @change="updateStatus(p.id, $event.target.value)"
-                      style="width: auto; display: inline-block;"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="diproses">Diproses</option>
-                      <option value="diterima">Diterima</option>
-                      <option value="ditolak">Ditolak</option>
-                    </select>
+                <tr v-for="p in pendaftaran" :key="p.id" class="border-b border-border hover:bg-muted/50">
+                  <td class="p-3 text-sm">{{ p.nomor_pendaftaran }}</td>
+                  <td class="p-3 text-sm">{{ p.nama_lengkap }}</td>
+                  <td class="p-3 text-sm">{{ p.pesantren?.nama || '-' }}</td>
+                  <td class="p-3">
+                    <span class="badge" :class="statusBadge(p.status)">{{ p.status }}</span>
                   </td>
-                  <td>{{ formatDate(p.created_at) }}</td>
-                  <td>
-                    <button class="btn btn-outline-primary btn-sm" @click="viewDetail(p)">Detail</button>
+                  <td class="p-3">
+                    <router-link :to="`/admin/pendaftaran/${p.id}`" class="btn btn-sm btn-outline-primary">Detail</router-link>
                   </td>
                 </tr>
               </tbody>
@@ -112,106 +98,17 @@
           </div>
         </div>
 
-        <div v-if="activeTab === 'pesantren'">
-          <AdminPesantrenManagement @refresh="loadData" />
+<div v-if="activeTab === 'pesantren'">
+          <AdminPesantrenManagement />
         </div>
 
         <div v-if="activeTab === 'users'">
-          <div v-if="usersLoading" class="text-center py-4">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-2 text-muted small">Memuat data...</p>
-          </div>
-          <div v-else-if="users.length === 0" class="text-center py-5">
-            <p class="fs-3 mb-3">👤</p>
-            <h6 class="fw-semibold">Belum ada user</h6>
-          </div>
-          <div v-else class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Terdaftar</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="u in users" :key="u.id">
-                  <td class="fw-medium">{{ u.username }}</td>
-                  <td>{{ u.email }}</td>
-                  <td><span class="badge" :class="roleBadge(u.role)">{{ roleLabel(u.role) }}</span></td>
-                  <td>{{ formatDate(u.created_at) }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="text-center py-5">
+            <p class="text-muted">Manajemen User</p>
           </div>
         </div>
       </div>
     </div>
-
-    <div v-if="selectedItem" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title fw-semibold">Detail Pendaftaran</h5>
-            <button type="button" class="btn-close" @click="selectedItem = null"></button>
-          </div>
-          <div class="modal-body">
-            <div class="row g-3">
-              <div class="col-12">
-                <span class="badge bg-primary fs-6">{{ selectedItem.nomor_pendaftaran }}</span>
-                <span class="badge ms-2" :class="statusBadge(selectedItem.status)">{{ statusLabel(selectedItem.status) }}</span>
-              </div>
-              <div class="col-sm-6">
-                <div class="p-3 bg-light rounded">
-                  <small class="text-muted d-block">Nama Lengkap</small>
-                  <strong>{{ selectedItem.nama_lengkap }}</strong>
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <div class="p-3 bg-light rounded">
-                  <small class="text-muted d-block">NIK</small>
-                  <strong>{{ selectedItem.nik || '-' }}</strong>
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <div class="p-3 bg-light rounded">
-                  <small class="text-muted d-block">Pesantren</small>
-                  <strong>{{ selectedItem.pesantren?.nama || '-' }}</strong>
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <div class="p-3 bg-light rounded">
-                  <small class="text-muted d-block">Jenis Kelamin</small>
-                  <strong>{{ selectedItem.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</strong>
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <div class="p-3 bg-light rounded">
-                  <small class="text-muted d-block">No. HP</small>
-                  <strong>{{ selectedItem.no_hp || '-' }}</strong>
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <div class="p-3 bg-light rounded">
-                  <small class="text-muted d-block">Orang Tua</small>
-                  <strong>{{ selectedItem.nama_ayah || '-' }} & {{ selectedItem.nama_ibu || '-' }}</strong>
-                </div>
-              </div>
-              <div v-if="selectedItem.catatan_admin" class="col-12">
-                <div class="alert alert-info mb-0">
-                  <strong>Catatan Admin:</strong> {{ selectedItem.catatan_admin }}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="selectedItem = null">Tutup</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div v-if="selectedItem" class="modal-backdrop fade show"></div>
   </div>
 </template>
 
@@ -223,61 +120,45 @@ import AdminPesantrenManagement from './AdminPesantrenManagement.vue'
 const activeTab = ref('pendaftaran')
 const stats = ref({})
 const pendaftaran = ref([])
-const loadingPendaftaran = ref(true)
-const selectedItem = ref(null)
+const loadingPendaftaran = ref(false)
 const exporting = ref(false)
-const users = ref([])
-const usersLoading = ref(true)
 
-const pendingCount = computed(() => pendaftaran.value.filter(p => p.status === 'pending').length)
-const diprosesCount = computed(() => pendaftaran.value.filter(p => p.status === 'diproses').length)
+const pendingCount = computed(() => {
+  return pendaftaran.value.filter(p => p.status === 'pending').length
+})
+
+const diprosesCount = computed(() => {
+  return pendaftaran.value.filter(p => p.status === 'diproses').length
+})
 
 function statusBadge(status) {
   const map = {
-    pending: 'bg-warning text-dark',
-    diproses: 'bg-info',
-    diterima: 'bg-success',
-    ditolak: 'bg-danger'
+    pending: 'bg-yellow-100 text-yellow-800',
+    diproses: 'bg-blue-100 text-blue-800',
+    diterima: 'bg-green-100 text-green-800',
+    ditolak: 'bg-red-100 text-red-800'
   }
-  return map[status] || 'bg-secondary'
+  return map[status] || 'bg-gray-100 text-gray-800'
 }
 
-function statusLabel(status) {
-  const map = {
-    pending: 'Pending',
-    diproses: 'Diproses',
-    diterima: 'Diterima',
-    ditolak: 'Ditolak'
-  }
-  return map[status] || status
-}
-
-function roleBadge(role) {
-  const map = { superadmin: 'bg-danger', pemilik: 'bg-warning text-dark', pendaftar: 'bg-success' }
-  return map[role] || 'bg-secondary'
-}
-
-function roleLabel(role) {
-  const map = { superadmin: 'Super Admin', pemilik: 'Pemilik', pendaftar: 'Pendaftar' }
-  return map[role] || role
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
-function viewDetail(p) {
-  selectedItem.value = p
-}
-
-async function updateStatus(id, status) {
+async function fetchStats() {
   try {
-    await admin.updatePendaftaranStatus(id, { status })
-    await loadData()
-  } catch (err) {
-    alert(err.response?.data?.error || 'Gagal update status')
-    await loadData()
+    const { data } = await admin.getStats()
+    stats.value = data.data
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+async function fetchPendaftaran() {
+  loadingPendaftaran.value = true
+  try {
+    const { data } = await admin.getPendaftaran()
+    pendaftaran.value = data.data || []
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loadingPendaftaran.value = false
   }
 }
 
@@ -288,59 +169,77 @@ async function exportData() {
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `pendaftaran_${new Date().toISOString().split('T')[0]}.xlsx`)
+    link.setAttribute('download', 'pendaftaran.xlsx')
     document.body.appendChild(link)
     link.click()
     link.remove()
-  } catch {
-    alert('Gagal export data')
+  } catch (e) {
+    console.error(e)
   } finally {
     exporting.value = false
   }
 }
 
-async function loadData() {
-  loadingPendaftaran.value = true
-  try {
-    const [statsRes, pendaftaranRes] = await Promise.all([
-      admin.getStats(),
-      admin.getPendaftaran()
-    ])
-    stats.value = statsRes.data.data || {}
-    pendaftaran.value = pendaftaranRes.data.data || []
-  } catch {
-    stats.value = {}
-    pendaftaran.value = []
-  } finally {
-    loadingPendaftaran.value = false
-  }
-}
-
-async function loadUsers() {
-  usersLoading.value = true
-  try {
-    const { data } = await admin.getUsers()
-    users.value = data.data || []
-  } catch {
-    users.value = []
-  } finally {
-    usersLoading.value = false
-  }
-}
-
 onMounted(async () => {
-  await Promise.all([loadData(), loadUsers()])
+  await fetchStats()
+  await fetchPendaftaran()
 })
 </script>
 
 <style scoped>
-.nav-link {
-  color: var(--bs-body-color);
-  cursor: pointer;
+.border-l-4 {
+  border-left-width: 4px;
 }
-.nav-link.active {
-  color: var(--bs-primary);
-  border-color: var(--bs-primary);
-  background-color: transparent;
+.border-l-primary {
+  border-left-color: hsl(231 84% 60%);
+}
+.border-l-green-500 {
+  border-left-color: #22c55e;
+}
+.border-l-yellow-500 {
+  border-left-color: #eab308;
+}
+.border-l-blue-500 {
+  border-left-color: #3b82f6;
+}
+.-mb-px {
+  margin-bottom: -1px;
+}
+.hover\:bg-muted\/50:hover {
+  background-color: hsl(214 32% 91% / 0.5);
+}
+
+.bg-green-100 {
+  background-color: #dcfce7 !important;
+}
+.text-green-800 {
+  color: #166534 !important;
+}
+.bg-green-200 {
+  background-color: #bbf7d0 !important;
+}
+.bg-yellow-100 {
+  background-color: #fef9c3 !important;
+}
+.text-yellow-800 {
+  color: #854d0e !important;
+}
+.bg-blue-100 {
+  background-color: #dbeafe !important;
+}
+.text-blue-800 {
+  color: #1e40af !important;
+}
+.bg-red-100 {
+  background-color: #fee2e2 !important;
+}
+.text-red-800 {
+  color: #991b1b !important;
+}
+.bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+.text-gray-800 {
+  color: #1f2937 !important;
 }
 </style>

@@ -118,14 +118,64 @@
                   <input v-model="telepon" v-bind="teleponProps" type="text" class="form-control" :class="{ 'is-invalid': errors.telepon }" placeholder="08xxxxxxxxxx" />
                   <div class="invalid-feedback" v-if="errors.telepon">{{ errors.telepon }}</div>
                 </div>
-                <div class="col-12">
-                  <label class="form-label fw-medium">Deskripsi</label>
-                  <textarea v-model="deskripsi" v-bind="deskripsiProps" class="form-control" rows="3"></textarea>
-                </div>
-                <div class="col-12">
-                  <label class="form-label fw-medium">Fasilitas (pisahkan dengan koma)</label>
-                  <input v-model="fasilitasInput" type="text" class="form-control" placeholder="Masjid, Asrama, Lab Komputer" />
-                </div>
+                 <div class="col-12">
+                   <label class="form-label fw-medium">Deskripsi</label>
+                   <textarea v-model="deskripsi" v-bind="deskripsiProps" class="form-control" rows="3"></textarea>
+                 </div>
+                 
+                 <!-- Foto Utama -->
+                 <div class="col-12">
+                   <label class="form-label fw-medium">Foto Utama *</label>
+                   <input 
+                     @change="handleFileUpload('foto_utama', $event)" 
+                     class="form-control" 
+                     type="file" 
+                     accept="image/*" 
+                     :class="{ 'is-invalid': fileErrors.foto_utama }"
+                   />
+                   <div class="invalid-feedback d-block" v-if="fileErrors.foto_utama">{{ fileErrors.foto_utama }}</div>
+                   <div class="form-text mt-2" v-if="files.foto_utama">
+                     ✓ {{ files.foto_utama.name }} ({{ formatFileSize(files.foto_utama.size) }})
+                     <button type="button" class="btn btn-link btn-sm p-0 text-danger" @click="removeFile('foto_utama')">
+                       Hapus
+                     </button>
+                   </div>
+                   <div class="form-text">Format: JPG, JPEG, PNG, WebP. Maksimal 1MB.</div>
+                 </div>
+                 
+                 <!-- Foto Gallery -->
+                 <div class="col-12">
+                   <label class="form-label fw-medium">Foto Gallery (maksimal 5)</label>
+                   <input 
+                     @change="handleFileUpload('foto_galeri', $event)" 
+                     class="form-control" 
+                     type="file" 
+                     accept="image/*" 
+                     multiple
+                     :class="{ 'is-invalid': fileErrors.foto_galeri }"
+                   />
+                   <div class="invalid-feedback d-block" v-if="fileErrors.foto_galeri">{{ fileErrors.foto_galeri }}</div>
+                   <div class="form-text mt-2" v-if="files.foto_galeri && files.foto_galeri.length > 0">
+                     {{ files.foto_galeri.length }} file terpilih:
+                     <div class="d-flex flex-wrap gap-2">
+                       <div v-for="(file, index) in files.foto_galeri" :key="index" class="badge bg-secondary text-light small p-2">
+                         {{ file.name }} ({{ formatFileSize(file.size) }})
+                         <button type="button" class="btn btn-link btn-sm p-0 ms-1 text-danger" @click="removeGalleryFile(index)">
+                           ×
+                         </button>
+                       </div>
+                     </div>
+                     <button type="button" class="btn btn-link btn-sm p-0 text-danger mt-2" @click="clearGalleryFiles()">
+                       Hapus Semua
+                     </button>
+                   </div>
+                   <div class="form-text">Format: JPG, JPEG, PNG, WebP. Maksimal 5 file, masing-masing maksimal 1MB.</div>
+                 </div>
+                 
+                 <div class="col-12">
+                   <label class="form-label fw-medium">Fasilitas (pisahkan dengan koma)</label>
+                   <input v-model="fasilitasInput" type="text" class="form-control" placeholder="Masjid, Asrama, Lab Komputer" />
+                 </div>
               </div>
               <div v-if="serverError" class="alert alert-danger mt-3 mb-0">{{ serverError }}</div>
             </form>
@@ -281,25 +331,60 @@ function closeForm() {
 }
 
 const onSubmit = handleSubmit(async (values) => {
-  serverError.value = ''
-  try {
-    const payload = { ...values }
-    if (fasilitasInput.value.trim()) {
-      payload.fasilitas = fasilitasInput.value.split(',').map(f => f.trim()).filter(Boolean)
-    }
+   serverError.value = ''
+   try {
+     const formData = new FormData()
+     
+     // Append all form fields
+     Object.entries(values).forEach(([key, value]) => {
+       if (value !== null && value !== undefined && value !== '') {
+         formData.append(key, value)
+       }
+     })
+     
+     // Append fasilitas as JSON
+     if (fasilitasInput.value.trim()) {
+       const fasilitas = fasilitasInput.value.split(',').map(f => f.trim()).filter(Boolean)
+       formData.append('fasilitas', JSON.stringify(fasilitas))
+     }
+     
+     // Append foto_utama
+     if (files.value.foto_utama) {
+       formData.append('foto_utama', files.value.foto_utama)
+     }
+     
+     // Append foto_galeri files
+     if (files.value.foto_galeri && files.value.foto_galeri.length > 0) {
+       files.value.foto_galeri.forEach(file => {
+         formData.append('foto_galeri', file)
+       })
+     }
 
-    if (editingId.value) {
-      await admin.updatePesantren(editingId.value, payload)
-    } else {
-      await admin.createPesantren(payload)
-    }
-    closeForm()
-    await loadPesantren()
-    emit('refresh')
-  } catch (err) {
-    serverError.value = err.response?.data?.error || 'Gagal menyimpan data'
-  }
-})
+     if (editingId.value) {
+       await admin.updatePesantren(editingId.value, formData)
+     } else {
+       await admin.createPesantren(formData)
+     }
+     closeForm()
+     await loadPesantren()
+     emit('refresh')
+   } catch (err) {
+     serverError.value = err.response?.data?.error || err.response?.data?.message || 'Gagal menyimpan data'
+   } finally {
+     // Reset file inputs after submit (success or error)
+     files.value.foto_utama = null
+     files.value.foto_galeri = []
+     fileErrors.value.foto_utama = ''
+     fileErrors.value.foto_galeri = ''
+     
+     // Reset actual file inputs
+     const fotoUtamaInput = document.querySelector('input[name="foto_utama"]')
+     if (fotoUtamaInput) fotoUtamaInput.value = ''
+     
+     const fotoGaleriInput = document.querySelector('input[name="foto_galeri"]')
+     if (fotoGaleriInput) fotoGaleriInput.value = ''
+   }
+ })
 
 function confirmDelete(p) {
   deleteTarget.value = p
@@ -337,12 +422,119 @@ async function loadPesantren() {
 }
 
 async function loadProvinces() {
-  try {
-    const { data } = await wilayah.getProvinces()
-    provinces.value = data.data || []
-  } catch {
-    provinces.value = []
-  }
+   try {
+     const { data } = await wilayah.getProvinces()
+     provinces.value = data.data || []
+   } catch {
+     provinces.value = []
+   }
+ }
+
+// File upload handling
+const files = ref({
+   foto_utama: null,
+   foto_galeri: []
+})
+const fileErrors = ref({
+   foto_utama: '',
+   foto_galeri: ''
+})
+
+function handleFileUpload(fieldName, event) {
+   const fileInput = event.target
+   if (!fileInput.files || fileInput.files.length === 0) {
+      if (fieldName === 'foto_utama') {
+         files.value.foto_utama = null
+         fileErrors.value.foto_utama = ''
+      } else if (fieldName === 'foto_galeri') {
+         files.value.foto_galeri = []
+         fileErrors.value.foto_galeri = ''
+      }
+      return
+   }
+
+   if (fieldName === 'foto_utama') {
+      const file = fileInput.files[0]
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+      if (!allowedTypes.includes(file.type)) {
+         fileErrors.value.foto_utama = 'Format file tidak didukung. Gunakan jpg, jpeg, png, atau webp'
+         files.value.foto_utama = null
+         return
+      }
+      
+      // Validate file size (1MB)
+      const maxSize = 1 * 1024 * 1024 // 1MB
+      if (file.size > maxSize) {
+         fileErrors.value.foto_utama = 'File terlalu besar. Maksimal ukuran adalah 1MB'
+         files.value.foto_utama = null
+         return
+      }
+      
+      fileErrors.value.foto_utama = ''
+      files.value.foto_utama = file
+   } else if (fieldName === 'foto_galeri') {
+      const selectedFiles = Array.from(fileInput.files)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+      
+      // Validate each file
+      for (const file of selectedFiles) {
+         if (!allowedTypes.includes(file.type)) {
+            fileErrors.value.foto_galeri = 'Format file tidak didukung. Gunakan jpg, jpeg, png, atau webp'
+            files.value.foto_galeri = []
+            return
+         }
+         
+         // Validate file size (1MB each)
+         const maxSize = 1 * 1024 * 1024 // 1MB
+         if (file.size > maxSize) {
+            fileErrors.value.foto_galeri = 'File terlalu besar. Maksimal ukuran adalah 1MB per file'
+            files.value.foto_galeri = []
+            return
+         }
+      }
+      
+      // Validate max 5 files
+      if (selectedFiles.length > 5) {
+         fileErrors.value.foto_galeri = 'Foto gallery maksimal 5 file'
+         files.value.foto_galeri = []
+         return
+      }
+      
+      fileErrors.value.foto_galeri = ''
+      files.value.foto_galeri = selectedFiles
+   }
+}
+
+function removeFile(fieldName) {
+   if (fieldName === 'foto_utama') {
+      files.value.foto_utama = null
+      // Reset file input
+      const fileInput = document.querySelector(`input[name="${fieldName}"]`)
+      if (fileInput) fileInput.value = ''
+   }
+}
+
+function removeGalleryFile(index) {
+   files.value.foto_galeri.splice(index, 1)
+   // Reset file input to trigger change event if needed
+   const fileInput = document.querySelector('input[name="foto_galeri"]')
+   if (fileInput) fileInput.value = ''
+}
+
+function clearGalleryFiles() {
+   files.value.foto_galeri = []
+   // Reset file input
+   const fileInput = document.querySelector('input[name="foto_galeri"]')
+   if (fileInput) fileInput.value = ''
+}
+
+function formatFileSize(bytes) {
+   if (bytes === 0) return '0 Bytes'
+   const k = 1024
+   const sizes = ['Bytes', 'KB', 'MB', 'GB']
+   const i = Math.floor(Math.log(bytes) / Math.log(k))
+   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
 onMounted(async () => {
