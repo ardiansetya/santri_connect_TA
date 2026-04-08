@@ -3,7 +3,7 @@
     <div class="container">
       <!-- Hero Header -->
       <div class="text-center mb-8">
-        <h1 class="font-bold text-3xl text-purple-600 mb-2">
+        <h1 class="font-bold text-3xl text-blue-600 mb-2">
           Rekomendasi Pesantren Pintar
         </h1>
         <p class="text-muted mt-2 text-base max-w-2xl mx-auto">Dapatkan rekomendasi pesantren terbaik yang sesuai dengan budget dan preferensi Anda</p>
@@ -36,12 +36,12 @@
                         class="form-input pl-10 pr-4"
                         required
                         min="0"
-                        placeholder="5.000.000"
+                        placeholder="Contoh: 5000000"
                       />
                     </div>
-                    <div v-if="form.budget" class="mt-2 px-3 py-2 bg-purple-50 rounded-lg">
+                    <div v-if="form.budget" class="mt-2 px-3 py-2 bg-blue-50 rounded-lg">
                       <div class="text-xs text-muted">Budget Anda:</div>
-                      <div class="font-bold text-purple-600">{{ formatCurrency(form.budget) }}</div>
+                      <div class="font-bold text-blue-600">{{ formatCurrency(form.budget) }}</div>
                     </div>
                   </div>
 
@@ -74,7 +74,7 @@
                   </div>
 
                   <!-- Submit Button -->
-                  <button type="submit" class="btn w-full py-3 bg-purple-600 text-white hover:bg-purple-700 shadow-lg hover:shadow-xl transition-all" :disabled="loading">
+                  <button type="submit" class="btn w-full py-3 bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all" :disabled="loading">
                     <svg v-if="!loading" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
@@ -85,9 +85,9 @@
               </div>
 
               <!-- Scoring Info Card -->
-              <div class="p-6 border-t border-border bg-purple-50">
+              <div class="p-6 border-t border-border bg-blue-50">
                 <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
-                  <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   Cara Kerja Scoring
@@ -150,7 +150,7 @@
                 <h2 class="font-bold text-2xl mb-1">Hasil Rekomendasi</h2>
                 <p class="text-muted text-sm">Ditemukan {{ results.length }} pesantren yang cocok</p>
               </div>
-              <span class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-full font-semibold text-sm shadow-lg">
+              <span class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-full font-semibold text-sm shadow-lg">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                 </svg>
@@ -168,7 +168,7 @@
               >
                 <div class="grid grid-cols-1 md:grid-cols-4">
                   <!-- Rank & Score Column -->
-                  <div class="md:col-span-1 bg-purple-50 p-6 flex flex-col justify-center items-center border-r border-border">
+                  <div class="md:col-span-1 bg-blue-50 p-6 flex flex-col justify-center items-center border-r border-border">
                     <div class="text-center">
                       <div class="mb-3">
                         <span v-if="index === 0" class="text-5xl">🥇</span>
@@ -176,7 +176,7 @@
                         <span v-else-if="index === 2" class="text-5xl">🥉</span>
                         <span v-else class="inline-flex items-center justify-center w-12 h-12 bg-gray-200 rounded-full text-xl font-bold text-gray-700">#{{ index + 1 }}</span>
                       </div>
-                      <div class="text-4xl font-bold text-purple-600 mb-1">
+                      <div class="text-4xl font-bold text-blue-600 mb-1">
                         {{ Math.round((item.score || 0) * 100) }}%
                       </div>
                       <div class="text-sm text-muted font-medium">Cocok</div>
@@ -239,7 +239,7 @@
                         <div v-if="item.fasilitas_match && item.fasilitas_match.length > 0" class="text-sm">
                           <div class="text-muted mb-1">Fasilitas cocok:</div>
                           <div class="flex flex-wrap gap-1">
-                            <span v-for="f in item.fasilitas_match.slice(0, 4)" :key="f" class="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-xs">
+                            <span v-for="f in item.fasilitas_match.slice(0, 4)" :key="f" class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">
                               {{ f }}
                             </span>
                           </div>
@@ -284,7 +284,7 @@
               <div class="text-7xl mb-4">📊</div>
               <h3 class="font-semibold text-2xl mb-2">Siap Mendapatkan Rekomendasi?</h3>
               <p class="text-muted text-lg max-w-md mx-auto mb-6">Masukkan budget dan preferensi Anda di form sebelah kiri untuk mendapatkan rekomendasi pesantren terbaik</p>
-              <div class="inline-flex items-center gap-2 px-6 py-3 bg-purple-100 rounded-full text-purple-700 font-medium">
+              <div class="inline-flex items-center gap-2 px-6 py-3 bg-blue-100 rounded-full text-blue-700 font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                 </svg>
