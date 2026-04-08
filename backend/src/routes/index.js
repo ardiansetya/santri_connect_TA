@@ -56,34 +56,11 @@ const adminRoutes = async (fastify) => {
   fastify.put('/api/admin/pendaftaran/:id/status', { preHandler: authMiddleware }, (request, reply) => AdminController.updatePendaftaranStatus(request, reply))
   fastify.get('/api/admin/pendaftaran/export', { preHandler: authMiddleware }, (request, reply) => AdminController.exportPendaftaran(request, reply))
   fastify.post('/api/admin/pesantren', {
-    preHandler: [authMiddleware, validateWilayah],
-    schema: {
-      body: {
-        type: 'object',
-        required: ['nama', 'province', 'kota'],
-        properties: {
-          nama: { type: 'string', minLength: 1 },
-          province: { type: 'string' },
-          kota: { type: 'string' },
-          kurikulum: { type: 'string', enum: ['modern', 'salaf', 'campuran'] }
-        }
-      }
-    }
+    preHandler: [authMiddleware]
   }, (request, reply) => AdminController.createPesantren(request, reply))
 
   fastify.put('/api/admin/pesantren/:id', {
-    preHandler: [authMiddleware, validateWilayah],
-    schema: {
-      body: {
-        type: 'object',
-        properties: {
-          nama: { type: 'string', minLength: 1 },
-          province: { type: 'string' },
-          kota: { type: 'string' },
-          kurikulum: { type: 'string', enum: ['modern', 'salaf', 'campuran'] }
-        }
-      }
-    }
+    preHandler: [authMiddleware]
   }, (request, reply) => AdminController.updatePesantren(request, reply))
   fastify.delete('/api/admin/pesantren/:id', { preHandler: authMiddleware }, (request, reply) => AdminController.deletePesantren(request, reply))
 }
@@ -121,56 +98,17 @@ const pemilikRoutes = async (fastify) => {
   })
 
   fastify.post('/api/pemilik/pesantren', {
-    preHandler: [authMiddleware, validateWilayah],
-    schema: {
-      body: {
-        type: 'object',
-        required: ['nama', 'province', 'kota'],
-        properties: {
-          nama: { type: 'string', minLength: 1 },
-          province: { type: 'string' },
-          kota: { type: 'string' },
-          kurikulum: { type: 'string', enum: ['modern', 'salaf', 'campuran'] }
-        }
-      }
-    }
-  }, async (request, reply) => {
+    preHandler: [authMiddleware]
+  }, (request, reply) => {
     if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
-    try {
-      const result = await PesantrenService.createByPemilik(request.user.id, request.body)
-      return reply.code(201).send(result)
-    } catch (err) {
-      return reply.code(400).send({ error: err.message })
-    }
+    return PesantrenController.createByPemilik(request, reply)
   })
 
   fastify.put('/api/pemilik/pesantren/:id', {
-    preHandler: [authMiddleware, validateWilayah],
-    schema: {
-      body: {
-        type: 'object',
-        properties: {
-          nama: { type: 'string', minLength: 1 },
-          province: { type: 'string' },
-          kota: { type: 'string' },
-          kurikulum: { type: 'string', enum: ['modern', 'salaf', 'campuran'] }
-        }
-      }
-    }
-  }, async (request, reply) => {
+    preHandler: [authMiddleware]
+  }, (request, reply) => {
     if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
-    try {
-      const result = await PesantrenService.updateByPemilik(request.user.id, request.params.id, request.body)
-      return reply.code(200).send(result)
-    } catch (err) {
-      if (err.message === 'Pesantren tidak ditemukan') {
-        return reply.code(404).send({ error: 'Pesantren tidak ditemukan' })
-      }
-      if (err.message === 'Akses ditolak, bukan pesantren Anda') {
-        return reply.code(403).send({ error: 'Akses ditolak' })
-      }
-      return reply.code(400).send({ error: err.message })
-    }
+    return PesantrenController.updateByPemilik(request, reply)
   })
 }
 

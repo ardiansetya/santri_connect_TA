@@ -122,21 +122,55 @@ const AdminController = {
 
   async createPesantren(request, reply) {
     if (request.user.role !== 'superadmin') return reply.code(403).send({ error: 'Akses ditolak, hanya superadmin' })
-    if (!request.body.nama) return reply.code(400).send({ error: 'Input tidak valid' })
+
+    let data = {}
+    const files = {}
+    
+    // Handle multipart or JSON payload
+    if (request.isMultipart()) {
+      try {
+        for await (const part of request.parts()) {
+          if (part.file) files[part.fieldname] = part
+          else data[part.fieldname] = part.value
+        }
+      } catch {
+        return reply.code(400).send({ error: 'Input tidak valid' })
+      }
+    } else {
+      data = request.body
+    }
+
+    // Normalize province/provinsi
+    const { normalizeWilayahData } = require('../middlewares/normalize-wilayah')
+    const normalizedData = normalizeWilayahData(data)
+
+    if (!normalizedData.nama) return reply.code(400).send({ error: 'Nama pesantren wajib diisi' })
+    if (!normalizedData.province) return reply.code(400).send({ error: 'Provinsi wajib diisi' })
+    if (!normalizedData.kota) return reply.code(400).send({ error: 'Kota wajib diisi' })
 
     try {
-      const result = await AdminService.createPesantren(request.body)
+      const result = await AdminService.createPesantren(normalizedData, files)
       return reply.code(201).send(result)
     } catch (err) {
       return reply.code(400).send({ error: err.message })
     }
   },
-
   async updatePesantren(request, reply) {
     if (request.user.role !== 'superadmin') return reply.code(403).send({ error: 'Akses ditolak, hanya superadmin' })
 
+    const data = {}
+    const files = {}
     try {
-      const result = await AdminService.updatePesantren(request.params.id, request.body)
+      for await (const part of request.parts()) {
+        if (part.file) files[part.fieldname] = part
+        else data[part.fieldname] = part.value
+      }
+    } catch {
+      return reply.code(400).send({ error: 'Input tidak valid' })
+    }
+
+    try {
+      const result = await AdminService.updatePesantren(request.params.id, data, files)
       return reply.code(200).send(result)
     } catch (err) {
       return err.message === 'Pesantren tidak ditemukan'

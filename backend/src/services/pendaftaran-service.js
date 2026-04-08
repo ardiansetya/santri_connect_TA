@@ -45,10 +45,25 @@ const PendaftaranService = {
     if (!data) throw new Error('Data pendaftaran tidak ditemukan')
 
     return {
+      id: data.id,
       nomor_pendaftaran: data.nomor_pendaftaran,
+      user_id: data.user_id,
+      pesantren_id: data.pesantren_id,
       status: data.status,
+      nama_lengkap: data.nama_lengkap,
+      nik: data.nik,
+      tempat_lahir: data.tempat_lahir,
+      tanggal_lahir: data.tanggal_lahir,
+      jenis_kelamin: data.jenis_kelamin,
+      alamat: data.alamat,
+      no_hp: data.no_hp,
+      nama_ayah: data.nama_ayah,
+      nama_ibu: data.nama_ibu,
+      no_hp_ortu: data.no_hp_ortu,
+      pekerjaan_ortu: data.pekerjaan_ortu,
       catatan_admin: data.catatan_admin,
       created_at: data.created_at,
+      updated_at: data.updated_at,
       pesantren: { id: data.pesantren_id, nama: data.pesantren_nama }
     }
   }

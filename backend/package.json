@@ -7,7 +7,10 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest --forceExit --detectOpenHandles",
-    "test:coverage": "jest --coverage --forceExit --detectOpenHandles"
+    "test:coverage": "jest --coverage --forceExit --detectOpenHandles",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.js\""
   },
   "repository": {
     "type": "git",
@@ -21,9 +24,11 @@
   },
   "homepage": "https://github.com/ardiansetya/santri_connect_TA#readme",
   "dependencies": {
+    "@fastify/cors": "^11.2.0",
     "@fastify/formbody": "^8.0.2",
     "@fastify/jwt": "^10.0.0",
     "@fastify/multipart": "^9.4.0",
+    "@fastify/static": "^9.1.0",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.5",
     "ajv-formats": "^3.0.1",
@@ -37,8 +42,10 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
+    "eslint": "^8.56.0",
     "jest": "^30.3.0",
     "nodemon": "^3.1.14",
+    "prettier": "^3.2.0",
     "supertest": "^7.2.2"
   }
 }

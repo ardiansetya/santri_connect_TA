@@ -1,14 +1,14 @@
 const Pesantren = {
   async findById(id) {
     const [rows] = await require('../config/db').getPool().query(
-      'SELECT id, user_id, nama, province, kota, alamat, tahun_berdiri, jumlah_santri, jumlah_pengajar, biaya_pendaftaran, biaya_bulanan, fasilitas, kurikulum, email, telepon, website, deskripsi, nama_bank, nomor_rekening, atas_nama_rekening FROM pesantren WHERE id = ?',
+      'SELECT id, user_id, nama, province, kota, alamat, tahun_berdiri, jumlah_santri, jumlah_pengajar, biaya_pendaftaran, biaya_bulanan, fasilitas, kurikulum, email, telepon, website, deskripsi, foto_utama, foto_galeri, nama_bank, nomor_rekening, atas_nama_rekening FROM pesantren WHERE id = ?',
       [id]
     )
     return rows[0]
   },
 
   async findAll({ search, provinsi, kota, biaya_min, biaya_max, fasilitas, kurikulum, page, limit, sort }) {
-    let query = 'SELECT * FROM pesantren WHERE 1=1'
+    let query = 'SELECT id, nama, province, kota, biaya_bulanan, kurikulum, fasilitas, foto_utama FROM pesantren WHERE 1=1'
     let countQuery = 'SELECT COUNT(*) as total FROM pesantren WHERE 1=1'
     const params = []
     const countParams = []
@@ -83,8 +83,9 @@ const Pesantren = {
       `INSERT INTO pesantren (
         user_id, nama, province, kota, alamat, tahun_berdiri, jumlah_santri,
         jumlah_pengajar, biaya_pendaftaran, biaya_bulanan, fasilitas, kurikulum,
-        email, telepon, website, deskripsi, nama_bank, nomor_rekening, atas_nama_rekening
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        email, telepon, website, deskripsi, foto_utama, foto_galeri,
+        nama_bank, nomor_rekening, atas_nama_rekening
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         data.user_id || null,
         data.nama,
@@ -102,6 +103,8 @@ const Pesantren = {
         data.telepon || null,
         data.website || null,
         data.deskripsi || null,
+        data.foto_utama || null,
+        data.foto_galeri ? JSON.stringify(data.foto_galeri) : null,
         data.nama_bank || null,
         data.nomor_rekening || null,
         data.atas_nama_rekening || null
@@ -116,8 +119,8 @@ const Pesantren = {
         nama = ?, province = ?, kota = ?, alamat = ?, tahun_berdiri = ?,
         jumlah_santri = ?, jumlah_pengajar = ?, biaya_pendaftaran = ?,
         biaya_bulanan = ?, fasilitas = ?, kurikulum = ?, email = ?,
-        telepon = ?, website = ?, deskripsi = ?, nama_bank = ?,
-        nomor_rekening = ?, atas_nama_rekening = ?, updated_at = NOW()
+        telepon = ?, website = ?, deskripsi = ?, foto_utama = ?, foto_galeri = ?,
+        nama_bank = ?, nomor_rekening = ?, atas_nama_rekening = ?, updated_at = NOW()
       WHERE id = ?`,
       [
         data.nama,
@@ -135,6 +138,8 @@ const Pesantren = {
         data.telepon || null,
         data.website || null,
         data.deskripsi || null,
+        data.foto_utama || null,
+        data.foto_galeri ? JSON.stringify(data.foto_galeri) : null,
         data.nama_bank || null,
         data.nomor_rekening || null,
         data.atas_nama_rekening || null,

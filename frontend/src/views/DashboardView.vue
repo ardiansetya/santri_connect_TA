@@ -7,9 +7,9 @@
       </div>
 
       <template v-else>
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="flex justify-between items-center mb-4">
           <div>
-            <h1 class="fw-bold mb-1">Dashboard</h1>
+            <h1 class="font-bold mb-1 text-2xl">Dashboard</h1>
             <p class="text-muted mb-0">Selamat datang, <strong>{{ authStore.user.username }}</strong></p>
           </div>
           <span class="badge" :class="roleBadge">{{ roleLabel }}</span>
@@ -34,11 +34,11 @@ const authStore = useAuthStore()
 
 const roleBadge = computed(() => {
   const map = {
-    superadmin: 'bg-danger',
-    pemilik: 'bg-warning text-dark',
-    pendaftar: 'bg-success'
+    superadmin: 'bg-red-100 text-red-800',
+    pemilik: 'bg-yellow-100 text-yellow-800',
+    pendaftar: 'bg-green-100 text-green-800'
   }
-  return map[authStore.role] || 'bg-secondary'
+  return map[authStore.role] || 'bg-gray-100 text-gray-800'
 })
 
 const roleLabel = computed(() => {
@@ -56,3 +56,30 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style scoped>
+.bg-red-100 {
+  background-color: #fee2e2 !important;
+}
+.text-red-800 {
+  color: #991b1b !important;
+}
+.bg-yellow-100 {
+  background-color: #fef9c3 !important;
+}
+.text-yellow-800 {
+  color: #854d0e !important;
+}
+.bg-green-100 {
+  background-color: #dcfce7 !important;
+}
+.text-green-800 {
+  color: #166534 !important;
+}
+.bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+.text-gray-800 {
+  color: #1f2937 !important;
+}
+</style>

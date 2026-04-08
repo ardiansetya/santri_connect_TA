@@ -2,7 +2,7 @@ const fastify = require('fastify')()
 
 async function test() {
   await fastify.register(require('@fastify/jwt'), {
-    secret: 'santo_connect_secret_key_2024'
+    secret: process.env.JWT_SECRET || 'santri_connect_secret_key'
   })
 
   const token = fastify.jwt.sign({ id: 6, role: 'pendaftar' })

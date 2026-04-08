@@ -179,62 +179,181 @@ const AdminService = {
     return buffer
   },
 
-  async createPesantren(data) {
-    const validKurikulum = ['modern', 'salaf', 'campuran']
-    if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
-      throw new Error('Kurikulum tidak valid')
-    }
+   async createPesantren(data, files = {}) {
+     const validKurikulum = ['modern', 'salaf', 'campuran']
+     if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
+       throw new Error('Kurikulum tidak valid')
+     }
 
-    const WilayahService = require('./wilayah-service')
-    if (data.province || data.provinsi) {
-      const provinceResult = await WilayahService.validateProvince(data.province || data.provinsi)
-      if (!provinceResult.valid) throw new Error(provinceResult.message)
-      data.province = provinceResult.name
-    }
-    if (data.kota) {
-      const provinceId = data.province ? (await WilayahService.getProvinceByName(data.province))?.id : null
-      if (provinceId) {
-        const regencyResult = await WilayahService.validateRegency(provinceId, data.kota)
-        if (!regencyResult.valid) throw new Error(regencyResult.message)
-        data.kota = regencyResult.name
+     const WilayahService = require('./wilayah-service')
+     const { normalizeWilayahData } = require('../middlewares/normalize-wilayah')
+     const normalizedData = normalizeWilayahData(data)
+     
+     if (normalizedData.province) {
+       const provinceResult = await WilayahService.validateProvince(normalizedData.province)
+       if (!provinceResult.valid) throw new Error(provinceResult.message)
+       normalizedData.province = provinceResult.name
+     }
+     if (normalizedData.kota) {
+       const provinceId = normalizedData.province ? (await WilayahService.getProvinceByName(normalizedData.province))?.id : null
+       if (provinceId) {
+         const regencyResult = await WilayahService.validateRegency(provinceId, normalizedData.kota)
+         if (!regencyResult.valid) throw new Error(regencyResult.message)
+         normalizedData.kota = regencyResult.name
+       }
+     }
+
+      // Handle foto_utama (single file)
+      if (files.foto_utama) {
+        const UploadService = require('./upload-service')
+        const validation = UploadService.validateFile(files.foto_utama, 'Foto Utama')
+        if (!validation.valid) {
+          throw new Error(validation.message)
+        }
+        data.foto_utama = await UploadService.saveFile(files.foto_utama, 'foto_utama')
       }
-    }
 
-    const Pesantren = require('../models/Pesantren')
-    await Pesantren.create(data)
-    return { message: 'Pesantren berhasil ditambahkan' }
-  },
-
-  async updatePesantren(id, data) {
-    const validKurikulum = ['modern', 'salaf', 'campuran']
-    if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
-      throw new Error('Kurikulum tidak valid')
-    }
-
-    const Pesantren = require('../models/Pesantren')
-    const existing = await Pesantren.findById(parseInt(id, 10))
-    if (!existing) throw new Error('Pesantren tidak ditemukan')
-
-    const WilayahService = require('./wilayah-service')
-    if (data.province || data.provinsi) {
-      const provinceResult = await WilayahService.validateProvince(data.province || data.provinsi)
-      if (!provinceResult.valid) throw new Error(provinceResult.message)
-      data.province = provinceResult.name
-    }
-    if (data.kota) {
-      const provinceId = data.province ? (await WilayahService.getProvinceByName(data.province))?.id : existing.province ? (await WilayahService.getProvinceByName(existing.province))?.id : null
-      if (provinceId) {
-        const regencyResult = await WilayahService.validateRegency(provinceId, data.kota)
-        if (!regencyResult.valid) throw new Error(regencyResult.message)
-        data.kota = regencyResult.name
+      // Handle foto_galeri (multiple files)
+      if (files.foto_galeri) {
+        const UploadService = require('./upload-service')
+        const { MAX_GALLERY_FILES } = require('../config/upload-config')
+        
+        // Convert single file to array if needed
+        const galleryFiles = Array.isArray(files.foto_galeri) ? files.foto_galeri : [files.foto_galeri]
+        
+        // Validate max 5 files
+        if (galleryFiles.length > MAX_GALLERY_FILES) {
+          throw new Error(`Foto gallery maksimal ${MAX_GALLERY_FILES} file`)
+        }
+        
+        // Validate each file
+        for (let i = 0; i < galleryFiles.length; i++) {
+          const validation = UploadService.validateFile(galleryFiles[i], `Foto Gallery ${i + 1}`)
+          if (!validation.valid) {
+            throw new Error(validation.message)
+          }
+        }
+        
+        data.foto_galeri = JSON.stringify(await UploadService.saveMultipleFiles(galleryFiles, 'foto_galeri'))
       }
-    }
 
-    const updated = await Pesantren.update(parseInt(id, 10), data)
-    if (!updated) throw new Error('Pesantren tidak ditemukan')
+     const Pesantren = require('../models/Pesantren')
+     await Pesantren.create(data)
+     return { message: 'Pesantren berhasil ditambahkan' }
+   },
 
-    return { message: 'Data pesantren berhasil diperbarui' }
-  },
+   async updatePesantren(id, data, files = {}) {
+     const validKurikulum = ['modern', 'salaf', 'campuran']
+     if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
+       throw new Error('Kurikulum tidak valid')
+     }
+
+     const Pesantren = require('../models/Pesantren')
+     const existing = await Pesantren.findById(parseInt(id, 10))
+     if (!existing) throw new Error('Pesantren tidak ditemukan')
+
+     const WilayahService = require('./wilayah-service')
+     const { normalizeWilayahData } = require('../middlewares/normalize-wilayah')
+     const normalizedData = normalizeWilayahData(data)
+     
+     if (normalizedData.province) {
+       const provinceResult = await WilayahService.validateProvince(normalizedData.province)
+       if (!provinceResult.valid) throw new Error(provinceResult.message)
+       normalizedData.province = provinceResult.name
+     }
+     if (normalizedData.kota) {
+       const provinceId = normalizedData.province ? (await WilayahService.getProvinceByName(normalizedData.province))?.id : existing.province ? (await WilayahService.getProvinceByName(existing.province))?.id : null
+       if (provinceId) {
+         const regencyResult = await WilayahService.validateRegency(provinceId, normalizedData.kota)
+         if (!regencyResult.valid) throw new Error(regencyResult.message)
+         normalizedData.kota = regencyResult.name
+       }
+     }
+
+      // Handle foto_utama (single file) - upload new if provided, keep old if not
+      if (files.foto_utama) {
+        const UploadService = require('./upload-service')
+        const validation = UploadService.validateFile(files.foto_utama, 'Foto Utama')
+        if (!validation.valid) {
+          throw new Error(validation.message)
+        }
+        
+        // Delete old foto_utama if exists
+        if (existing.foto_utama) {
+          UploadService.deleteFile(existing.foto_utama)
+        }
+        
+        data.foto_utama = await UploadService.saveFile(files.foto_utama, 'foto_utama')
+      } else if (data.foto_utama === null) {
+        // Explicitly set to null to delete
+        if (existing.foto_utama) {
+          UploadService.deleteFile(existing.foto_utama)
+        }
+        data.foto_utama = null
+      }
+      // If no file provided and not explicitly null, keep existing foto_utama
+
+      // Handle foto_galeri (multiple files)
+      if (files.foto_galeri !== undefined) {
+        const UploadService = require('./upload-service')
+        const { MAX_GALLERY_FILES } = require('../config/upload-config')
+        
+        // Convert single file to array if needed
+        const galleryFiles = Array.isArray(files.foto_galeri) ? files.foto_galeri : [files.foto_galeri]
+        
+        // Handle empty array (explicitly set to empty)
+        if (galleryFiles.length === 0 && files.foto_galeri !== undefined) {
+          // Delete all existing gallery photos
+          if (existing.foto_galeri) {
+            try {
+              const existingGallery = JSON.parse(existing.foto_galeri)
+              for (const filename of existingGallery) {
+                UploadService.deleteFile(filename)
+              }
+            } catch (e) {
+              // If parsing fails, continue
+            }
+          }
+          data.foto_galeri = JSON.stringify([])
+        } 
+        // Handle file uploads
+        else if (galleryFiles.length > 0) {
+          // Validate max 5 files
+          if (galleryFiles.length > MAX_GALLERY_FILES) {
+            throw new Error(`Foto gallery maksimal ${MAX_GALLERY_FILES} file`)
+          }
+          
+          // Validate each file
+          for (let i = 0; i < galleryFiles.length; i++) {
+            const validation = UploadService.validateFile(galleryFiles[i], `Foto Gallery ${i + 1}`)
+            if (!validation.valid) {
+              throw new Error(validation.message)
+            }
+          }
+          
+          // Delete existing gallery photos
+          if (existing.foto_galeri) {
+            try {
+              const existingGallery = JSON.parse(existing.foto_galeri)
+              for (const filename of existingGallery) {
+                UploadService.deleteFile(filename)
+              }
+            } catch (e) {
+              // If parsing fails, continue
+            }
+          }
+          
+          data.foto_galeri = JSON.stringify(await UploadService.saveMultipleFiles(galleryFiles, 'foto_galeri'))
+        }
+        // If galleryFiles is undefined, keep existing foto_galeri
+      }
+      // If files.foto_galeri is undefined, keep existing foto_galeri
+
+     const updated = await Pesantren.update(parseInt(id, 10), data)
+     if (!updated) throw new Error('Pesantren tidak ditemukan')
+
+     return { message: 'Data pesantren berhasil diperbarui' }
+   },
 
   async deletePesantren(id) {
     const Pesantren = require('../models/Pesantren')

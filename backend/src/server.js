@@ -10,11 +10,25 @@ const fastify = require('fastify')({
 })
 
 async function start() {
-  await fastify.register(require('@fastify/multipart'))
-  await fastify.register(require('@fastify/formbody'))
-  await fastify.register(require('@fastify/jwt'), {
-    secret: process.env.JWT_SECRET || 'santri_connect_secret_key'
-  })
+   await fastify.register(require('@fastify/cors'), {
+     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+     allowedHeaders: ['Content-Type', 'Authorization'],
+     credentials: true
+   })
+
+   await fastify.register(require('@fastify/multipart'))
+   await fastify.register(require('@fastify/formbody'))
+   
+   // Serve static uploads
+   await fastify.register(require('@fastify/static'), {
+     root: path.join(__dirname, '..', 'uploads'),
+     prefix: '/uploads/', // optional: default '/'
+   })
+   
+   await fastify.register(require('@fastify/jwt'), {
+     secret: process.env.JWT_SECRET || 'santri_connect_secret_key'
+   })
 
   await fastify.register(require('@fastify/swagger'), {
     mode: 'static',
