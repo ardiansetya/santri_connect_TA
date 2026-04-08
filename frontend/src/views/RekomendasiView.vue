@@ -29,7 +29,7 @@
                   <div>
                     <label class="form-label text-sm font-semibold mb-2 block">Budget Bulanan</label>
                     <div class="relative">
-                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">Rp</span>
+                      <!-- <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">Rp</span> -->
                       <input
                         v-model.number="form.budget"
                         type="number"
