@@ -31,7 +31,7 @@
           <router-link to="/profile" class="btn btn-ghost btn-sm gap-2">
             👤 {{ authStore.user?.username || 'Profil' }}
           </router-link>
-          <button @click="handleLogout" class="btn btn-ghost btn-sm text-destructive">Keluar</button>
+          <button @click="handleLogout" class="btn btn-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200">Keluar</button>
         </template>
         <template v-else>
           <router-link to="/login" class="btn btn-ghost btn-sm gap-2">Masuk</router-link>
@@ -62,7 +62,7 @@
         <div class="mt-3 flex gap-2 border-t border-border pt-3">
           <template v-if="authStore.isAuthenticated">
             <router-link to="/dashboard" class="btn btn-outline btn-sm flex-1" @click="isOpen = false">Dashboard</router-link>
-            <button @click="handleLogout" class="btn btn-outline btn-sm flex-1 text-destructive">Keluar</button>
+            <button @click="handleLogout" class="btn btn-sm flex-1 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200">Keluar</button>
           </template>
           <template v-else>
             <router-link to="/login" class="btn btn-outline btn-sm flex-1" @click="isOpen = false">Masuk</router-link>
