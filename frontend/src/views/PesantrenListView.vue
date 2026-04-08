@@ -2,11 +2,11 @@
   <div class="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
     <div class="container mx-auto px-4 py-8">
       <!-- Header Section -->
-      <div class="text-center mb-8">
-        <h1 class="font-bold text-4xl mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+      <div class="text-center mb-6">
+        <h1 class="font-bold text-3xl mb-2 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
           Jelajahi Pesantren
         </h1>
-        <p class="text-muted text-lg">Temukan pesantren terbaik untuk masa depan putra-putri Anda</p>
+        <p class="text-muted text-base">Temukan pesantren terbaik untuk masa depan putra-putri Anda</p>
       </div>
 
       <!-- Main Layout: Sidebar + Content -->
