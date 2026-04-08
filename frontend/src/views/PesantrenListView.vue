@@ -9,63 +9,81 @@
         <p class="text-muted text-lg">Temukan pesantren terbaik untuk masa depan putra-putri Anda</p>
       </div>
 
-      <!-- Filter Section -->
-      <div class="card mb-6 border-0 shadow-lg">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold text-lg flex items-center gap-2">
-              <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-              </svg>
-              Filter & Pencarian
-            </h3>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div>
-              <label class="form-label text-sm font-medium mb-1 block">Provinsi</label>
-              <select class="form-select w-full" v-model="filters.province" @change="onProvinceChange">
-                <option value="">Semua Provinsi</option>
-                <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="form-label text-sm font-medium mb-1 block">Kota</label>
-              <select class="form-select w-full" v-model="filters.kota" @change="fetchData" :disabled="!cities.length">
-                <option value="">Semua Kota</option>
-                <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="form-label text-sm font-medium mb-1 block">Kurikulum</label>
-              <select class="form-select w-full" v-model="filters.kurikulum" @change="fetchData">
-                <option value="">Semua Kurikulum</option>
-                <option value="modern">Modern</option>
-                <option value="salaf">Salaf</option>
-                <option value="campuran">Campuran</option>
-              </select>
-            </div>
-            <div>
-              <label class="form-label text-sm font-medium mb-1 block">Urutkan</label>
-              <select class="form-select w-full" v-model="sortField" @change="fetchData">
-                <option value="">Default</option>
-                <option value="nama">Nama</option>
-                <option value="tahun_berdiri">Tahun Berdiri</option>
-                <option value="jumlah_santri">Jumlah Santri</option>
-                <option value="biaya_bulanan">Biaya Bulanan</option>
-              </select>
-            </div>
-            <div>
-              <label class="form-label text-sm font-medium mb-1 block">Urutan</label>
-              <select class="form-select w-full" v-model="sortOrder" @change="fetchData">
-                <option value="asc">Naik (A-Z)</option>
-                <option value="desc">Turun (Z-A)</option>
-              </select>
+      <!-- Main Layout: Sidebar + Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Left Sidebar - Filters -->
+        <div class="lg:col-span-1">
+          <div class="card border-0 shadow-lg sticky" style="top: 6rem;">
+            <div class="p-6">
+              <h3 class="font-semibold text-lg flex items-center gap-2 mb-5">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+                Filter & Pencarian
+              </h3>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="form-label text-sm font-medium mb-2 block">Provinsi</label>
+                  <select class="form-select w-full" v-model="filters.province" @change="onProvinceChange">
+                    <option value="">Semua Provinsi</option>
+                    <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="form-label text-sm font-medium mb-2 block">Kota</label>
+                  <select class="form-select w-full" v-model="filters.kota" @change="fetchData" :disabled="!cities.length">
+                    <option value="">Semua Kota</option>
+                    <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="form-label text-sm font-medium mb-2 block">Kurikulum</label>
+                  <select class="form-select w-full" v-model="filters.kurikulum" @change="fetchData">
+                    <option value="">Semua Kurikulum</option>
+                    <option value="modern">Modern</option>
+                    <option value="salaf">Salaf</option>
+                    <option value="campuran">Campuran</option>
+                  </select>
+                </div>
+
+                <div class="border-t border-border pt-4">
+                  <label class="form-label text-sm font-medium mb-2 block">Urutkan</label>
+                  <select class="form-select w-full" v-model="sortField" @change="fetchData">
+                    <option value="">Default</option>
+                    <option value="nama">Nama</option>
+                    <option value="tahun_berdiri">Tahun Berdiri</option>
+                    <option value="jumlah_santri">Jumlah Santri</option>
+                    <option value="biaya_bulanan">Biaya Bulanan</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="form-label text-sm font-medium mb-2 block">Urutan</label>
+                  <select class="form-select w-full" v-model="sortOrder" @change="fetchData">
+                    <option value="asc">Naik (A-Z)</option>
+                    <option value="desc">Turun (Z-A)</option>
+                  </select>
+                </div>
+
+                <button 
+                  class="btn btn-outline w-full py-2 mt-2"
+                  @click="resetFilters"
+                >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  Reset Filter
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Loading State -->
+        <!-- Right Content - Results -->
+        <div class="lg:col-span-3">
       <div v-if="loading" class="text-center py-16">
         <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
         <p class="mt-4 text-muted text-lg">Memuat data pesantren...</p>
@@ -217,6 +235,7 @@
             </button>
           </div>
         </nav>
+        </div>
       </div>
     </div>
   </div>
@@ -279,6 +298,18 @@ function toggleCompare(id) {
   } else {
     compareStore.add(id)
   }
+}
+
+function resetFilters() {
+  filters.value = {
+    province: '',
+    kota: '',
+    kurikulum: ''
+  }
+  sortField.value = ''
+  sortOrder.value = 'asc'
+  cities.value = []
+  fetchData()
 }
 
 async function fetchProvinces() {

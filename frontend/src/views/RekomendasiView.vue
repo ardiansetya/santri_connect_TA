@@ -1,170 +1,280 @@
 <template>
-  <div class="py-4 md:py-5">
-    <div class="container">
-      <div class="text-center mb-4 md:mb-5">
-        <h1 class="font-bold text-3xl">Rekomendasi Pesantren</h1>
-        <p class="text-muted mt-2">Dapatkan rekomendasi pesantren terbaik berdasarkan preferensi Anda</p>
+  <div class="min-h-screen bg-gradient-to-br from-purple-50/50 via-blue-50/30 to-white">
+    <div class="container mx-auto px-4 py-8">
+      <!-- Hero Header -->
+      <div class="text-center mb-10">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl mb-4 shadow-lg">
+          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+          </svg>
+        </div>
+        <h1 class="font-bold text-4xl mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Rekomendasi Pesantren Pintar
+        </h1>
+        <p class="text-muted text-lg max-w-2xl mx-auto">Dapatkan rekomendasi pesantren terbaik yang sesuai dengan budget dan preferensi Anda</p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div class="lg:col-span-4 xl:col-span-1">
-          <div class="card mb-3">
-            <div class="p-4">
-              <h5 class="font-semibold mb-3">Preferensi Anda</h5>
-              <form @submit.prevent="cariRekomendasi">
-                <div class="mb-3">
-                  <label class="form-label font-medium">Budget Bulanan (Rp)</label>
-                  <input
-                    v-model.number="form.budget"
-                    type="number"
-                    class="form-input"
-                    required
-                    min="0"
-                    placeholder="Contoh: 5000000"
-                  />
-                  <div v-if="form.budget" class="text-primary font-semibold text-sm mt-1">
-                    {{ formatCurrency(form.budget) }}
+      <!-- Main Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Left Sidebar - Form -->
+        <div class="lg:col-span-1">
+          <div class="space-y-6">
+            <!-- Preferences Form -->
+            <div class="card border-0 shadow-xl sticky" style="top: 6rem;">
+              <div class="p-6">
+                <h3 class="font-bold text-lg mb-5 flex items-center gap-2">
+                  <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                  </svg>
+                  Preferensi Anda
+                </h3>
+                
+                <form @submit.prevent="cariRekomendasi" class="space-y-5">
+                  <!-- Budget Input -->
+                  <div>
+                    <label class="form-label text-sm font-semibold mb-2 block">Budget Bulanan</label>
+                    <div class="relative">
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">Rp</span>
+                      <input
+                        v-model.number="form.budget"
+                        type="number"
+                        class="form-input pl-10 pr-4"
+                        required
+                        min="0"
+                        placeholder="5.000.000"
+                      />
+                    </div>
+                    <div v-if="form.budget" class="mt-2 px-3 py-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                      <div class="text-xs text-muted">Budget Anda:</div>
+                      <div class="font-bold text-purple-600">{{ formatCurrency(form.budget) }}</div>
+                    </div>
                   </div>
-                </div>
 
-                <div class="mb-3">
-                  <label class="form-label font-medium">Provinsi (opsional)</label>
-                  <select v-model="form.provinsi" class="form-select">
-                    <option value="">Semua Provinsi</option>
-                    <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
-                  </select>
-                </div>
+                  <!-- Province Select -->
+                  <div>
+                    <label class="form-label text-sm font-semibold mb-2 block">Lokasi Provinsi</label>
+                    <select v-model="form.provinsi" class="form-select w-full">
+                      <option value="">Semua Provinsi</option>
+                      <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
+                    </select>
+                  </div>
 
-                <div class="mb-3">
-                  <label class="form-label font-medium">Fasilitas yang Diinginkan</label>
-                  <div class="grid grid-cols-2 gap-2">
-                    <div v-for="f in fasilitasOptions" :key="f">
-                      <div class="flex items-center">
+                  <!-- Fasilitas Checkboxes -->
+                  <div>
+                    <label class="form-label text-sm font-semibold mb-3 block">Fasilitas Diinginkan</label>
+                    <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                      <label v-for="f in fasilitasOptions" :key="f" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
                         <input
                           :value="f"
                           v-model="form.fasilitas"
-                          class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                           type="checkbox"
-                          :id="`fas-${f}`"
+                          class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                         />
-                        <label class="ml-2 text-sm" :for="`fas-${f}`">{{ f }}</label>
-                      </div>
+                        <span class="text-sm">{{ f }}</span>
+                      </label>
+                    </div>
+                    <div v-if="form.fasilitas.length > 0" class="mt-2 text-xs text-purple-600 font-medium">
+                      {{ form.fasilitas.length }} fasilitas dipilih
                     </div>
                   </div>
-                </div>
 
-                <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-                  <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-                  🔍 Cari Rekomendasi
-                </button>
-              </form>
-            </div>
-          </div>
+                  <!-- Submit Button -->
+                  <button type="submit" class="btn w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all" :disabled="loading">
+                    <svg v-if="!loading" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <div v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    {{ loading ? 'Mencari...' : '🔍 Cari Rekomendasi' }}
+                  </button>
+                </form>
+              </div>
 
-          <div class="card bg-primary/10 border-primary mb-3">
-            <div class="p-4">
-              <h6 class="font-semibold mb-3">💡 Cara Kerja Scoring</h6>
-              <div class="flex flex-col gap-2">
-                <div class="flex justify-between text-sm">
-                  <span class="text-muted">Skor Budget</span>
-                  <span class="font-bold text-primary">40%</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-muted">Skor Lokasi</span>
-                  <span class="font-bold text-primary">30%</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-muted">Skor Fasilitas</span>
-                  <span class="font-bold text-primary">30%</span>
+              <!-- Scoring Info Card -->
+              <div class="p-6 border-t border-border bg-gradient-to-br from-purple-50/50 to-blue-50/50">
+                <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Cara Kerja Scoring
+                </h4>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span class="text-sm text-muted">Budget</span>
+                    </div>
+                    <span class="font-bold text-green-600">40%</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span class="text-sm text-muted">Lokasi</span>
+                    </div>
+                    <span class="font-bold text-blue-600">30%</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span class="text-sm text-muted">Fasilitas</span>
+                    </div>
+                    <span class="font-bold text-purple-600">30%</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="lg:col-span-3 xl:col-span-3">
-          <div v-if="loading && searched" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-3 text-muted">Menghitung rekomendasi...</p>
+        <!-- Right Content - Results -->
+        <div class="lg:col-span-3">
+          <!-- Loading State -->
+          <div v-if="loading && searched" class="text-center py-20 card border-0 shadow-lg">
+            <div class="py-8">
+              <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-purple-600 border-t-transparent"></div>
+              <p class="mt-6 text-muted text-lg">Menghitung rekomendasi terbaik untuk Anda...</p>
+            </div>
           </div>
 
-          <div v-else-if="searched && results.length === 0" class="text-center py-5">
-            <p class="text-5xl mb-3">🔍</p>
-            <h5 class="font-semibold">Tidak ada rekomendasi</h5>
-            <p class="text-muted mt-2">Coba ubah budget atau preferensi Anda</p>
+          <!-- Empty State -->
+          <div v-else-if="searched && results.length === 0" class="text-center py-20 card border-0 shadow-lg">
+            <div class="py-8">
+              <div class="text-7xl mb-4">🔍</div>
+              <h3 class="font-semibold text-2xl mb-2">Tidak ada rekomendasi</h3>
+              <p class="text-muted text-lg mb-6">Coba ubah budget atau preferensi Anda untuk mendapatkan hasil yang lebih baik</p>
+              <button @click="searched = false" class="btn btn-outline px-6 py-2">
+                Ubah Preferensi
+              </button>
+            </div>
           </div>
 
+          <!-- Results -->
           <div v-else-if="results.length > 0">
-            <div class="flex items-center justify-between mb-3">
-              <h5 class="font-semibold mb-0">Hasil Rekomendasi</h5>
-              <span class="badge badge-primary rounded-full">{{ results.length }} pesantren</span>
+            <!-- Results Header -->
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h2 class="font-bold text-2xl mb-1">Hasil Rekomendasi</h2>
+                <p class="text-muted text-sm">Ditemukan {{ results.length }} pesantren yang cocok</p>
+              </div>
+              <span class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-full font-semibold text-sm shadow-lg">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                </svg>
+                {{ results.length }} Pesantren
+              </span>
             </div>
 
-            <div class="flex flex-col gap-3">
-              <div
-                v-for="(item, index) in results"
-                :key="item.pesantren?.id || index"
-                class="card"
+            <!-- Results List -->
+            <div class="space-y-4">
+              <div 
+                v-for="(item, index) in results" 
+                :key="item.pesantren?.id"
+                class="card border-0 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                :class="index === 0 ? 'ring-2 ring-yellow-400' : ''"
               >
-                <div class="p-4">
-                  <div class="flex items-start">
-                    <div class="text-center" style="min-width: 60px">
-                      <span class="text-3xl font-bold text-primary">#{{ index + 1 }}</span>
-                    </div>
-                    <div class="flex-1">
-                      <div class="flex justify-between items-start mb-3">
-                        <div>
-                          <h5 class="font-semibold mb-1">{{ item.pesantren?.nama || 'Pesantren' }}</h5>
-                          <p class="text-muted text-sm mb-0">📍 {{ item.pesantren?.kota }}, {{ item.pesantren?.province }}</p>
-                        </div>
-                        <div class="text-center">
-                          <span class="text-3xl font-bold text-primary">{{ Math.round((item.score || 0) * 100) }}%</span>
-                          <br><small class="text-muted">Cocok</small>
-                        </div>
-                      </div>
-
+                <div class="grid grid-cols-1 md:grid-cols-4">
+                  <!-- Rank & Score Column -->
+                  <div class="md:col-span-1 bg-gradient-to-br from-purple-50 to-blue-50 p-6 flex flex-col justify-center items-center border-r border-border">
+                    <div class="text-center">
                       <div class="mb-3">
-                        <div v-for="(label, key) in scoreLabels" :key="key" class="mb-2">
-                          <div class="flex justify-between text-sm mb-1">
-                            <span class="text-muted">{{ label }}</span>
-                            <span class="font-medium">{{ Math.round((item[key] || 0) * 100) }}%</span>
+                        <span v-if="index === 0" class="text-5xl">🥇</span>
+                        <span v-else-if="index === 1" class="text-5xl">🥈</span>
+                        <span v-else-if="index === 2" class="text-5xl">🥉</span>
+                        <span v-else class="inline-flex items-center justify-center w-12 h-12 bg-gray-200 rounded-full text-xl font-bold text-gray-700">#{{ index + 1 }}</span>
+                      </div>
+                      <div class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-1">
+                        {{ Math.round((item.score || 0) * 100) }}%
+                      </div>
+                      <div class="text-sm text-muted font-medium">Cocok</div>
+                      
+                      <!-- Score Breakdown -->
+                      <div class="mt-4 space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                          <span class="text-muted">Budget</span>
+                          <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                            <div class="bg-green-500 h-1.5 rounded-full" :style="{ width: `${(item.budget_score || 0) * 100}%` }"></div>
                           </div>
-                          <div class="h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              class="h-full rounded-full"
-                              :class="getScoreBarClass(item[key])"
-                              :style="{ width: `${(item[key] || 0) * 100}%` }"
-                            ></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                          <span class="text-muted">Lokasi</span>
+                          <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                            <div class="bg-blue-500 h-1.5 rounded-full" :style="{ width: `${(item.location_score || 0) * 100}%` }"></div>
+                          </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                          <span class="text-muted">Fasilitas</span>
+                          <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                            <div class="bg-purple-500 h-1.5 rounded-full" :style="{ width: `${(item.fasilitas_score || 0) * 100}%` }"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Main Info Column -->
+                  <div class="md:col-span-3 p-6">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      <div class="flex-1">
+                        <router-link 
+                          :to="`/pesantren/${item.pesantren?.id}`" 
+                          class="text-xl font-bold text-primary hover:underline mb-2 block"
+                        >
+                          {{ item.pesantren?.nama }}
+                        </router-link>
+                        <p class="text-muted text-sm mb-3 flex items-center gap-1">
+                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.5l-4.95-4.55a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                          </svg>
+                          {{ item.pesantren?.kota }}, {{ item.pesantren?.province }}
+                        </p>
+
+                        <!-- Tags -->
+                        <div class="flex flex-wrap gap-2 mb-3">
+                          <span v-if="item.pesantren?.biaya_bulanan" class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                            {{ formatCurrency(item.pesantren.biaya_bulanan) }}/bulan
+                          </span>
+                          <span v-if="item.pesantren?.kurikulum" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                            {{ item.pesantren.kurikulum }}
+                          </span>
+                          <span v-if="item.pesantren?.jumlah_santri" class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-semibold">
+                            {{ formatNumber(item.pesantren.jumlah_santri) }} Santri
+                          </span>
+                        </div>
+
+                        <!-- Fasilitas Match -->
+                        <div v-if="item.fasilitas_match && item.fasilitas_match.length > 0" class="text-sm">
+                          <div class="text-muted mb-1">Fasilitas cocok:</div>
+                          <div class="flex flex-wrap gap-1">
+                            <span v-for="f in item.fasilitas_match.slice(0, 4)" :key="f" class="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-xs">
+                              {{ f }}
+                            </span>
                           </div>
                         </div>
                       </div>
 
-                      <div class="flex flex-wrap gap-2 items-center">
-                        <span v-if="item.pesantren?.biaya_bulanan" class="badge bg-green-100 text-green-800">
-                          💰 {{ formatCurrency(item.pesantren.biaya_bulanan) }}/bulan
-                        </span>
-                        <span v-if="item.pesantren?.kurikulum" class="badge" :class="getKurikulumClass(item.pesantren.kurikulum)">
-                          {{ item.pesantren.kurikulum }}
-                        </span>
-                        <span v-if="item.pesantren?.jumlah_santri" class="badge bg-gray-100 text-gray-800">
-                          👥 {{ formatNumber(item.pesantren.jumlah_santri) }} santri
-                        </span>
-                        <div class="ml-auto flex gap-2">
-                          <router-link
-                            :to="`/pesantren/${item.pesantren?.id}`"
-                            class="btn btn-outline-primary btn-sm"
-                          >
-                            Detail
-                          </router-link>
-                          <button
-                            class="btn btn-sm"
-                            :class="compareStore.isSelected(item.pesantren?.id) ? 'btn-primary' : 'btn-outline'"
-                            :disabled="compareStore.isFull && !compareStore.isSelected(item.pesantren?.id)"
-                            @click="toggleCompare(item.pesantren?.id)"
-                          >
-                            {{ compareStore.isSelected(item.pesantren?.id) ? '✓' : '⚖️' }}
-                          </button>
-                        </div>
+                      <!-- Action Buttons -->
+                      <div class="flex md:flex-col gap-2">
+                        <router-link 
+                          :to="`/pesantren/${item.pesantren?.id}`" 
+                          class="btn btn-primary px-4 py-2 text-sm"
+                        >
+                          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                          </svg>
+                          Detail
+                        </router-link>
+                        <button
+                          @click="toggleCompare(item.pesantren?.id)"
+                          class="btn px-3 py-2 text-sm"
+                          :class="compareStore.isSelected(item.pesantren?.id) ? 'bg-purple-500 text-white' : 'btn-outline'"
+                        >
+                          <svg v-if="compareStore.isSelected(item.pesantren?.id)" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                          </svg>
+                          <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -173,10 +283,19 @@
             </div>
           </div>
 
-          <div v-else class="text-center py-5">
-            <p class="text-5xl mb-3">📊</p>
-            <h5 class="font-semibold">Isi preferensi Anda</h5>
-            <p class="text-muted mt-2">Masukkan budget dan preferensi untuk mendapatkan rekomendasi pesantren terbaik</p>
+          <!-- Initial State -->
+          <div v-else class="text-center py-20 card border-0 shadow-lg">
+            <div class="py-8">
+              <div class="text-7xl mb-4">📊</div>
+              <h3 class="font-semibold text-2xl mb-2">Siap Mendapatkan Rekomendasi?</h3>
+              <p class="text-muted text-lg max-w-md mx-auto mb-6">Masukkan budget dan preferensi Anda di form sebelah kiri untuk mendapatkan rekomendasi pesantren terbaik</p>
+              <div class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full text-purple-700 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
+                Isi form di samping untuk memulai
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -186,8 +305,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { pesantren as pesantrenApi, wilayah } from '../services'
 import { useCompareStore } from '../stores/compare'
+import { pesantren as pesantrenApi, wilayah } from '../services'
 
 const compareStore = useCompareStore()
 
@@ -202,12 +321,6 @@ const results = ref([])
 const loading = ref(false)
 const searched = ref(false)
 
-const scoreLabels = {
-  budget_score: 'Budget',
-  location_score: 'Lokasi',
-  facilities_score: 'Fasilitas'
-}
-
 const fasilitasOptions = [
   'Masjid', 'Asrama', 'Lab Komputer', 'Perpustakaan',
   'Lapangan Olahraga', 'Kantin', 'Klinik', 'Ruang Kelas AC',
@@ -219,23 +332,8 @@ function formatNumber(num) {
 }
 
 function formatCurrency(amount) {
+  if (!amount) return '-'
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount)
-}
-
-function getScoreBarClass(score) {
-  if (!score || score === 0) return 'bg-gray-400'
-  if (score > 0.7) return 'bg-green-500'
-  if (score > 0.4) return 'bg-yellow-500'
-  return 'bg-primary'
-}
-
-function getKurikulumClass(kurikulum) {
-  const classes = {
-    modern: 'bg-blue-100 text-blue-800',
-    salaf: 'bg-green-100 text-green-800',
-    campuran: 'bg-yellow-100 text-yellow-800'
-  }
-  return classes[kurikulum] || 'bg-gray-100 text-gray-800'
 }
 
 function toggleCompare(id) {
@@ -247,7 +345,7 @@ function toggleCompare(id) {
   }
 }
 
-async function fetchProvinces() {
+async function loadProvinces() {
   try {
     const { data } = await wilayah.getProvinces()
     provinces.value = data.data || []
@@ -258,17 +356,15 @@ async function fetchProvinces() {
 
 async function cariRekomendasi() {
   if (!form.value.budget) return
+  
   loading.value = true
   searched.value = true
-  results.value = []
+  
   try {
-    const payload = { budget: form.value.budget }
-    if (form.value.provinsi) payload.provinsi = form.value.provinsi
-    if (form.value.fasilitas.length > 0) payload.fasilitas = form.value.fasilitas
-
-    const { data } = await pesantrenApi.getRekomendasi(payload)
+    const { data } = await pesantrenApi.getRekomendasi(form.value)
     results.value = data.data || []
-  } catch {
+  } catch (e) {
+    console.error(e)
     results.value = []
   } finally {
     loading.value = false
@@ -276,46 +372,10 @@ async function cariRekomendasi() {
 }
 
 onMounted(async () => {
-  await fetchProvinces()
+  await loadProvinces()
 })
 </script>
 
 <style scoped>
-.bg-green-100 {
-  background-color: #dcfce7 !important;
-}
-.text-green-800 {
-  color: #166534 !important;
-}
-.bg-green-500 {
-  background-color: #22c55e !important;
-}
-.bg-yellow-100 {
-  background-color: #fef9c3 !important;
-}
-.text-yellow-800 {
-  color: #854d0e !important;
-}
-.bg-yellow-500 {
-  background-color: #eab308 !important;
-}
-.bg-blue-100 {
-  background-color: #dbeafe !important;
-}
-.text-blue-800 {
-  color: #1e40af !important;
-}
-.bg-gray-100 {
-  background-color: #f3f4f6 !important;
-}
-.text-gray-800 {
-  color: #1f2937 !important;
-}
-.bg-gray-400 {
-  background-color: #9ca3af !important;
-}
-
-.rounded-full {
-  border-radius: 9999px;
-}
+/* All styles using Tailwind CSS */
 </style>
