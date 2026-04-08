@@ -3,7 +3,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
       <div class="card border-l-4 border-l-primary">
         <div class="p-4">
-          <p class="text-muted text-sm mb-1">Total Universitas</p>
+          <p class="text-muted text-sm mb-1">Total Pesantren</p>
           <h3 class="font-bold mb-0">{{ stats.total_pesantren || 0 }}</h3>
         </div>
       </div>
@@ -42,7 +42,7 @@
             :class="activeTab === 'pesantren' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'"
             @click="activeTab = 'pesantren'"
           >
-            Manajemen Universitas
+            Manajemen Pesantren
           </button>
           <button 
             class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors" 
@@ -76,7 +76,7 @@
                 <tr>
                   <th class="text-left p-3 text-sm font-medium">No. Pendaftaran</th>
                   <th class="text-left p-3 text-sm font-medium">Nama</th>
-                  <th class="text-left p-3 text-sm font-medium">Universitas</th>
+                  <th class="text-left p-3 text-sm font-medium">Pesantren</th>
                   <th class="text-left p-3 text-sm font-medium">Status</th>
                   <th class="text-left p-3 text-sm font-medium">Aksi</th>
                 </tr>

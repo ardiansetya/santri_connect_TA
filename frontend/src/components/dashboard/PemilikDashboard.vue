@@ -5,8 +5,8 @@
         <div class="p-4">
           <div class="flex justify-between items-center">
             <div>
-              <p class="text-muted text-sm mb-1">Universitas Saya</p>
-              <h3 class="font-bold mb-0">{{ universitas.length }}</h3>
+              <p class="text-muted text-sm mb-1">Pesantren Saya</p>
+              <h3 class="font-bold mb-0">{{ pesantren.length }}</h3>
             </div>
             <div class="text-4xl text-primary opacity-50">🕌</div>
           </div>
@@ -27,9 +27,9 @@
 
     <div class="card">
       <div class="flex justify-between items-center p-3 border-b border-border">
-        <h5 class="font-semibold mb-0">Universitas Saya</h5>
+        <h5 class="font-semibold mb-0">Pesantren Saya</h5>
         <button class="btn btn-primary btn-sm" @click="openForm()" :disabled="!canAdd">
-          + Tambah Universitas
+          + Tambah Pesantren
         </button>
       </div>
       <div v-if="loading" class="text-center py-4">
@@ -38,13 +38,13 @@
       </div>
       <div v-else-if="pesantren.length === 0" class="text-center py-5">
         <p class="text-3xl mb-3">🏫</p>
-        <h6 class="font-semibold">Belum ada universitas</h6>
-        <p class="text-muted text-sm mb-3">Tambahkan universitas Anda untuk mulai mengelola</p>
-        <button class="btn btn-primary btn-sm" @click="openForm()">+ Tambah Universitas</button>
+        <h6 class="font-semibold">Belum ada pesantren</h6>
+        <p class="text-muted text-sm mb-3">Tambahkan pesantren Anda untuk mulai mengelola</p>
+        <button class="btn btn-primary btn-sm" @click="openForm()">+ Tambah Pesantren</button>
       </div>
       <div v-else>
         <div
-          v-for="p in universitas"
+          v-for="p in pesantren"
           :key="p.id"
           class="p-3 border-b border-border"
         >
@@ -65,14 +65,14 @@
     <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(0,0,0,0.5)">
       <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center p-4 border-b">
-          <h5 class="font-semibold text-lg">{{ editingId ? 'Edit Universitas' : 'Tambah Universitas' }}</h5>
+          <h5 class="font-semibold text-lg">{{ editingId ? 'Edit Pesantren' : 'Tambah Pesantren' }}</h5>
           <button type="button" class="text-2xl" @click="closeForm">&times;</button>
         </div>
         <div class="p-4">
           <form @submit="onSubmit">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="form-label font-medium">Nama Universitas *</label>
+                <label class="form-label font-medium">Nama Pesantren *</label>
                 <input v-model="nama" v-bind="namaProps" type="text" class="form-input" :class="{ 'border-red-500': errors.nama }" />
                 <p v-if="errors.nama" class="text-red-500 text-sm mt-1">{{ errors.nama }}</p>
               </div>
@@ -173,7 +173,7 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh'])
 
-const universitas = ref([])
+const pesantren = ref([])
 const provinces = ref([])
 const cities = ref([])
 const loading = ref(false)
@@ -207,7 +207,7 @@ const fasilitasOptions = [
 ]
 
 const totalSantri = computed(() => {
-  return universitas.value.reduce((sum, p) => sum + (p.jumlah_santri || 0), 0)
+  return pesantren.value.reduce((sum, p) => sum + (p.jumlah_santri || 0), 0)
 })
 
 const canAdd = computed(() => {
@@ -345,7 +345,7 @@ async function fetchData() {
   loading.value = true
   try {
     const { data } = await pemilik.getPesantren()
-    universitas.value = data.data || []
+    pesantren.value = data.data || []
   } catch (e) {
     console.error(e)
   } finally {
