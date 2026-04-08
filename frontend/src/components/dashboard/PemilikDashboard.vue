@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <div class="card border-l-[4px] border-l-[hsl(231 84% 60%)]">
+      <div class="card" style="border-left: 4px solid hsl(231 84% 60%)">
         <div class="p-4">
           <div class="flex justify-between items-center">
             <div>
@@ -12,7 +12,7 @@
           </div>
         </div>
       </div>
-      <div class="card border-l-[4px] border-l-[#3b82f6]">
+      <div class="card" style="border-left: 4px solid #3b82f6">
         <div class="p-4">
           <div class="flex justify-between items-center">
             <div>

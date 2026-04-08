@@ -1,25 +1,25 @@
 <template>
   <div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-      <div class="card border-l-[4px] border-l-[hsl(231 84% 60%)]">
+      <div class="card" style="border-left: 4px solid hsl(231 84% 60%)">
         <div class="p-4">
           <p class="text-muted text-sm mb-1">Total Pesantren</p>
           <h3 class="font-bold mb-0">{{ stats.total_pesantren || 0 }}</h3>
         </div>
       </div>
-      <div class="card border-l-[4px] border-l-[#22c55e]">
+      <div class="card" style="border-left: 4px solid #22c55e">
         <div class="p-4">
           <p class="text-muted text-sm mb-1">Total Pendaftaran</p>
           <h3 class="font-bold mb-0">{{ stats.total_pendaftaran || 0 }}</h3>
         </div>
       </div>
-      <div class="card border-l-[4px] border-l-[#eab308]">
+      <div class="card" style="border-left: 4px solid #eab308">
         <div class="p-4">
           <p class="text-muted text-sm mb-1">Pending</p>
           <h3 class="font-bold mb-0">{{ pendingCount }}</h3>
         </div>
       </div>
-      <div class="card border-l-[4px] border-l-[#3b82f6]">
+      <div class="card" style="border-left: 4px solid #3b82f6">
         <div class="p-4">
           <p class="text-muted text-sm mb-1">Diproses</p>
           <h3 class="font-bold mb-0">{{ diprosesCount }}</h3>
@@ -28,7 +28,7 @@
     </div>
 
     <div class="card">
-      <div class="border-b border-border">
+      <div class="border-b border-border px-5 py-4">
         <div class="flex">
           <button
             class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors"
@@ -37,15 +37,15 @@
           >
             Manajemen Pendaftaran
           </button>
-          <button 
-            class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors" 
+          <button
+            class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors"
             :class="activeTab === 'pesantren' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'"
             @click="activeTab = 'pesantren'"
           >
             Manajemen Pesantren
           </button>
-          <button 
-            class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors" 
+          <button
+            class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors"
             :class="activeTab === 'users' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'"
             @click="activeTab = 'users'"
           >
@@ -53,7 +53,7 @@
           </button>
         </div>
       </div>
-      <div class="p-4">
+      <div class="p-5">
         <div v-if="activeTab === 'pendaftaran'">
           <div class="flex justify-end mb-3">
             <button class="btn btn-sm bg-green-100 text-green-800 hover:bg-green-200" @click="exportData" :disabled="exporting">
