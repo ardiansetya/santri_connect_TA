@@ -60,7 +60,7 @@
             <div v-if="passwordServerError" class="alert alert--error mb-4">{{ passwordServerError }}</div>
             <div v-if="passwordSuccess" class="alert alert--success mb-4">{{ passwordSuccess }}</div>
 
-            <button type="submit" class="btn btn-warning" :disabled="isPasswordSubmitting || !passwordMeta.valid">
+            <button type="submit" class="btn bg-orange-500 text-white hover:bg-orange-600 px-6 py-2" :disabled="isPasswordSubmitting || !passwordMeta.valid">
               <span v-if="isPasswordSubmitting" class="spinner-border spinner-border-sm me-2"></span>
               {{ isPasswordSubmitting ? 'Mengubah...' : 'Ubah Password' }}
             </button>
