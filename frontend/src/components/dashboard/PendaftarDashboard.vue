@@ -46,7 +46,7 @@
             <div class="spinner-border text-primary" role="status"></div>
             <p class="mt-2 text-muted text-sm">Memuat data...</p>
           </div>
-          <div v-else-if="pendaftaran.length === 0" class="text-center py-6">
+          <div v-else-if="pendaftaranList.length === 0" class="text-center py-6">
             <p class="text-3xl mb-3">📭</p>
             <h6 class="font-semibold">Belum ada pendaftaran</h6>
             <p class="text-muted text-sm mb-4">Mulai daftarkan diri Anda ke pesantren pilihan</p>
@@ -54,14 +54,25 @@
           </div>
           <div v-else>
             <div
-              v-for="p in pendaftaran"
+              v-for="p in pendaftaranList"
               :key="p.id"
               class="p-4 border-b border-border"
             >
               <div class="flex justify-between items-start">
                 <div>
                   <h6 class="font-semibold mb-1">{{ p.pesantren?.nama || 'Pesantren' }}</h6>
-                  <p class="text-muted text-sm mb-1">No: {{ p.nomor_pendaftaran }}</p>
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-muted text-sm font-mono">No: {{ p.nomor_pendaftaran }}</span>
+                    <button
+                      @click="copyNomor(p.nomor_pendaftaran)"
+                      class="inline-flex items-center justify-center p-1 rounded hover:bg-muted transition-colors text-muted hover:text-primary"
+                      title="Salin nomor pendaftaran"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                  </div>
                   <p class="text-muted text-xs">{{ formatDate(p.created_at) }}</p>
                 </div>
                 <div class="text-right">
@@ -110,10 +121,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { admin } from '../../services'
+import { pendaftaran } from '../../services'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const stats = ref({ pending: 0, diterima: 0, total: 0 })
-const pendaftaran = ref([])
+const pendaftaranList = ref([])
 const loading = ref(true)
 
 function statusBadge(status) {
@@ -141,16 +154,38 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
+async function copyNomor(nomor) {
+  try {
+    await navigator.clipboard.writeText(nomor)
+    toast.success(`Nomor "${nomor}" berhasil disalin`, { title: 'Berhasil Disalin' })
+  } catch (err) {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea')
+    textArea.value = nomor
+    textArea.style.position = 'fixed'
+    textArea.style.left = '-999999px'
+    document.body.appendChild(textArea)
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      toast.success(`Nomor "${nomor}" berhasil disalin`, { title: 'Berhasil Disalin' })
+    } catch (e) {
+      toast.error('Gagal menyalin nomor pendaftaran', { title: 'Gagal' })
+    }
+    document.body.removeChild(textArea)
+  }
+}
+
 onMounted(async () => {
   loading.value = true
   try {
-    const { data } = await admin.getPendaftaran()
-    pendaftaran.value = data.data || []
+    const { data } = await pendaftaran.getMyRegistrations()
+    pendaftaranList.value = data.data || []
     // Update stats based on fetched data
     stats.value = {
-      pending: pendaftaran.value.filter(p => p.status === 'pending').length,
-      diterima: pendaftaran.value.filter(p => p.status === 'diterima').length,
-      total: pendaftaran.value.length
+      pending: pendaftaranList.value.filter(p => p.status === 'pending').length,
+      diterima: pendaftaranList.value.filter(p => p.status === 'diterima').length,
+      total: pendaftaranList.value.length
     }
   } catch (error) {
     console.error('Failed to load pendaftaran data:', error)

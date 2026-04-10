@@ -84,6 +84,7 @@ const rekomendasiRoutes = async (fastify) => {
 const pendaftaranRoutes = async (fastify) => {
   fastify.post('/api/pendaftaran', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.create(request, reply))
   fastify.get('/api/pendaftaran/status/:nomor', (request, reply) => PendaftaranController.getTrackingStatus(request, reply))
+  fastify.get('/api/pendaftaran/saya', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.getMyRegistrations(request, reply))
 }
 
 const pemilikRoutes = async (fastify) => {
@@ -110,11 +111,30 @@ const pemilikRoutes = async (fastify) => {
     if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
     return PesantrenController.updateByPemilik(request, reply)
   })
+
+  fastify.delete('/api/pemilik/pesantren/:id', {
+    preHandler: [authMiddleware]
+  }, (request, reply) => {
+    if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
+    return PesantrenController.deleteByPemilik(request, reply)
+  })
+
+  // Pendaftaran routes untuk pemilik
+  fastify.get('/api/pemilik/pendaftaran', { preHandler: authMiddleware }, (request, reply) => {
+    if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
+    return PemilikController.getPendaftaran(request, reply)
+  })
+
+  fastify.put('/api/pemilik/pendaftaran/:id/status', { preHandler: authMiddleware }, (request, reply) => {
+    if (request.user.role !== 'pemilik') return reply.code(403).send({ error: 'Akses ditolak, hanya pemilik' })
+    return PemilikController.updatePendaftaranStatus(request, reply)
+  })
 }
 
 const publicRoutes = require('./public-routes')
 const wilayahRoutes = require('./wilayah-routes')
 const CompareController = require('../controllers/compare-controller')
+const PemilikController = require('../controllers/pemilik-controller')
 
 const compareRoutes = async (fastify) => {
   fastify.post('/api/compare', {

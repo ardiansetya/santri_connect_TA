@@ -124,7 +124,7 @@
               <div class="relative aspect-video overflow-hidden">
                 <img
                   v-if="p.foto_utama"
-                  :src="`/uploads/pesantrenImages/${p.foto_utama}`"
+                  :src="getUploadUrl(p.foto_utama)"
                   :alt="p.nama"
                   class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
@@ -216,6 +216,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { pesantren as pesantrenApi, wilayah } from '../services'
+import { getUploadUrl } from '../services/api'
 import { useCompareStore } from '../stores/compare'
 
 const compareStore = useCompareStore()

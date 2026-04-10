@@ -179,7 +179,7 @@ const AdminService = {
     return buffer
   },
 
-   async createPesantren(data, files = {}) {
+   async createPesantren(data, files = {}, uploadedFiles = []) {
      const validKurikulum = ['modern', 'salaf', 'campuran']
      if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
        throw new Error('Kurikulum tidak valid')
@@ -203,38 +203,41 @@ const AdminService = {
        }
      }
 
-      // Handle foto_utama (single file)
+      // Handle foto_utama (single file) - already saved by controller
       if (files.foto_utama) {
         const UploadService = require('./upload-service')
-        const validation = UploadService.validateFile(files.foto_utama, 'Foto Utama')
+        const validation = UploadService.validateUploadedFile(files.foto_utama, 'Foto Utama')
         if (!validation.valid) {
           throw new Error(validation.message)
         }
-        data.foto_utama = await UploadService.saveFile(files.foto_utama, 'foto_utama')
+        data.foto_utama = files.foto_utama.filename
+        uploadedFiles.push(files.foto_utama.filename)
       }
 
-      // Handle foto_galeri (multiple files)
+      // Handle foto_galeri (multiple files) - already saved by controller
       if (files.foto_galeri) {
         const UploadService = require('./upload-service')
         const { MAX_GALLERY_FILES } = require('../config/upload-config')
-        
+
         // Convert single file to array if needed
         const galleryFiles = Array.isArray(files.foto_galeri) ? files.foto_galeri : [files.foto_galeri]
-        
+
         // Validate max 5 files
         if (galleryFiles.length > MAX_GALLERY_FILES) {
           throw new Error(`Foto gallery maksimal ${MAX_GALLERY_FILES} file`)
         }
-        
+
         // Validate each file
         for (let i = 0; i < galleryFiles.length; i++) {
-          const validation = UploadService.validateFile(galleryFiles[i], `Foto Gallery ${i + 1}`)
+          const validation = UploadService.validateUploadedFile(galleryFiles[i], `Foto Gallery ${i + 1}`)
           if (!validation.valid) {
             throw new Error(validation.message)
           }
         }
-        
-        data.foto_galeri = JSON.stringify(await UploadService.saveMultipleFiles(galleryFiles, 'foto_galeri'))
+
+        const savedFilenames = galleryFiles.map(f => f.filename)
+        savedFilenames.forEach(f => uploadedFiles.push(f))
+        data.foto_galeri = JSON.stringify(savedFilenames)
       }
 
      const Pesantren = require('../models/Pesantren')
@@ -242,7 +245,7 @@ const AdminService = {
      return { message: 'Pesantren berhasil ditambahkan' }
    },
 
-   async updatePesantren(id, data, files = {}) {
+   async updatePesantren(id, data, files = {}, uploadedFiles = []) {
      const validKurikulum = ['modern', 'salaf', 'campuran']
      if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
        throw new Error('Kurikulum tidak valid')
@@ -273,17 +276,18 @@ const AdminService = {
       // Handle foto_utama (single file) - upload new if provided, keep old if not
       if (files.foto_utama) {
         const UploadService = require('./upload-service')
-        const validation = UploadService.validateFile(files.foto_utama, 'Foto Utama')
+        const validation = UploadService.validateUploadedFile(files.foto_utama, 'Foto Utama')
         if (!validation.valid) {
           throw new Error(validation.message)
         }
-        
+
         // Delete old foto_utama if exists
         if (existing.foto_utama) {
           UploadService.deleteFile(existing.foto_utama)
         }
-        
-        data.foto_utama = await UploadService.saveFile(files.foto_utama, 'foto_utama')
+
+        data.foto_utama = files.foto_utama.filename
+        uploadedFiles.push(files.foto_utama.filename)
       } else if (data.foto_utama === null) {
         // Explicitly set to null to delete
         if (existing.foto_utama) {
@@ -325,7 +329,7 @@ const AdminService = {
           
           // Validate each file
           for (let i = 0; i < galleryFiles.length; i++) {
-            const validation = UploadService.validateFile(galleryFiles[i], `Foto Gallery ${i + 1}`)
+            const validation = UploadService.validateUploadedFile(galleryFiles[i], `Foto Gallery ${i + 1}`)
             if (!validation.valid) {
               throw new Error(validation.message)
             }
@@ -343,7 +347,9 @@ const AdminService = {
             }
           }
           
-          data.foto_galeri = JSON.stringify(await UploadService.saveMultipleFiles(galleryFiles, 'foto_galeri'))
+          const savedFilenames = galleryFiles.map(f => f.filename)
+          data.foto_galeri = JSON.stringify(savedFilenames)
+          savedFilenames.forEach(f => uploadedFiles.push(f))
         }
         // If galleryFiles is undefined, keep existing foto_galeri
       }
@@ -357,8 +363,25 @@ const AdminService = {
 
   async deletePesantren(id) {
     const Pesantren = require('../models/Pesantren')
+    const UploadService = require('./upload-service')
     const existing = await Pesantren.findById(parseInt(id, 10))
     if (!existing) throw new Error('Pesantren tidak ditemukan')
+
+    // Delete associated photo files before deleting the record
+    if (existing.foto_utama) {
+      UploadService.deleteFile(existing.foto_utama)
+    }
+    if (existing.foto_galeri) {
+      try {
+        const existingGallery = JSON.parse(existing.foto_galeri)
+        for (const filename of existingGallery) {
+          UploadService.deleteFile(filename)
+        }
+      } catch (e) {
+        // If parsing fails, continue with deletion
+        console.error('Failed to parse foto_galeri for deletion:', e)
+      }
+    }
 
     const deleted = await Pesantren.delete(parseInt(id, 10))
     if (!deleted) throw new Error('Pesantren tidak ditemukan')

@@ -20,7 +20,11 @@ const Pendaftaran = {
 
   async findByNomor(nomor) {
     const [rows] = await require('../config/db').getPool().query(
-      `SELECT p.nomor_pendaftaran, p.status, p.catatan_admin, p.created_at,
+      `SELECT p.id, p.nomor_pendaftaran, p.user_id, p.pesantren_id, p.status, p.catatan_admin, 
+              p.created_at, p.updated_at,
+              p.nama_lengkap, p.nik, p.tempat_lahir, p.tanggal_lahir, p.jenis_kelamin,
+              p.alamat, p.no_hp, p.nama_ayah, p.nama_ibu, p.no_hp_ortu, p.pekerjaan_ortu,
+              p.foto_ktp, p.pas_foto, p.kartu_keluarga,
               pes.id as pesantren_id, pes.nama as pesantren_nama
        FROM pendaftaran p
        LEFT JOIN pesantren pes ON p.pesantren_id = pes.id
@@ -111,6 +115,39 @@ const Pendaftaran = {
       [status, catatan_admin || null, id]
     )
     return result.affectedRows > 0
+  },
+
+  async findByUserId(userId) {
+    const [rows] = await require('../config/db').getPool().query(
+      `SELECT p.id, p.nomor_pendaftaran, p.status, p.catatan_admin, p.created_at, p.updated_at,
+              p.nama_lengkap, p.nik, p.tempat_lahir, p.tanggal_lahir, p.jenis_kelamin,
+              p.alamat, p.no_hp, p.nama_ayah, p.nama_ibu, p.no_hp_ortu, p.pekerjaan_ortu,
+              p.foto_ktp, p.pas_foto, p.kartu_keluarga,
+              pes.id as pesantren_id, pes.nama as pesantren_nama, pes.kota as pesantren_kota,
+              pes.province as pesantren_province
+       FROM pendaftaran p
+       LEFT JOIN pesantren pes ON p.pesantren_id = pes.id
+       WHERE p.user_id = ?
+       ORDER BY p.created_at DESC`,
+      [userId]
+    )
+    return rows
+  },
+
+  async findByPemilikUserId(pemilikUserId) {
+    const [rows] = await require('../config/db').getPool().query(
+      `SELECT p.id, p.nomor_pendaftaran, p.status, p.catatan_admin, p.created_at, p.updated_at,
+              p.nama_lengkap, p.nik, p.tempat_lahir, p.tanggal_lahir, p.jenis_kelamin,
+              p.alamat, p.no_hp, p.nama_ayah, p.nama_ibu, p.no_hp_ortu, p.pekerjaan_ortu,
+              p.foto_ktp, p.pas_foto, p.kartu_keluarga,
+              pes.id as pesantren_id, pes.nama as pesantren_nama
+       FROM pendaftaran p
+       INNER JOIN pesantren pes ON p.pesantren_id = pes.id
+       WHERE pes.user_id = ?
+       ORDER BY p.created_at DESC`,
+      [pemilikUserId]
+    )
+    return rows
   }
 }
 

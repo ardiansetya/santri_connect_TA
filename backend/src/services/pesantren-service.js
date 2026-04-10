@@ -30,7 +30,7 @@ const PesantrenService = {
       rekening: {
         nama_bank: data.nama_bank,
         nomor_rekening: data.nomor_rekening,
-        atas_nama_rekening: data.atas_nama_rekening
+        atas_nama: data.atas_nama_rekening
       }
     }
   },
@@ -77,13 +77,43 @@ const PesantrenService = {
     const page = Math.max(1, parseInt(filters.page) || 1)
     const limit = Math.min(50, Math.max(1, parseInt(filters.limit) || 10))
     const { data, total } = await Pesantren.findByUserId(userId, { page, limit })
+
+    console.log('[PesantrenService.getByUserId] Raw data from DB:', JSON.stringify(data, null, 2));
+
+    // Parse JSON fields and construct rekening object
+    const parsedData = data.map(row => {
+      // Parse fasilitas
+      if (row.fasilitas && typeof row.fasilitas === 'string') {
+        try {
+          row.fasilitas = JSON.parse(row.fasilitas)
+        } catch {
+          row.fasilitas = []
+        }
+      }
+      // Parse foto_galeri
+      if (row.foto_galeri && typeof row.foto_galeri === 'string') {
+        try {
+          row.foto_galeri = JSON.parse(row.foto_galeri)
+        } catch {
+          row.foto_galeri = []
+        }
+      }
+      // Construct rekening object
+      row.rekening = {
+        nama_bank: row.nama_bank || '',
+        nomor_rekening: row.nomor_rekening || '',
+        atas_nama: row.atas_nama_rekening || ''
+      }
+      return row
+    })
+
     return {
-      data,
+      data: parsedData,
       meta: { page, limit, total_data: total, total_page: Math.ceil(total / limit) }
     }
   },
 
-   async createByPemilik(userId, data, files = {}) {
+   async createByPemilik(userId, data, files = {}, uploadedFiles = []) {
      const validKurikulum = ['modern', 'salaf', 'campuran']
      if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
        throw new Error('Kurikulum tidak valid')
@@ -93,7 +123,7 @@ const PesantrenService = {
      const WilayahService = require('./wilayah-service')
      const { normalizeWilayahData } = require('../middlewares/normalize-wilayah')
      const normalizedData = normalizeWilayahData(data)
-     
+
      if (normalizedData.province) {
        const provinceResult = await WilayahService.validateProvince(normalizedData.province)
        if (!provinceResult.valid) throw new Error(provinceResult.message)
@@ -108,41 +138,52 @@ const PesantrenService = {
        }
      }
 
-      // Handle foto_utama (single file)
+      // Handle foto_utama (single file) - already saved by controller
       if (files.foto_utama) {
-        const validation = UploadService.validateFile(files.foto_utama, 'Foto Utama')
+        // Validate file size and type
+        const validation = UploadService.validateUploadedFile(files.foto_utama, 'Foto Utama')
         if (!validation.valid) {
           throw new Error(validation.message)
         }
-        data.foto_utama = await UploadService.saveFile(files.foto_utama, 'foto_utama')
+        data.foto_utama = files.foto_utama.filename
+        uploadedFiles.push(files.foto_utama.filename)
       }
 
-      // Handle foto_galeri (multiple files)
+      // Handle foto_galeri (multiple files) - already saved by controller
       if (files.foto_galeri) {
+        console.log('[PesantrenService.create] Received foto_galeri:', JSON.stringify(files.foto_galeri, null, 2));
+        
         // Convert single file to array if needed
         const galleryFiles = Array.isArray(files.foto_galeri) ? files.foto_galeri : [files.foto_galeri]
         
+        console.log('[PesantrenService.create] galleryFiles array length:', galleryFiles.length);
+        console.log('[PesantrenService.create] galleryFiles:', galleryFiles.map(f => f.filename));
+
         // Validate max 5 files
         if (galleryFiles.length > MAX_GALLERY_FILES) {
           throw new Error(`Foto gallery maksimal ${MAX_GALLERY_FILES} file`)
         }
-        
+
         // Validate each file
         for (let i = 0; i < galleryFiles.length; i++) {
-          const validation = UploadService.validateFile(galleryFiles[i], `Foto Gallery ${i + 1}`)
+          const validation = UploadService.validateUploadedFile(galleryFiles[i], `Foto Gallery ${i + 1}`)
           if (!validation.valid) {
             throw new Error(validation.message)
           }
         }
+
+        const savedFilenames = galleryFiles.map(f => f.filename)
+        console.log('[PesantrenService.create] savedFilenames:', savedFilenames);
         
-        data.foto_galeri = JSON.stringify(await UploadService.saveMultipleFiles(galleryFiles, 'foto_galeri'))
+        savedFilenames.forEach(f => uploadedFiles.push(f))
+        data.foto_galeri = JSON.stringify(savedFilenames)
       }
 
      await Pesantren.create({ ...data, user_id: userId })
      return { message: 'Pesantren berhasil ditambahkan' }
    },
 
-   async updateByPemilik(userId, id, data, files = {}) {
+   async updateByPemilik(userId, id, data, files = {}, uploadedFiles = []) {
      const validKurikulum = ['modern', 'salaf', 'campuran']
      if (data.kurikulum && !validKurikulum.includes(data.kurikulum)) {
        throw new Error('Kurikulum tidak valid')
@@ -152,10 +193,22 @@ const PesantrenService = {
      if (!existing) throw new Error('Pesantren tidak ditemukan')
      if (existing.user_id !== userId) throw new Error('Akses ditolak, bukan pesantren Anda')
 
+     console.log('[PesantrenService.update] Input data:', JSON.stringify(data, null, 2));
+     console.log('[PesantrenService.update] Files:', Object.keys(files));
+     console.log('[PesantrenService.update] foto_galeri type:', typeof files.foto_galeri);
+     console.log('[PesantrenService.update] foto_galeri isArray:', Array.isArray(files.foto_galeri));
+     if (files.foto_galeri) {
+       console.log('[PesantrenService.update] foto_galeri:', JSON.stringify(files.foto_galeri, null, 2));
+     }
+
      const WilayahService = require('./wilayah-service')
      const { normalizeWilayahData } = require('../middlewares/normalize-wilayah')
      const normalizedData = normalizeWilayahData(data)
-     
+
+     if (!normalizedData.nama) normalizedData.nama = existing.nama
+     if (!normalizedData.province) normalizedData.province = existing.province
+     if (!normalizedData.kota) normalizedData.kota = existing.kota
+
      if (normalizedData.province) {
        const provinceResult = await WilayahService.validateProvince(normalizedData.province)
        if (!provinceResult.valid) throw new Error(provinceResult.message)
@@ -171,17 +224,18 @@ const PesantrenService = {
      }
       // Handle foto_utama (single file) - upload new if provided, keep old if not
       if (files.foto_utama) {
-        const validation = UploadService.validateFile(files.foto_utama, 'Foto Utama')
+        const validation = UploadService.validateUploadedFile(files.foto_utama, 'Foto Utama')
         if (!validation.valid) {
           throw new Error(validation.message)
         }
-        
+
         // Delete old foto_utama if exists
         if (existing.foto_utama) {
           UploadService.deleteFile(existing.foto_utama)
         }
-        
-        data.foto_utama = await UploadService.saveFile(files.foto_utama, 'foto_utama')
+
+        data.foto_utama = files.foto_utama.filename
+        uploadedFiles.push(files.foto_utama.filename)
       } else if (data.foto_utama === null) {
         // Explicitly set to null to delete
         if (existing.foto_utama) {
@@ -194,12 +248,44 @@ const PesantrenService = {
       // Handle foto_galeri (multiple files)
       if (files.foto_galeri !== undefined) {
         // Convert single file to array if needed
-        const galleryFiles = Array.isArray(files.foto_galeri) ? files.foto_galeri : [files.foto_galeri]
-        
-        // Handle empty array (explicitly set to empty)
-        if (galleryFiles.length === 0 && files.foto_galeri !== undefined) {
-          // Delete all existing gallery photos
-          if (existing.foto_galeri) {
+        const newGalleryFiles = Array.isArray(files.foto_galeri) ? files.foto_galeri : [files.foto_galeri]
+
+        // Get existing gallery files from frontend (sent as JSON string)
+        let existingGalleryFromClient = []
+        if (data.existing_foto_galeri) {
+          try {
+            existingGalleryFromClient = JSON.parse(data.existing_foto_galeri)
+            console.log('[PesantrenService.update] Existing gallery from client:', existingGalleryFromClient);
+          } catch (e) {
+            console.error('Failed to parse existing_foto_galeri:', e)
+          }
+        }
+        // Remove from data so it doesn't get saved to DB
+        delete data.existing_foto_galeri
+
+        // Handle new gallery files
+        if (newGalleryFiles.length > 0) {
+          // Validate new files
+          for (let i = 0; i < newGalleryFiles.length; i++) {
+            const validation = UploadService.validateUploadedFile(newGalleryFiles[i], `Foto Gallery ${i + 1}`)
+            if (!validation.valid) {
+              throw new Error(validation.message)
+            }
+          }
+
+          // Merge: existing + new (if client sent existing files)
+          // OR: just new files (if client didn't send existing - means replacing all)
+          const allGalleryFiles = existingGalleryFromClient.length > 0
+            ? [...existingGalleryFromClient, ...newGalleryFiles.map(f => f.filename)]
+            : newGalleryFiles.map(f => f.filename)
+
+          // Validate max 5 files
+          if (allGalleryFiles.length > MAX_GALLERY_FILES) {
+            throw new Error(`Foto gallery maksimal ${MAX_GALLERY_FILES} file`)
+          }
+
+          // Only delete old gallery files if we're REPLACING (not merging)
+          if (existingGalleryFromClient.length === 0 && existing.foto_galeri) {
             try {
               const existingGallery = JSON.parse(existing.foto_galeri)
               for (const filename of existingGallery) {
@@ -209,38 +295,15 @@ const PesantrenService = {
               // If parsing fails, continue
             }
           }
-          data.foto_galeri = JSON.stringify([])
-        } 
-        // Handle file uploads
-        else if (galleryFiles.length > 0) {
-          // Validate max 5 files
-          if (galleryFiles.length > MAX_GALLERY_FILES) {
-           throw new Error(`Foto gallery maksimal ${MAX_GALLERY_FILES} file`)
-         }
-         
-         // Validate each file
-         for (let i = 0; i < galleryFiles.length; i++) {
-           const validation = UploadService.validateFile(galleryFiles[i], `Foto Gallery ${i + 1}`)
-           if (!validation.valid) {
-             throw new Error(validation.message)
-           }
-         }
-         
-         // Delete existing gallery photos
-         if (existing.foto_galeri) {
-           try {
-             const existingGallery = JSON.parse(existing.foto_galeri)
-             for (const filename of existingGallery) {
-               UploadService.deleteFile(filename)
-             }
-           } catch (e) {
-             // If parsing fails, continue
-           }
-         }
-         
-          data.foto_galeri = JSON.stringify(await UploadService.saveMultipleFiles(galleryFiles, 'foto_galeri'))
+
+          // Save new gallery files
+          const newFilenames = newGalleryFiles.map(f => f.filename)
+          newFilenames.forEach(f => uploadedFiles.push(f))
+
+          data.foto_galeri = JSON.stringify(allGalleryFiles)
+          console.log('[PesantrenService.update] Final gallery files:', allGalleryFiles);
         }
-        // If galleryFiles is undefined, keep existing foto_galeri
+        // No new files - keep existing gallery (don't delete)
       }
       // If files.foto_galeri is undefined, keep existing foto_galeri
 
@@ -248,6 +311,34 @@ const PesantrenService = {
      if (!updated) throw new Error('Pesantren tidak ditemukan')
  
      return { message: 'Data pesantren berhasil diperbarui' }
+   },
+
+   async deleteByPemilik(userId, id) {
+     const existing = await Pesantren.findById(parseInt(id, 10))
+     if (!existing) throw new Error('Pesantren tidak ditemukan')
+     if (existing.user_id !== userId) throw new Error('Akses ditolak, bukan pesantren Anda')
+
+     // Delete associated photo files before deleting the record
+     const UploadService = require('./upload-service')
+     if (existing.foto_utama) {
+       UploadService.deleteFile(existing.foto_utama)
+     }
+     if (existing.foto_galeri) {
+       try {
+         const existingGallery = JSON.parse(existing.foto_galeri)
+         for (const filename of existingGallery) {
+           UploadService.deleteFile(filename)
+         }
+       } catch (e) {
+         // If parsing fails, continue with deletion
+         console.error('Failed to parse foto_galeri for deletion:', e)
+       }
+     }
+
+     const deleted = await Pesantren.delete(parseInt(id, 10))
+     if (!deleted) throw new Error('Pesantren tidak ditemukan')
+
+     return { message: 'Pesantren berhasil dihapus' }
    }
 }
 

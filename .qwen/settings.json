@@ -9,7 +9,11 @@
       "Bash(node *)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(npm run *)",
+      "Bash(type *)",
+      "Bash(netstat *)",
+      "Bash(findstr *)"
     ]
   },
   "$version": 3

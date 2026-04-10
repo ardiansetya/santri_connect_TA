@@ -43,8 +43,9 @@
           <div class="p-4">
             <div class="flex justify-between items-start mb-4">
               <div>
-                <h5 class="font-semibold mb-1">{{ data.nama_lengkap }}</h5>
+                <h5 class="font-semibold mb-1">{{ data.nama_lengkap || '-' }}</h5>
                 <p class="text-muted mb-0">No: <strong>{{ data.nomor_pendaftaran }}</strong></p>
+                <p class="text-muted text-sm mt-1">{{ data.pesantren?.nama || 'Pesantren' }}</p>
               </div>
               <span class="badge text-base px-3 py-1" :class="statusBadge(data.status)">
                 {{ statusLabel(data.status) }}
@@ -64,19 +65,27 @@
                 </div>
                 <div class="p-3 bg-muted rounded">
                   <small class="text-muted block">Tempat, Tanggal Lahir</small>
-                  <strong>{{ data.tempat_lahir || '-' }}, {{ formatDate(data.tanggal_lahir) }}</strong>
+                  <strong>{{ formatTempatTanggalLahir(data.tempat_lahir, data.tanggal_lahir) }}</strong>
                 </div>
                 <div class="p-3 bg-muted rounded">
                   <small class="text-muted block">Jenis Kelamin</small>
-                  <strong>{{ data.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</strong>
+                  <strong>{{ formatJenisKelamin(data.jenis_kelamin) }}</strong>
                 </div>
                 <div class="p-3 bg-muted rounded">
                   <small class="text-muted block">No. HP</small>
                   <strong>{{ data.no_hp || '-' }}</strong>
                 </div>
                 <div class="p-3 bg-muted rounded">
-                  <small class="text-muted block">Nama Orang Tua</small>
-                  <strong>{{ data.nama_ayah || '-' }} & {{ data.nama_ibu || '-' }}</strong>
+                  <small class="text-muted block">Nama Ayah</small>
+                  <strong>{{ data.nama_ayah || '-' }}</strong>
+                </div>
+                <div class="p-3 bg-muted rounded">
+                  <small class="text-muted block">Nama Ibu</small>
+                  <strong>{{ data.nama_ibu || '-' }}</strong>
+                </div>
+                <div class="p-3 bg-muted rounded">
+                  <small class="text-muted block">No. HP Orang Tua</small>
+                  <strong>{{ data.no_hp_ortu || '-' }}</strong>
                 </div>
               </div>
             </div>
@@ -170,6 +179,18 @@ function isStepActive(status, index) {
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+function formatTempatTanggalLahir(tempat, tanggal) {
+  const tempatStr = tempat || '-'
+  const tanggalStr = tanggal ? formatDate(tanggal) : '-'
+  return `${tempatStr}, ${tanggalStr}`
+}
+
+function formatJenisKelamin(jk) {
+  if (jk === 'L') return 'Laki-laki'
+  if (jk === 'P') return 'Perempuan'
+  return '-'
 }
 
 function formatDateTime(dateStr) {
