@@ -40,8 +40,11 @@ export const pendaftaran = {
   getStatus(nomor) {
     return api.get(`/pendaftaran/status/${nomor}`)
   },
-  create(formData) {
-    return api.post('/pendaftaran', formData)
+  create(formData, config = {}) {
+    return api.post('/pendaftaran', formData, config)
+  },
+  getMyRegistrations() {
+    return api.get('/pendaftaran/saya')
   },
   getPesantrenInfo(pesantrenId) {
     return api.get(`/pesantren/${pesantrenId}/pendaftaran-info`)
@@ -87,6 +90,15 @@ export const pemilik = {
   },
   updatePesantren(id, data) {
     return api.put(`/pemilik/pesantren/${id}`, data)
+  },
+  deletePesantren(id) {
+    return api.delete(`/pemilik/pesantren/${id}`)
+  },
+  getPendaftaran() {
+    return api.get('/pemilik/pendaftaran')
+  },
+  updatePendaftaranStatus(id, data) {
+    return api.put(`/pemilik/pendaftaran/${id}/status`, data)
   }
 }
 

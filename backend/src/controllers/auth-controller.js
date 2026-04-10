@@ -1,4 +1,10 @@
+const fs = require('fs')
+const path = require('path')
+const { pipeline } = require('node:stream/promises')
 const { AuthService, UserService, AdminService } = require('../services/auth-service')
+const UploadService = require('../services/upload-service')
+
+const UPLOAD_DIR = path.join(__dirname, '../../uploads/pesantrenImages')
 
 const AuthController = {
   async register(fastify, request, reply) {
@@ -125,15 +131,50 @@ const AdminController = {
 
     let data = {}
     const files = {}
-    
+    const uploadedFiles = [] // Track uploaded files for cleanup on error
+
     // Handle multipart or JSON payload
     if (request.isMultipart()) {
       try {
         for await (const part of request.parts()) {
-          if (part.file) files[part.fieldname] = part
-          else data[part.fieldname] = part.value
+          if (part.type === 'file') {
+            // Stream file to disk using pipeline
+            const ext = path.extname(part.filename) || '.jpg'
+            const filename = `${part.fieldname}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}${ext}`
+            const filePath = path.join(UPLOAD_DIR, filename)
+
+            await pipeline(part.file, fs.createWriteStream(filePath))
+
+            const fileInfo = {
+              filename: filename,
+              originalName: part.filename,
+              mimetype: part.mimetype,
+              size: fs.statSync(filePath).size
+            }
+
+            // Handle multiple files with same fieldname (e.g., foto_galeri)
+            if (files[part.fieldname]) {
+              if (!Array.isArray(files[part.fieldname])) {
+                files[part.fieldname] = [files[part.fieldname]]
+              }
+              files[part.fieldname].push(fileInfo)
+            } else {
+              files[part.fieldname] = fileInfo
+            }
+
+            console.log(`[AdminController] 📁 Saved file: ${part.fieldname} → ${filename}`);
+          } else {
+            data[part.fieldname] = part.value
+          }
         }
-      } catch {
+        console.log('[AdminController] 📦 Parsed data keys:', Object.keys(data));
+        console.log('[AdminController] 📁 Parsed files:', Object.keys(files));
+      } catch (err) {
+        console.error('[AdminController] ❌ Error parsing multipart:', err);
+        // Cleanup uploaded files on error
+        for (const filename of uploadedFiles) {
+          UploadService.deleteFile(filename)
+        }
         return reply.code(400).send({ error: 'Input tidak valid' })
       }
     } else {
@@ -149,9 +190,13 @@ const AdminController = {
     if (!normalizedData.kota) return reply.code(400).send({ error: 'Kota wajib diisi' })
 
     try {
-      const result = await AdminService.createPesantren(normalizedData, files)
+      const result = await AdminService.createPesantren(normalizedData, files, uploadedFiles)
       return reply.code(201).send(result)
     } catch (err) {
+      // Cleanup uploaded files on error
+      for (const filename of uploadedFiles) {
+        UploadService.deleteFile(filename)
+      }
       return reply.code(400).send({ error: err.message })
     }
   },
@@ -160,19 +205,60 @@ const AdminController = {
 
     const data = {}
     const files = {}
+    const uploadedFiles = [] // Track uploaded files for cleanup on error
+
     try {
       for await (const part of request.parts()) {
-        if (part.file) files[part.fieldname] = part
-        else data[part.fieldname] = part.value
+        if (part.type === 'file') {
+          // Stream file to disk using pipeline
+          const ext = path.extname(part.filename) || '.jpg'
+          const filename = `${part.fieldname}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}${ext}`
+          const filePath = path.join(UPLOAD_DIR, filename)
+
+          await pipeline(part.file, fs.createWriteStream(filePath))
+
+          const fileInfo = {
+            filename: filename,
+            originalName: part.filename,
+            mimetype: part.mimetype,
+            size: fs.statSync(filePath).size
+          }
+
+          // Handle multiple files with same fieldname (e.g., foto_galeri)
+          if (files[part.fieldname]) {
+            if (!Array.isArray(files[part.fieldname])) {
+              files[part.fieldname] = [files[part.fieldname]]
+            }
+            files[part.fieldname].push(fileInfo)
+          } else {
+            files[part.fieldname] = fileInfo
+          }
+
+          console.log(`[AdminController] 📁 Saved file: ${part.fieldname} → ${filename}`);
+        } else {
+          data[part.fieldname] = part.value
+        }
       }
-    } catch {
+      console.log('[AdminController] 📦 Parsed data keys:', Object.keys(data));
+      console.log('[AdminController] 📁 Parsed files:', Object.keys(files));
+    } catch (err) {
+      console.error('[AdminController] ❌ Error parsing multipart:', err);
+      // Cleanup uploaded files on error
+      for (const filename of uploadedFiles) {
+        UploadService.deleteFile(filename)
+      }
       return reply.code(400).send({ error: 'Input tidak valid' })
     }
 
     try {
-      const result = await AdminService.updatePesantren(request.params.id, data, files)
+      const result = await AdminService.updatePesantren(request.params.id, data, files, uploadedFiles)
       return reply.code(200).send(result)
     } catch (err) {
+      // Cleanup uploaded files on error
+      for (const filename of uploadedFiles) {
+        UploadService.deleteFile(filename)
+      }
+
       return err.message === 'Pesantren tidak ditemukan'
         ? reply.code(404).send({ error: 'Pesantren tidak ditemukan' })
         : reply.code(400).send({ error: err.message })

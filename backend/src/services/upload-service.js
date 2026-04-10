@@ -13,7 +13,7 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 
 const UploadService = {
   /**
-   * Validate file size and extension
+   * Validate file size and extension (for Fastify file stream objects - DEPRECATED)
    * @param {Object} file - Fastify file object
    * @param {string} fieldName - Name of the field for error messages
    * @returns {Object} - { valid: boolean, message: string }
@@ -25,15 +25,55 @@ const UploadService = {
 
     // Check file size
     if (file.data && file.data.length > MAX_FILE_SIZE) {
-      return { 
-        valid: false, 
-        message: `${fieldName} terlalu besar. Maksimal ukuran adalah 1MB` 
+      return {
+        valid: false,
+        message: `${fieldName} terlalu besar. Maksimal ukuran adalah 1MB`
       }
     }
 
     // Check file extension
     const ext = path.extname(file.filename).toLowerCase()
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return {
+        valid: false,
+        message: `Format ${fieldName} tidak didukung. Gunakan jpg, jpeg, png, atau webp`
+      }
+    }
+
+    return { valid: true, message: '' }
+  },
+
+  /**
+   * Validate file that has already been saved to disk by controller
+   * @param {Object} fileInfo - Object with { filename, size, mimetype }
+   * @param {string} fieldName - Name of the field for error messages
+   * @returns {Object} - { valid: boolean, message: string }
+   */
+  validateUploadedFile(fileInfo, fieldName = 'File') {
+    if (!fileInfo) {
+      return { valid: false, message: `${fieldName} wajib diisi` }
+    }
+
+    // Check file size
+    if (fileInfo.size > MAX_FILE_SIZE) {
+      return {
+        valid: false,
+        message: `${fieldName} terlalu besar. Maksimal ukuran adalah 1MB`
+      }
+    }
+
+    // Check file extension
+    const ext = path.extname(fileInfo.filename).toLowerCase()
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return {
+        valid: false,
+        message: `Format ${fieldName} tidak didukung. Gunakan jpg, jpeg, png, atau webp`
+      }
+    }
+
+    // Check mimetype
+    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowedMimeTypes.includes(fileInfo.mimetype)) {
       return {
         valid: false,
         message: `Format ${fieldName} tidak didukung. Gunakan jpg, jpeg, png, atau webp`
@@ -101,8 +141,27 @@ const UploadService = {
    */
   deleteFile(filename) {
     if (!filename) return false
-    
-    const filePath = path.join(UPLOAD_DIR, filename)
+
+    // Sanitize filename to prevent path traversal attacks
+    // Only allow valid filename patterns: {fieldName}-{timestamp}[-{index}].{ext}
+    const sanitizedFilename = path.basename(filename)
+    const validFilenameRegex = /^(foto_utama|foto_galeri)-\d+(-\d+)?\.(jpg|jpeg|png|webp)$/i
+
+    if (!validFilenameRegex.test(sanitizedFilename)) {
+      console.error('Invalid filename format:', filename)
+      return false
+    }
+
+    const filePath = path.join(UPLOAD_DIR, sanitizedFilename)
+
+    // Verify the resolved path is still within UPLOAD_DIR
+    const resolvedPath = path.resolve(filePath)
+    const resolvedUploadDir = path.resolve(UPLOAD_DIR)
+    if (!resolvedPath.startsWith(resolvedUploadDir)) {
+      console.error('Path traversal attempt blocked:', filename)
+      return false
+    }
+
     try {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath)

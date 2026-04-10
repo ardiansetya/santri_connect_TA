@@ -32,22 +32,58 @@
         <div class="grid gap-8 lg:grid-cols-3">
           <!-- Main content -->
           <div class="lg:col-span-2 space-y-6">
-            <!-- Photo -->
-            <div class="overflow-hidden rounded-xl">
-              <img
-                v-if="pesantren.foto_utama"
-                :src="`/uploads/pesantrenImages/${pesantren.foto_utama}`"
-                :alt="pesantren.nama"
-                class="w-full aspect-video object-cover"
-              />
-              <div
-                v-else
-                class="w-full aspect-video bg-gradient-to-br from-primary/20 to-blue-100 flex items-center justify-center"
-              >
-                <div class="text-center">
-                  <div class="text-7xl mb-4">🕌</div>
-                  <p class="text-muted-foreground text-lg">Foto belum tersedia</p>
+            <!-- Photo Carousel -->
+            <div class="overflow-hidden rounded-xl relative group">
+              <!-- Main Image -->
+              <div class="relative aspect-video bg-gradient-to-br from-primary/20 to-blue-100">
+                <img
+                  v-if="currentImage"
+                  :src="currentImage"
+                  :alt="pesantren.nama"
+                  class="w-full h-full object-cover"
+                />
+                <div v-else class="w-full h-full flex items-center justify-center">
+                  <div class="text-center">
+                    <div class="text-7xl mb-4">🕌</div>
+                    <p class="text-muted-foreground text-lg">Foto belum tersedia</p>
+                  </div>
                 </div>
+
+                <!-- Navigation Arrows -->
+                <button
+                  v-if="allImages.length > 1"
+                  @click="prevImage"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  v-if="allImages.length > 1"
+                  @click="nextImage"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Indicator Dots -->
+              <div v-if="allImages.length > 1" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                <button
+                  v-for="(img, idx) in allImages"
+                  :key="idx"
+                  @click="currentIndex = idx"
+                  class="w-2.5 h-2.5 rounded-full transition-all"
+                  :class="currentIndex === idx ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/75'"
+                />
+              </div>
+
+              <!-- Image Counter -->
+              <div v-if="allImages.length > 1" class="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                {{ currentIndex + 1 }} / {{ allImages.length }}
               </div>
             </div>
 
@@ -57,14 +93,15 @@
                 <div class="flex-1">
                   <h1 class="font-heading text-2xl font-bold text-foreground lg:text-3xl">{{ pesantren.nama }}</h1>
                   <p class="mt-2 flex items-center gap-1.5 text-muted-foreground">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    {{ pesantren.kota }}, {{ pesantren.province }}
+                    <span v-if="pesantren.alamat">{{ pesantren.alamat }}, {{ pesantren.kota }}, {{ pesantren.province }}</span>
+                    <span v-else>{{ pesantren.kota }}, {{ pesantren.province }}</span>
                   </p>
                 </div>
-                <span v-if="pesantren.kurikulum" class="shrink-0 inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
+                <span v-if="pesantren.kurikulum" class="shrink-0 inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground capitalize">
                   {{ pesantren.kurikulum }}
                 </span>
               </div>
@@ -83,7 +120,7 @@
             </div>
 
             <!-- Info Grid -->
-            <div class="grid gap-4 sm:grid-cols-3">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div v-if="pesantren.biaya_bulanan" class="rounded-xl border border-border bg-card p-4">
                 <div class="flex items-center gap-2 text-sm text-muted-foreground">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,6 +144,28 @@
                   {{ formatNumber(pesantren.jumlah_santri) }} santri
                 </div>
               </div>
+              <div v-if="pesantren.jumlah_pengajar" class="rounded-xl border border-border bg-card p-4">
+                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Jumlah Pengajar
+                </div>
+                <div class="mt-1 font-heading text-lg font-bold text-card-foreground">
+                  {{ formatNumber(pesantren.jumlah_pengajar) }} pengajar
+                </div>
+              </div>
+              <div v-if="pesantren.tahun_berdiri" class="rounded-xl border border-border bg-card p-4">
+                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Tahun Berdiri
+                </div>
+                <div class="mt-1 font-heading text-lg font-bold text-card-foreground">
+                  {{ pesantren.tahun_berdiri }}
+                </div>
+              </div>
               <div v-if="pesantren.kurikulum" class="rounded-xl border border-border bg-card p-4">
                 <div class="flex items-center gap-2 text-sm text-muted-foreground">
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +173,7 @@
                   </svg>
                   Kurikulum
                 </div>
-                <div class="mt-1 font-heading text-lg font-bold text-card-foreground">
+                <div class="mt-1 font-heading text-lg font-bold text-card-foreground capitalize">
                   {{ pesantren.kurikulum }}
                 </div>
               </div>
@@ -131,6 +190,30 @@
                     </svg>
                   </div>
                   <span class="text-sm font-medium text-card-foreground">{{ f }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Informasi Rekening -->
+            <div v-if="pesantren.rekening && (pesantren.rekening.nama_bank || pesantren.rekening.nomor_rekening)" class="rounded-xl border border-border bg-card p-6">
+              <h2 class="font-heading text-xl font-bold text-card-foreground flex items-center gap-2">
+                <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Informasi Rekening Pembayaran
+              </h2>
+              <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                <div v-if="pesantren.rekening.nama_bank" class="rounded-lg bg-muted/50 p-4">
+                  <p class="text-sm text-muted-foreground">Nama Bank</p>
+                  <p class="mt-1 font-semibold text-card-foreground">{{ pesantren.rekening.nama_bank }}</p>
+                </div>
+                <div v-if="pesantren.rekening.nomor_rekening" class="rounded-lg bg-muted/50 p-4">
+                  <p class="text-sm text-muted-foreground">Nomor Rekening</p>
+                  <p class="mt-1 font-semibold text-card-foreground font-mono">{{ pesantren.rekening.nomor_rekening }}</p>
+                </div>
+                <div v-if="pesantren.rekening.atas_nama" class="rounded-lg bg-muted/50 p-4">
+                  <p class="text-sm text-muted-foreground">Atas Nama</p>
+                  <p class="mt-1 font-semibold text-card-foreground">{{ pesantren.rekening.atas_nama }}</p>
                 </div>
               </div>
             </div>
@@ -205,10 +288,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCompareStore } from '@/stores/compare'
 import { pesantren as pesantrenService } from '@/services'
+import { getUploadUrl } from '@/services/api'
 
 const route = useRoute()
 const compareStore = useCompareStore()
@@ -216,6 +300,37 @@ const compareStore = useCompareStore()
 const pesantren = ref(null)
 const loading = ref(true)
 const error = ref('')
+const currentIndex = ref(0)
+
+// Carousel images
+const allImages = computed(() => {
+  if (!pesantren.value) return []
+  const images = []
+  if (pesantren.value.foto_utama) {
+    images.push(getUploadUrl(pesantren.value.foto_utama))
+  }
+  if (pesantren.value.foto_galeri && Array.isArray(pesantren.value.foto_galeri)) {
+    pesantren.value.foto_galeri.forEach(f => {
+      images.push(getUploadUrl(f))
+    })
+  }
+  return images
+})
+
+const currentImage = computed(() => {
+  if (allImages.value.length === 0) return ''
+  return allImages.value[currentIndex.value] || ''
+})
+
+function nextImage() {
+  if (allImages.value.length <= 1) return
+  currentIndex.value = (currentIndex.value + 1) % allImages.value.length
+}
+
+function prevImage() {
+  if (allImages.value.length <= 1) return
+  currentIndex.value = (currentIndex.value - 1 + allImages.value.length) % allImages.value.length
+}
 
 function formatNumber(num) {
   if (!num) return '0'
