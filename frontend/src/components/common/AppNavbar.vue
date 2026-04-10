@@ -3,7 +3,7 @@
     <div class="container flex h-16 items-center justify-between">
       <router-link to="/" class="flex items-center gap-2">
         <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
         <span class="font-heading text-xl font-bold text-foreground">
           Santri<span class="text-primary">Connect</span>

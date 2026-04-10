@@ -147,6 +147,25 @@
                 <label class="form-label font-medium">Email</label>
                 <input v-model="email" type="email" class="form-input" />
               </div>
+              <div class="md:col-span-2">
+                <label class="form-label font-medium">Foto Utama</label>
+                <input type="file" @change="onFileChange" accept="image/*" class="form-input" />
+                <p class="text-muted text-sm mt-1">Format: JPG, PNG, maksimal 5MB</p>
+                <div v-if="fotoPreview" class="mt-3">
+                  <img :src="fotoPreview" class="w-full h-48 object-cover rounded-lg border" />
+                </div>
+              </div>
+              <div class="md:col-span-2">
+                <label class="form-label font-medium">Galeri Foto (maksimal 5)</label>
+                <input type="file" @change="onGalleryChange" accept="image/*" multiple class="form-input" />
+                <p class="text-muted text-sm mt-1">Bisa pilih beberapa foto sekaligus</p>
+                <div v-if="galleryPreview.length" class="grid grid-cols-3 gap-2 mt-3">
+                  <div v-for="(img, idx) in galleryPreview" :key="idx" class="relative">
+                    <img :src="img" class="w-full h-32 object-cover rounded-lg border" />
+                    <button type="button" @click="removeGallery(idx)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">&times;</button>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="flex justify-end gap-2 mt-4">
               <button type="button" class="btn btn-outline" @click="closeForm">Batal</button>
@@ -195,6 +214,10 @@ const fasilitas = ref([])
 const deskripsi = ref('')
 const telepon = ref('')
 const email = ref('')
+const fotoFile = ref(null)
+const fotoPreview = ref('')
+const galleryFiles = ref([])
+const galleryPreview = ref([])
 
 const errors = ref({})
 
@@ -247,6 +270,39 @@ async function onProvinceChange() {
   }
 }
 
+function onFileChange(e) {
+  const file = e.target.files[0]
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran file maksimal 5MB')
+      e.target.value = ''
+      return
+    }
+    fotoFile.value = file
+    fotoPreview.value = URL.createObjectURL(file)
+  }
+}
+
+function onGalleryChange(e) {
+  const files = Array.from(e.target.files)
+  if (files.length + galleryFiles.value.length > 5) {
+    alert('Maksimal 5 foto galeri')
+    e.target.value = ''
+    return
+  }
+  files.forEach(file => {
+    if (file.size <= 5 * 1024 * 1024) {
+      galleryFiles.value.push(file)
+      galleryPreview.value.push(URL.createObjectURL(file))
+    }
+  })
+}
+
+function remove_gallery(idx) {
+  galleryFiles.value.splice(idx, 1)
+  galleryPreview.value.splice(idx, 1)
+}
+
 function openForm(p = null) {
   if (p) {
     editingId.value = p.id
@@ -264,6 +320,8 @@ function openForm(p = null) {
     deskripsi.value = p.deskripsi || ''
     telepon.value = p.telepon || ''
     email.value = p.email || ''
+    fotoPreview.value = p.foto_utama ? `/uploads/pesantrenImages/${p.foto_utama}` : ''
+    galleryPreview.value = (p.foto_galeri || []).map(f => `/uploads/pesantrenImages/${f}`)
     onProvinceChange()
   } else {
     resetForm()
@@ -292,6 +350,10 @@ function resetForm() {
   deskripsi.value = ''
   telepon.value = ''
   email.value = ''
+  fotoFile.value = null
+  fotoPreview.value = ''
+  galleryFiles.value = []
+  galleryPreview.value = []
   errors.value = {}
 }
 
@@ -305,27 +367,34 @@ async function onSubmit() {
 
   submitting.value = true
   try {
-    const data = {
-      nama: nama.value,
-      province: province.value,
-      kota: kota.value,
-      alamat: alamat.value,
-      kurikulum: kurikulum.value,
-      tahun_berdiri: tahun_berdiri.value,
-      jumlah_santri: jumlah_santri.value,
-      jumlah_pengajar: jumlah_pengajar.value,
-      biaya_bulanan: biaya_bulanan.value,
-      biaya_pendaftaran: biaya_pendaftaran.value,
-      fasilitas: fasilitas.value,
-      deskripsi: deskripsi.value,
-      telepon: telepon.value,
-      email: email.value
+    const formData = new FormData()
+    formData.append('nama', nama.value)
+    formData.append('province', province.value)
+    formData.append('kota', kota.value)
+    formData.append('alamat', alamat.value)
+    formData.append('kurikulum', kurikulum.value)
+    formData.append('tahun_berdiri', tahun_berdiri.value || '')
+    formData.append('jumlah_santri', jumlah_santri.value || '')
+    formData.append('jumlah_pengajar', jumlah_pengajar.value || '')
+    formData.append('biaya_bulanan', biaya_bulanan.value || '')
+    formData.append('biaya_pendaftaran', biaya_pendaftaran.value || '')
+    formData.append('fasilitas', JSON.stringify(fasilitas.value))
+    formData.append('deskripsi', deskripsi.value)
+    formData.append('telepon', telepon.value)
+    formData.append('email', email.value)
+
+    if (fotoFile.value) {
+      formData.append('foto_utama', fotoFile.value)
     }
 
+    galleryFiles.value.forEach((file, idx) => {
+      formData.append(`galeri_${idx}`, file)
+    })
+
     if (editingId.value) {
-      await pemilik.updatePesantren(editingId.value, data)
+      await pemilik.updatePesantren(editingId.value, formData)
     } else {
-      await pemilik.createPesantren(data)
+      await pemilik.createPesantren(formData)
     }
 
     closeForm()

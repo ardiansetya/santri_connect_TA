@@ -42,6 +42,9 @@ export const pendaftaran = {
   },
   create(formData) {
     return api.post('/pendaftaran', formData)
+  },
+  getPesantrenInfo(pesantrenId) {
+    return api.get(`/pesantren/${pesantrenId}/pendaftaran-info`)
   }
 }
 
