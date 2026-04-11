@@ -35,7 +35,8 @@ const CompareService = {
         kurikulum: p.kurikulum,
         jumlah_santri: p.jumlah_santri,
         jumlah_pengajar: p.jumlah_pengajar,
-        tahun_berdiri: p.tahun_berdiri
+        tahun_berdiri: p.tahun_berdiri,
+        foto_utama: p.foto_utama
       }
     })
   }

@@ -1,5 +1,4 @@
 const authMiddleware = require('../middlewares/auth-middleware')
-const validateWilayah = require('../middlewares/validate-wilayah')
 const { AuthController, UserController, AdminController } = require('../controllers/auth-controller')
 const PesantrenController = require('../controllers/pesantren-controller')
 const PesantrenService = require('../services/pesantren-service')
@@ -83,7 +82,7 @@ const rekomendasiRoutes = async (fastify) => {
 
 const pendaftaranRoutes = async (fastify) => {
   fastify.post('/api/pendaftaran', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.create(request, reply))
-  fastify.get('/api/pendaftaran/status/:nomor', (request, reply) => PendaftaranController.getTrackingStatus(request, reply))
+  fastify.get('/api/pendaftaran/status/:nomor', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.getTrackingStatus(request, reply))
   fastify.get('/api/pendaftaran/saya', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.getMyRegistrations(request, reply))
 }
 

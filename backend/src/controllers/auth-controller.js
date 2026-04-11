@@ -22,7 +22,7 @@ const AuthController = {
   async login(fastify, request, reply) {
     try {
       const result = await AuthService.login(request.body)
-      const token = fastify.jwt.sign({ id: result.user.id, role: result.user.role })
+      const token = fastify.jwt.sign({ id: result.user.id, role: result.user.role }, { expiresIn: '7d' })
       return reply.code(200).send({ data: { ...result, token } })
     } catch {
       return reply.code(401).send({ error: 'Email atau password salah' })
@@ -152,6 +152,8 @@ const AdminController = {
               size: fs.statSync(filePath).size
             }
 
+            uploadedFiles.push(filename)
+
             // Handle multiple files with same fieldname (e.g., foto_galeri)
             if (files[part.fieldname]) {
               if (!Array.isArray(files[part.fieldname])) {
@@ -161,8 +163,6 @@ const AdminController = {
             } else {
               files[part.fieldname] = fileInfo
             }
-
-            console.log(`[AdminController] 📁 Saved file: ${part.fieldname} → ${filename}`);
           } else {
             data[part.fieldname] = part.value
           }
@@ -224,6 +224,8 @@ const AdminController = {
             size: fs.statSync(filePath).size
           }
 
+          uploadedFiles.push(filename)
+
           // Handle multiple files with same fieldname (e.g., foto_galeri)
           if (files[part.fieldname]) {
             if (!Array.isArray(files[part.fieldname])) {
@@ -233,8 +235,6 @@ const AdminController = {
           } else {
             files[part.fieldname] = fileInfo
           }
-
-          console.log(`[AdminController] 📁 Saved file: ${part.fieldname} → ${filename}`);
         } else {
           data[part.fieldname] = part.value
         }

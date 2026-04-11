@@ -11,13 +11,20 @@ const api = axios.create({
 // In production, uses full backend URL
 export function getUploadUrl(filename) {
   if (!filename) return ''
-  // During development with Vite dev server, use relative path (proxied)
   if (import.meta.env.DEV) {
     return `/uploads/pesantrenImages/${filename}`
   }
-  // In production, construct full URL from API base URL
   const baseUrl = API_BASE_URL.replace('/api', '')
   return `${baseUrl}/uploads/pesantrenImages/${filename}`
+}
+
+export function getPendaftaranUploadUrl(filename) {
+  if (!filename) return ''
+  if (import.meta.env.DEV) {
+    return `/uploads/pendaftaran/${filename}`
+  }
+  const baseUrl = API_BASE_URL.replace('/api', '')
+  return `${baseUrl}/uploads/pendaftaran/${filename}`
 }
 
 api.interceptors.request.use(config => {
@@ -45,5 +52,17 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+export const publicApi = {
+  getStats() {
+    return api.get('/public/stats')
+  },
+  getPesantren(params) {
+    return api.get('/pesantren', { params })
+  },
+  getFeatured() {
+    return api.get('/pesantren', { params: { limit: 4 } })
+  }
+}
 
 export default api

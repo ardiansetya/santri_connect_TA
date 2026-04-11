@@ -1,179 +1,305 @@
 <template>
-  <div class="py-4">
-    <div class="container mx-auto px-4 max-w-4xl">
-      <nav class="mb-4 text-sm">
-        <router-link to="/pesantren" class="text-primary hover:underline">Pesantren</router-link>
-        <span class="mx-2 text-muted">/</span>
-        <span class="text-muted-foreground">Pendaftaran</span>
+  <div class="registration-form-page paper-texture min-h-screen pt-24 pb-20 relative bg-background overflow-hidden">
+    <!-- Background Overlay -->
+    <div class="pattern-overlay z-0 opacity-40"></div>
+    
+    <div class="container relative z-10 mx-auto px-4 max-w-4xl">
+      <!-- Breadcrumb Navigation -->
+      <nav class="mb-8 text-sm font-medium animate-fade-in flex items-center gap-2">
+        <router-link to="/pesantren" class="text-primary hover:text-primary-dark transition-colors">Eksplorasi Pesantren</router-link>
+        <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <span class="text-muted-foreground">Form Registrasi Santri Baru</span>
       </nav>
 
-      <div v-if="pesantrenInfo" class="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
-        <h4 class="font-semibold text-primary">📍 {{ pesantrenInfo.nama }}</h4>
-        <p class="text-sm text-muted-foreground mt-1">{{ pesantrenInfo.kota }}, {{ pesantrenInfo.province }}</p>
+      <!-- Pesantren Target Informational Card -->
+      <div v-if="pesantrenInfo" class="mb-10 bg-white shadow-xl shadow-primary/5 rounded-2xl border-l-[6px] border-primary p-6 animate-slide-up flex flex-col md:flex-row items-center gap-6 justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+          </div>
+          <div>
+            <h4 class="font-heading font-bold text-2xl text-foreground">{{ pesantrenInfo.nama }}</h4>
+            <p class="text-sm font-medium text-muted-foreground mt-1 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              {{ pesantrenInfo.kota }}, {{ pesantrenInfo.province }}
+            </p>
+          </div>
+        </div>
+        <div class="shrink-0">
+          <span class="inline-flex px-4 py-2 bg-accent/10 border border-accent/20 text-accent font-bold text-sm uppercase tracking-widest rounded-full shadow-sm">
+            Jalur Terbuka
+          </span>
+        </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-md border border-border overflow-hidden">
-        <div class="bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-4 border-b border-border">
-          <h3 class="font-semibold text-lg text-foreground">Form Pendaftaran Pesantren</h3>
-          <p class="text-sm text-muted-foreground mt-1">Lengkapi data di bawah ini untuk mendaftar</p>
+      <!-- Main Registration Card -->
+      <div class="bg-white rounded-[2rem] shadow-2xl border border-border/60 overflow-hidden animate-slide-up delay-1 relative">
+        <!-- Floating Accent Lines -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/4"></div>
+
+        <!-- Form Header -->
+        <div class="px-8 md:px-12 py-10 border-b border-border bg-gradient-to-b from-primary/5 to-transparent relative z-10">
+          <h1 class="font-heading font-bold text-3xl md:text-4xl text-primary-dark mb-3">Pendaftaran Resmi Sekolah</h1>
+          <p class="text-muted-foreground text-lg leading-relaxed max-w-2xl">
+            Lengkapi formulir pendaftaran ini secara komprehensif. Pastikan seluruh administrasi sesuai dengan dokumen kependudukan asli untuk mempermudah verifikasi tim akademik.
+          </p>
         </div>
 
-        <div class="p-6">
+        <!-- The Form -->
+        <div class="p-8 md:p-12 relative z-10">
           <form @submit="onSubmit">
-            <!-- Data Pribadi -->
-            <div class="mb-6">
-              <h5 class="font-semibold text-base text-foreground flex items-center gap-2 mb-4 pb-2 border-b border-border">
-                <span class="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-white text-sm font-semibold">1</span>
-                Data Pribadi
-              </h5>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- SECTION 1: Data Pribadi -->
+            <div class="mb-12">
+              <div class="flex items-center gap-4 mb-8">
+                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-primary shadow-md shadow-primary/30 text-white font-bold font-heading text-lg shrink-0">1</span>
+                <div>
+                  <h3 class="font-heading font-bold text-2xl text-foreground">Identitas Calon Santri</h3>
+                  <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Biodata Diri Utama</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 bg-muted/20 p-6 md:p-8 rounded-2xl border border-border/50">
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Nama Lengkap <span class="text-red-500">*</span></label>
-                  <input v-model="nama_lengkap" v-bind="nama_lengkapProps" type="text" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" :class="{ 'border-red-500 ring-1 ring-red-500': errors.nama_lengkap }" placeholder="Masukkan nama lengkap" />
-                  <p v-if="errors.nama_lengkap" class="text-red-500 text-xs mt-1">{{ errors.nama_lengkap }}</p>
+                  <label class="form-label block mb-2">Nama Lengkap Santri <span class="text-destructive">*</span></label>
+                  <input v-model="nama_lengkap" v-bind="nama_lengkapProps" type="text" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-primary outline-none transition-all focus:ring-4 focus:ring-primary/10 bg-white" :class="{ 'border-destructive focus:border-destructive focus:ring-destructive/10 ring-1 ring-destructive': errors.nama_lengkap }" placeholder="Sesuai Akta Kelahiran / KK" />
+                  <p v-if="errors.nama_lengkap" class="text-destructive text-sm font-medium mt-1.5 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> {{ errors.nama_lengkap }}</p>
                 </div>
+                
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">NIK <span class="text-red-500">*</span></label>
-                  <input v-model="nik" v-bind="nikProps" type="text" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" :class="{ 'border-red-500 ring-1 ring-red-500': errors.nik }" maxlength="16" inputmode="numeric" placeholder="16 digit NIK" />
-                  <p v-if="errors.nik" class="text-red-500 text-xs mt-1">{{ errors.nik }}</p>
+                  <label class="form-label block mb-2">Nomor Induk Kependudukan (NIK) <span class="text-destructive">*</span></label>
+                  <input v-model="nik" v-bind="nikProps" type="text" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-primary outline-none transition-all focus:ring-4 focus:ring-primary/10 bg-white font-mono placeholder:font-sans text-lg tracking-wider" :class="{ 'border-destructive focus:border-destructive focus:ring-destructive/10 ring-1 ring-destructive': errors.nik }" maxlength="16" inputmode="numeric" placeholder="Contoh: 317XXXXXXXXXXXXX" />
+                  <p v-if="errors.nik" class="text-destructive text-sm font-medium mt-1.5 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> {{ errors.nik }}</p>
                 </div>
+                
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Jenis Kelamin <span class="text-red-500">*</span></label>
-                  <select v-model="jenis_kelamin" v-bind="jenis_kelaminProps" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" :class="{ 'border-red-500 ring-1 ring-red-500': errors.jenis_kelamin }">
-                    <option value="">Pilih</option>
-                    <option value="L">Laki-laki</option>
-                    <option value="P">Perempuan</option>
-                  </select>
-                  <p v-if="errors.jenis_kelamin" class="text-red-500 text-xs mt-1">{{ errors.jenis_kelamin }}</p>
+                  <label class="form-label block mb-2">Jenis Kelamin Identitas <span class="text-destructive">*</span></label>
+                  <div class="relative">
+                    <select v-model="jenis_kelamin" v-bind="jenis_kelaminProps" class="form-input appearance-none w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-primary outline-none transition-all focus:ring-4 focus:ring-primary/10 bg-white" :class="{ 'border-destructive focus:border-destructive focus:ring-destructive/10 ring-1 ring-destructive': errors.jenis_kelamin }">
+                      <option value="" disabled>Pilih Kategori</option>
+                      <option value="L">Laki-laki (Putra)</option>
+                      <option value="P">Perempuan (Putri)</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-foreground/50">
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
+                  <p v-if="errors.jenis_kelamin" class="text-destructive text-sm font-medium mt-1.5 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> {{ errors.jenis_kelamin }}</p>
                 </div>
+                
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Tempat Lahir</label>
-                  <input v-model="tempat_lahir" v-bind="tempat_lahirProps" type="text" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" :class="{ 'border-red-500 ring-1 ring-red-500': errors.tempat_lahir }" placeholder="Contoh: Jakarta" />
+                  <label class="form-label block mb-2">Kabupaten/Kota Tempat Lahir</label>
+                  <input v-model="tempat_lahir" v-bind="tempat_lahirProps" type="text" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-primary outline-none transition-all focus:ring-4 focus:ring-primary/10 bg-white" :class="{ 'border-destructive focus:border-destructive focus:ring-destructive/10 ring-1 ring-destructive': errors.tempat_lahir }" placeholder="Lokasi Terbit Akta" />
                 </div>
+                
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Tanggal Lahir</label>
-                  <input v-model="tanggal_lahir" v-bind="tanggal_lahirProps" type="date" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" :class="{ 'border-red-500 ring-1 ring-red-500': errors.tanggal_lahir }" :max="maxDate" />
+                  <label class="form-label block mb-2">Tanggal Lahir Santri</label>
+                  <input v-model="tanggal_lahir" v-bind="tanggal_lahirProps" type="date" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-primary outline-none transition-all focus:ring-4 focus:ring-primary/10 bg-white text-foreground" :class="{ 'border-destructive focus:border-destructive focus:ring-destructive/10 ring-1 ring-destructive': errors.tanggal_lahir }" :max="maxDate" />
                 </div>
+                
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Alamat</label>
-                  <textarea v-model="alamat" v-bind="alamatProps" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white resize-none" :class="{ 'border-red-500 ring-1 ring-red-500': errors.alamat }" rows="2" placeholder="Alamat lengkap"></textarea>
+                  <label class="form-label block mb-2">Domisili Peserta Didik (Alamat Lengkap)</label>
+                  <textarea v-model="alamat" v-bind="alamatProps" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-primary outline-none transition-all focus:ring-4 focus:ring-primary/10 bg-white resize-none" :class="{ 'border-destructive focus:border-destructive focus:ring-destructive/10 ring-1 ring-destructive': errors.alamat }" rows="3" placeholder="Jl. Diponegoro No.XXX, Kelurahan, Kecamatan..."></textarea>
                 </div>
+                
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">No. HP</label>
-                  <input v-model="no_hp" v-bind="no_hpProps" type="tel" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" :class="{ 'border-red-500 ring-1 ring-red-500': errors.no_hp }" placeholder="08xxxxxxxxxx" />
-                  <p v-if="errors.no_hp" class="text-red-500 text-xs mt-1">{{ errors.no_hp }}</p>
+                  <label class="form-label block mb-2">Nomor Telepon Seluler (Pendaftar)</label>
+                  <input v-model="no_hp" v-bind="no_hpProps" type="tel" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-primary outline-none transition-all focus:ring-4 focus:ring-primary/10 bg-white font-mono placeholder:font-sans" :class="{ 'border-destructive focus:border-destructive focus:ring-destructive/10 ring-1 ring-destructive': errors.no_hp }" placeholder="08XXXXXXXXXX" />
+                  <p v-if="errors.no_hp" class="text-destructive text-sm font-medium mt-1.5 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> {{ errors.no_hp }}</p>
                 </div>
               </div>
             </div>
 
-            <!-- Data Orang Tua -->
-            <div class="mb-6">
-              <h5 class="font-semibold text-base text-foreground flex items-center gap-2 mb-4 pb-2 border-b border-border">
-                <span class="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-white text-sm font-semibold">2</span>
-                Data Orang Tua
-              </h5>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- SECTION 2: Data Orang Tua -->
+            <div class="mb-12">
+              <div class="flex items-center gap-4 mb-8">
+                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-accent shadow-md shadow-accent/30 text-white font-bold font-heading text-lg shrink-0">2</span>
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Nama Ayah</label>
-                  <input v-model="nama_ayah" v-bind="nama_ayahProps" type="text" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" placeholder="Nama lengkap ayah" />
+                  <h3 class="font-heading font-bold text-2xl text-foreground">Penanggung Jawab Santri</h3>
+                  <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Informasi Orang Tua / Wali</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 bg-muted/10 p-6 md:p-8 rounded-2xl border border-border/50">
+                <div>
+                  <label class="form-label block mb-2">Nama Lengkap Ayah Kandung</label>
+                  <input v-model="nama_ayah" v-bind="nama_ayahProps" type="text" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-accent outline-none transition-all focus:ring-4 focus:ring-accent/10 bg-white" placeholder="Sesuai KK" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Nama Ibu</label>
-                  <input v-model="nama_ibu" v-bind="nama_ibuProps" type="text" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" placeholder="Nama lengkap ibu" />
+                  <label class="form-label block mb-2">Nama Lengkap Ibu Kandung</label>
+                  <input v-model="nama_ibu" v-bind="nama_ibuProps" type="text" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-accent outline-none transition-all focus:ring-4 focus:ring-accent/10 bg-white" placeholder="Sesuai KK (Penting untuk validasi nasab)" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">No. HP Orang Tua</label>
-                  <input v-model="no_hp_ortu" v-bind="no_hp_ortuProps" type="tel" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" :class="{ 'border-red-500 ring-1 ring-red-500': errors.no_hp_ortu }" placeholder="08xxxxxxxxxx" />
-                  <p v-if="errors.no_hp_ortu" class="text-red-500 text-xs mt-1">{{ errors.no_hp_ortu }}</p>
+                  <label class="form-label block mb-2">Kontak Darurat Wali Utama</label>
+                  <input v-model="no_hp_ortu" v-bind="no_hp_ortuProps" type="tel" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-accent outline-none transition-all focus:ring-4 focus:ring-accent/10 bg-white font-mono placeholder:font-sans" :class="{ 'border-destructive focus:border-destructive ring-destructive': errors.no_hp_ortu }" placeholder="Nomor GSM/WhatsApp Aktif" />
+                  <p v-if="errors.no_hp_ortu" class="text-destructive text-sm font-medium mt-1.5 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> {{ errors.no_hp_ortu }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Pekerjaan Orang Tua</label>
-                  <input v-model="pekerjaan_ortu" v-bind="pekerjaan_ortuProps" type="text" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white" placeholder="Pekerjaan" />
+                  <label class="form-label block mb-2">Pekerjaan Wali (Ayah/Ibu)</label>
+                  <input v-model="pekerjaan_ortu" v-bind="pekerjaan_ortuProps" type="text" class="w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-accent outline-none transition-all focus:ring-4 focus:ring-accent/10 bg-white" placeholder="Wiraswasta / PNS / Guru / Petani ..." />
                 </div>
               </div>
             </div>
 
-            <!-- Dokumen -->
-            <div class="mb-6">
-              <h5 class="font-semibold text-base text-foreground flex items-center gap-2 mb-4 pb-2 border-b border-border">
-                <span class="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-white text-sm font-semibold">3</span>
-                Upload Dokumen
-              </h5>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- SECTION 3: Dokumen Pendukung -->
+            <div class="mb-12">
+              <div class="flex items-center gap-4 mb-8">
+                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-success shadow-md shadow-success/30 text-white font-bold font-heading text-lg shrink-0">3</span>
                 <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Foto KTP</label>
-                  <input type="file" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-primary/10 file:text-primary file:text-sm file:font-medium file:cursor-pointer hover:file:bg-primary/20" accept="image/*" :class="{ 'border-red-500': fileErrors.foto_ktp }" @change="handleFile('foto_ktp', $event)" />
-                  <p v-if="fileErrors.foto_ktp" class="text-red-500 text-xs mt-1">{{ fileErrors.foto_ktp }}</p>
-                  <p v-if="files.foto_ktp" class="text-green-600 text-xs mt-1">✓ {{ files.foto_ktp.name }} ({{ formatFileSize(files.foto_ktp.size) }})</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Pas Foto</label>
-                  <input type="file" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-primary/10 file:text-primary file:text-sm file:font-medium file:cursor-pointer hover:file:bg-primary/20" accept="image/*" :class="{ 'border-red-500': fileErrors.pas_foto }" @change="handleFile('pas_foto', $event)" />
-                  <p v-if="fileErrors.pas_foto" class="text-red-500 text-xs mt-1">{{ fileErrors.pas_foto }}</p>
-                  <p v-if="files.pas_foto" class="text-green-600 text-xs mt-1">✓ {{ files.pas_foto.name }} ({{ formatFileSize(files.pas_foto.size) }})</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium mb-1.5 text-foreground">Kartu Keluarga</label>
-                  <input type="file" class="w-full px-3 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all bg-white text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-primary/10 file:text-primary file:text-sm file:font-medium file:cursor-pointer hover:file:bg-primary/20" accept="image/*,.pdf" :class="{ 'border-red-500': fileErrors.kartu_keluarga }" @change="handleFile('kartu_keluarga', $event)" />
-                  <p v-if="fileErrors.kartu_keluarga" class="text-red-500 text-xs mt-1">{{ fileErrors.kartu_keluarga }}</p>
-                  <p v-if="files.kartu_keluarga" class="text-green-600 text-xs mt-1">✓ {{ files.kartu_keluarga.name }} ({{ formatFileSize(files.kartu_keluarga.size) }})</p>
+                  <h3 class="font-heading font-bold text-2xl text-foreground">Berkas Faktual</h3>
+                  <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Lampiran Syarat Administrasi (Opsional / Max 2MB)</p>
                 </div>
               </div>
-            </div>
 
-            <!-- Alerts -->
-            <div v-if="serverError" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              <span class="font-semibold">❌ Gagal:</span> {{ serverError }}
-            </div>
-            <div v-if="success" class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div class="flex items-start gap-3">
-                <div class="flex-1">
-                  <p class="text-green-700 font-semibold">✅ Pendaftaran Berhasil!</p>
-                  <p class="text-green-600 text-sm mt-1">Nomor pendaftaran Anda:</p>
-                  <div class="flex items-center gap-2 mt-2">
-                    <code class="bg-green-100 text-green-800 px-3 py-1.5 rounded-lg font-mono font-semibold text-base">{{ success }}</code>
-                    <button
-                      @click="copyNomor"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
-                      :class="{ 'opacity-75': copiedNomor }"
-                    >
-                      <svg v-if="copiedNomor" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                      {{ copiedNomor ? 'Tersalin!' : 'Salin' }}
-                    </button>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- KTP Upload -->
+                <div class="border-2 border-dashed border-border/80 hover:border-success/50 transition-colors bg-white rounded-2xl p-6 flex flex-col justify-between group h-full">
+                  <div>
+                    <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center text-success mb-4 group-hover:scale-110 transition-transform">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
+                    </div>
+                    <label class="form-label font-bold text-base block mb-2">Scan KTP Orang Tua (Wali)</label>
+                    <p class="text-xs text-muted-foreground mb-4">Mendukung file JPG, PNG. Maksimum 2MB.</p>
+                  </div>
+                  <div class="mt-auto">
+                    <input type="file" class="hidden" id="ktp-upload" accept="image/jpeg,image/png,image/jpg" @change="handleFile('foto_ktp', $event)" />
+                    <label for="ktp-upload" class="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-muted/40 hover:bg-success/10 border border-border text-sm font-semibold rounded-lg transition-colors" :class="{ 'border-destructive text-destructive bg-destructive/10': fileErrors.foto_ktp }">
+                      Memilih File
+                    </label>
+                    <p v-if="fileErrors.foto_ktp" class="text-destructive text-xs font-bold mt-2 text-center">{{ fileErrors.foto_ktp }}</p>
+                    <div v-if="files.foto_ktp" class="mt-3 p-2 bg-success/10 rounded border border-success/20 flex gap-2 items-center">
+                      <svg class="w-4 h-4 text-success shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      <p class="text-success-foreground text-xs font-bold truncate">{{ files.foto_ktp.name }} ({{ formatFileSize(files.foto_ktp.size) }})</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Pas Foto Upload -->
+                <div class="border-2 border-dashed border-border/80 hover:border-success/50 transition-colors bg-white rounded-2xl p-6 flex flex-col justify-between group h-full">
+                  <div>
+                    <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center text-success mb-4 group-hover:scale-110 transition-transform">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <label class="form-label font-bold text-base block mb-2">Pas Foto Diri Santri (3x4)</label>
+                    <p class="text-xs text-muted-foreground mb-4">Asli berwarna terbaru. Latar bebas. Maks 2MB.</p>
+                  </div>
+                  <div class="mt-auto">
+                    <input type="file" class="hidden" id="pas-foto-upload" accept="image/jpeg,image/png,image/jpg" @change="handleFile('pas_foto', $event)" />
+                    <label for="pas-foto-upload" class="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-muted/40 hover:bg-success/10 border border-border text-sm font-semibold rounded-lg transition-colors" :class="{ 'border-destructive text-destructive bg-destructive/10': fileErrors.pas_foto }">
+                      Memilih File
+                    </label>
+                    <p v-if="fileErrors.pas_foto" class="text-destructive text-xs font-bold mt-2 text-center">{{ fileErrors.pas_foto }}</p>
+                    <div v-if="files.pas_foto" class="mt-3 p-2 bg-success/10 rounded border border-success/20 flex gap-2 items-center">
+                      <svg class="w-4 h-4 text-success shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      <p class="text-success-foreground text-xs font-bold truncate">{{ files.pas_foto.name }} ({{ formatFileSize(files.pas_foto.size) }})</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Kartu Keluarga Upload -->
+                <div class="border-2 border-dashed border-border/80 hover:border-success/50 transition-colors bg-white rounded-2xl p-6 flex flex-col justify-between group h-full">
+                  <div>
+                    <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center text-success mb-4 group-hover:scale-110 transition-transform">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <label class="form-label font-bold text-base block mb-2">Scan Resmi Kartu Keluarga</label>
+                    <p class="text-xs text-muted-foreground mb-4">Ekstensi dibolehkan: PDF & Gambar Resolusi Tinggi.</p>
+                  </div>
+                  <div class="mt-auto">
+                    <input type="file" class="hidden" id="kk-upload" accept="image/jpeg,image/png,image/jpg,application/pdf" @change="handleFile('kartu_keluarga', $event)" />
+                    <label for="kk-upload" class="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-muted/40 hover:bg-success/10 border border-border text-sm font-semibold rounded-lg transition-colors" :class="{ 'border-destructive text-destructive bg-destructive/10': fileErrors.kartu_keluarga }">
+                      Memilih File
+                    </label>
+                    <p v-if="fileErrors.kartu_keluarga" class="text-destructive text-xs font-bold mt-2 text-center">{{ fileErrors.kartu_keluarga }}</p>
+                    <div v-if="files.kartu_keluarga" class="mt-3 p-2 bg-success/10 rounded border border-success/20 flex gap-2 items-center">
+                      <svg class="w-4 h-4 text-success shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      <p class="text-success-foreground text-xs font-bold truncate">{{ files.kartu_keluarga.name }} ({{ formatFileSize(files.kartu_keluarga.size) }})</p>
+                    </div>
                   </div>
                 </div>
               </div>
-              <router-link to="/track" class="inline-block mt-4 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
-                📋 Cek Status Pendaftaran
-              </router-link>
             </div>
 
-            <!-- Actions -->
-            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
-              <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!!success">
-                <svg v-if="isSubmitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {{ isSubmitting ? 'Mengirim...' : 'Kirim Pendaftaran' }}
-              </button>
-              <router-link to="/pesantren" class="inline-flex items-center justify-center px-6 py-2.5 border border-border text-foreground font-medium rounded-lg hover:bg-muted transition-colors">
-                Batal
-              </router-link>
-            </div>
-
-            <!-- Validation Errors Display -->
-            <div v-if="Object.keys(errors).length > 0" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p class="text-sm font-semibold text-yellow-800 mb-2">⚠️ Mohon perbaiki field berikut:</p>
-              <ul class="text-sm text-yellow-700 list-disc pl-5 space-y-1">
-                <li v-for="(msg, key) in errors" :key="key" class="capitalize">{{ key.replace(/_/g, ' ') }}: {{ msg }}</li>
+            <!-- Pre-Submit Validation View -->
+            <div v-if="Object.keys(errors).length > 0" class="mb-10 p-6 bg-accent/10 border-l-4 border-accent rounded-r-xl">
+              <h5 class="font-bold text-accent-foreground mb-3 flex items-center gap-2">
+                <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Peringatan: Verifikasi Isian
+              </h5>
+              <ul class="text-sm text-foreground/80 list-disc pl-5 space-y-1.5 font-medium">
+                <li v-for="(msg, key) in errors" :key="key"><span class="uppercase tracking-widest text-xs font-bold text-accent-foreground mr-1">{{ key.replace(/_/g, ' ') }}:</span> {{ msg }}</li>
               </ul>
             </div>
+
+            <!-- Server Error View -->
+            <div v-if="serverError" class="mb-10 p-6 bg-destructive/10 border-l-4 border-destructive rounded-r-xl">
+              <h5 class="font-bold text-destructive mb-2 flex items-center gap-2">Transmisi Data Gagal</h5>
+              <p class="text-sm font-medium">{{ serverError }}</p>
+            </div>
+
+            <!-- Success State UI -->
+            <div v-if="success" class="mb-12 p-8 bg-gradient-to-r from-success/20 to-success/5 border-2 border-success/30 rounded-2xl shadow-xl flex flex-col md:flex-row items-center gap-8 justify-between animate-fade-in relative overflow-hidden">
+               <!-- Watermark -->
+               <div class="absolute right-0 bottom-0 text-9xl opacity-5 text-success pointer-events-none transform translate-y-1/4">✓</div>
+               
+              <div class="flex items-center gap-6 z-10">
+                <div class="w-16 h-16 rounded-full bg-success text-white flex items-center justify-center shrink-0 shadow-lg shadow-success/40">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <div>
+                  <h3 class="font-heading font-bold text-2xl text-success-foreground">Registrasi Tahap Awal Selesai!</h3>
+                  <p class="text-muted-foreground font-medium mt-1">Harap menyimpan nomor identifikasi eksklusif Anda di bawah.</p>
+                </div>
+              </div>
+              
+              <div class="flex flex-col items-start gap-4 z-10 w-full md:w-auto mt-4 md:mt-0 p-5 bg-white rounded-xl shadow-inner border border-border/80">
+                <div class="w-full text-center">
+                  <p class="text-xs uppercase tracking-widest font-bold text-muted-foreground mb-1">Kode Lacak Status Pendaftaran</p>
+                  <code class="text-2xl font-mono font-bold text-primary">{{ success }}</code>
+                </div>
+                <div class="flex gap-2 w-full justify-center">
+                  <button
+                    @click.prevent="copyNomor"
+                    class="btn btn-outline border-border flex items-center justify-center font-bold px-4 hover:border-success hover:text-success hover:bg-success/5 flex-1"
+                    :class="{ 'border-success text-success bg-success/10': copiedNomor }"
+                  >
+                    <svg v-if="copiedNomor" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                    <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    {{ copiedNomor ? 'Tersalin!' : 'Copy Code' }}
+                  </button>
+                  <router-link to="/track" class="btn btn-primary flex-1 justify-center whitespace-nowrap shadow-md">
+                    Lacak Status >>
+                  </router-link>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-10 border-t border-border">
+              <button 
+                type="submit" 
+                class="flex-1 btn btn-primary py-4 text-lg font-bold shadow-xl shadow-primary/20 
+                      disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-1 transition-all" 
+                :disabled="!!success || isSubmitting"
+              >
+                <div v-if="isSubmitting" class="flex items-center justify-center gap-3">
+                  <svg class="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Mengamankan Berkas Pendaftaran...</span>
+                </div>
+                <div v-else class="flex items-center justify-center gap-2">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.95 11.95 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                  Finalisasi & Ajukan Pendaftaran
+                </div>
+              </button>
+              
+              <router-link :to="`/pesantren/${route.params.id}`" class="sm:w-1/4 btn bg-muted/40 hover:bg-muted text-foreground border-border hover:border-muted-foreground transition-all py-4 font-bold flex justify-center text-lg">
+                Batalkan
+              </router-link>
+            </div>
+
           </form>
         </div>
       </div>
@@ -187,10 +313,8 @@ import { useRoute } from 'vue-router'
 import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import { pesantren as pesantrenApi, pendaftaran } from '../services'
-import { useToast } from 'vue-toastification'
 
 const route = useRoute()
-const toast = useToast()
 const pesantrenInfo = ref(null)
 const files = ref({})
 const fileErrors = ref({})
@@ -206,26 +330,26 @@ const maxDate = computed(() => {
 const phoneRegex = /^(\+62|62|0)[0-9]{8,13}$/
 
 const schema = yup.object({
-  nama_lengkap: yup.string().required('Nama lengkap harus diisi').min(3, 'Nama minimal 3 karakter'),
+  nama_lengkap: yup.string().required('Nama lengkap harus diisi').min(3, 'Nama min. 3 karakter'),
   nik: yup.string()
     .required('NIK harus diisi')
-    .length(16, 'NIK harus 16 digit')
-    .matches(/^[0-9]{16}$/, 'NIK harus berisi 16 digit angka'),
-  jenis_kelamin: yup.string().required('Jenis kelamin harus dipilih').oneOf(['L', 'P']),
+    .length(16, 'Panjang NIK wajib 16 digit angka')
+    .matches(/^[0-9]{16}$/, 'Format NIK hanya membolehkan angka'),
+  jenis_kelamin: yup.string().required('Silakan tentukan identitas Kelamin').oneOf(['L', 'P']),
   tempat_lahir: yup.string().notRequired(),
-  tanggal_lahir: yup.string().notRequired().test('is-valid-date', 'Tanggal lahir tidak valid', (val) => {
+  tanggal_lahir: yup.string().notRequired().test('is-valid-date', 'Kalender kelahiran di luar rentang wajar', (val) => {
     if (!val) return true
     const date = new Date(val)
     return date <= new Date() && date.getFullYear() >= 1950
   }),
   alamat: yup.string().notRequired(),
-  no_hp: yup.string().notRequired().test('phone-format', 'Format nomor HP tidak valid (contoh: 08xxxxxxxxxx)', (val) => {
+  no_hp: yup.string().notRequired().test('phone-format', 'Contoh Format Standar: 0812XXXXXXXX', (val) => {
     if (!val) return true
     return phoneRegex.test(val)
   }),
   nama_ayah: yup.string().notRequired(),
   nama_ibu: yup.string().notRequired(),
-  no_hp_ortu: yup.string().notRequired().test('phone-format', 'Format nomor HP tidak valid', (val) => {
+  no_hp_ortu: yup.string().notRequired().test('phone-format', 'Nomor tak dikenal, mohon koreksi pengetikan', (val) => {
     if (!val) return true
     return phoneRegex.test(val)
   }),
@@ -277,18 +401,21 @@ function handleFile(field, event) {
 
   if (field === 'kartu_keluarga') {
     if (!allowedTypes.includes(file.type)) {
-      fileErrors.value[field] = 'File harus berupa gambar atau PDF'
+      fileErrors.value[field] = 'Resolusi format (Gambar/PDF) dibutuhkan.'
+      event.target.value = ''
       return
     }
   } else {
     if (!allowedImageTypes.includes(file.type)) {
-      fileErrors.value[field] = 'File harus berupa gambar (JPG, PNG, WebP)'
+      fileErrors.value[field] = 'Lampirkan file citra Gambar (JPG, PNG, WebP) saja.'
+      event.target.value = ''
       return
     }
   }
 
   if (file.size > maxSize) {
-    fileErrors.value[field] = 'Ukuran file maksimal 2MB'
+    fileErrors.value[field] = 'Volume data melonjak. Standar sistem maksimum bernilai 2MB per formulir.'
+    event.target.value = ''
     return
   }
 
@@ -298,14 +425,10 @@ function handleFile(field, event) {
 
 async function copyNomor() {
   if (!success.value) return
-  
   try {
     await navigator.clipboard.writeText(success.value)
     copiedNomor.value = true
-    toast.success(`Nomor "${success.value}" berhasil disalin`, { title: 'Berhasil Disalin' })
-    setTimeout(() => {
-      copiedNomor.value = false
-    }, 2000)
+    setTimeout(() => { copiedNomor.value = false }, 2500)
   } catch (err) {
     const textArea = document.createElement('textarea')
     textArea.value = success.value
@@ -316,22 +439,15 @@ async function copyNomor() {
     try {
       document.execCommand('copy')
       copiedNomor.value = true
-      toast.success(`Nomor "${success.value}" berhasil disalin`, { title: 'Berhasil Disalin' })
-      setTimeout(() => {
-        copiedNomor.value = false
-      }, 2000)
-    } catch (e) {
-      toast.error('Gagal menyalin nomor pendaftaran', { title: 'Gagal' })
+      setTimeout(() => { copiedNomor.value = false }, 2500)
+    } finally {
+      document.body.removeChild(textArea)
     }
-    document.body.removeChild(textArea)
   }
 }
 
 const onSubmit = handleSubmit(async (values) => {
   serverError.value = ''
-  console.log('[PendaftaranForm] 📤 Submitting form with values:', values);
-  console.log('[PendaftaranForm] 📎 Files:', Object.keys(files.value));
-  
   try {
     const formData = new FormData()
     formData.append('pesantren_id', route.params.id)
@@ -342,57 +458,29 @@ const onSubmit = handleSubmit(async (values) => {
       formData.append(key, file)
     })
 
-    console.log('[PendaftaranForm] 📦 FormData entries:');
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(`  ${key}: File(${value.name}, ${(value.size / 1024).toFixed(1)} KB)`);
-      } else {
-        console.log(`  ${key}: ${value}`);
-      }
-    }
-
-    // Add timeout to prevent hanging
-    const { data } = await pendaftaran.create(formData, {
-      timeout: 30000 // 30 seconds timeout
-    })
-    
+    const { data } = await pendaftaran.create(formData, { timeout: 30000 })
     success.value = data.data?.nomor_pendaftaran || 'Berhasil'
-    
-    console.log('[PendaftaranForm] ✅ Pendaftaran berhasil:', {
-      nomor: success.value,
-      pesantren_id: route.params.id,
-      nama: values.nama_lengkap,
-      nik: values.nik,
-      timestamp: new Date().toISOString()
-    });
-    
-    toast.success(`Nomor pendaftaran: ${success.value}`, { title: 'Pendaftaran Berhasil' })
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth'})
   } catch (err) {
-    console.error('[PendaftaranForm] ❌ Error:', {
-      message: err.message,
-      code: err.code,
-      response: err.response?.data,
-      status: err.response?.status
-    });
-    
     if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
-      serverError.value = 'Waktu permintaan habis. Periksa koneksi internet Anda dan coba lagi.'
-      toast.error('Waktu permintaan habis', { title: 'Timeout' })
+      serverError.value = 'Mesin peladen sibuk menanggapi lonjakan. Silahkan ulangi kembali.'
     } else {
-      serverError.value = err.response?.data?.error || 'Gagal mengirim pendaftaran'
-      toast.error(serverError.value, { title: 'Gagal Mendaftar' })
+      serverError.value = err.response?.data?.error || 'Kesalahan Teknis pada basis data.'
     }
   }
 })
 
-// Debug logging
-watch([() => isSubmitting.value, () => success.value, errors], ([submitting, suc, errs]) => {
-  console.log('[PendaftaranForm] 📊 State:', {
-    isSubmitting: submitting,
-    success: suc,
-    errors: errs,
-    errorsCount: Object.keys(errs).length
-  });
+// Focus fix
+watch([() => isSubmitting.value, () => Object.keys(errors.value).length], ([submitting, errCount]) => {
+  if (!submitting && errCount > 0) {
+    // Try scrolling to first error field
+    const firstErrorName = Object.keys(errors.value)[0];
+    const el = document.querySelector(`[name="${firstErrorName}"]`);
+    if(el) {
+       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+       el.focus();
+    }
+  }
 });
 
 onMounted(async () => {

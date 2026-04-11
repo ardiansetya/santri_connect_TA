@@ -148,6 +148,19 @@ const Pendaftaran = {
       [pemilikUserId]
     )
     return rows
+  },
+
+  async findLatest(limit = 5) {
+    const [rows] = await require('../config/db').getPool().query(
+      `SELECT p.id, p.nama_lengkap, p.status, p.created_at,
+              pes.nama as pesantren_nama
+       FROM pendaftaran p
+       LEFT JOIN pesantren pes ON p.pesantren_id = pes.id
+       ORDER BY p.created_at DESC
+       LIMIT ?`,
+      [limit]
+    )
+    return rows
   }
 }
 

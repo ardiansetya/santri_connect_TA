@@ -8,7 +8,7 @@ const Pesantren = {
   },
 
   async findAll({ search, provinsi, kota, biaya_min, biaya_max, fasilitas, kurikulum, page, limit, sort }) {
-    let query = 'SELECT id, nama, province, kota, biaya_bulanan, kurikulum, fasilitas, foto_utama FROM pesantren WHERE 1=1'
+    let query = 'SELECT id, nama, province, kota, biaya_bulanan, jumlah_santri, kurikulum, fasilitas, foto_utama FROM pesantren WHERE 1=1'
     let countQuery = 'SELECT COUNT(*) as total FROM pesantren WHERE 1=1'
     const params = []
     const countParams = []
@@ -97,14 +97,13 @@ const Pesantren = {
         data.jumlah_pengajar || null,
         data.biaya_pendaftaran || null,
         data.biaya_bulanan || null,
-        data.fasilitas ? JSON.stringify(data.fasilitas) : null,
-        data.kurikulum || null,
+        data.fasilitas ? (typeof data.fasilitas === 'string' ? data.fasilitas : JSON.stringify(data.fasilitas)) : null,
         data.email || null,
         data.telepon || null,
         data.website || null,
         data.deskripsi || null,
         data.foto_utama || null,
-        data.foto_galeri ? JSON.stringify(data.foto_galeri) : null,
+        data.foto_galeri ? (typeof data.foto_galeri === 'string' ? data.foto_galeri : JSON.stringify(data.foto_galeri)) : null,
         data.nama_bank || null,
         data.nomor_rekening || null,
         data.atas_nama_rekening || null
@@ -146,14 +145,14 @@ const Pesantren = {
         data.jumlah_pengajar !== undefined ? (data.jumlah_pengajar || null) : existing.jumlah_pengajar,
         data.biaya_pendaftaran !== undefined ? (data.biaya_pendaftaran || null) : existing.biaya_pendaftaran,
         data.biaya_bulanan !== undefined ? (data.biaya_bulanan || null) : existing.biaya_bulanan,
-        data.fasilitas ? JSON.stringify(data.fasilitas) : existing.fasilitas,
+        data.fasilitas ? (typeof data.fasilitas === 'string' ? data.fasilitas : JSON.stringify(data.fasilitas)) : existing.fasilitas,
         data.kurikulum !== undefined ? (data.kurikulum || null) : existing.kurikulum,
         data.email !== undefined ? (data.email || null) : existing.email,
         data.telepon !== undefined ? (data.telepon || null) : existing.telepon,
         data.website !== undefined ? (data.website || null) : existing.website,
         data.deskripsi !== undefined ? (data.deskripsi || null) : existing.deskripsi,
         finalFotoUtama,
-        finalFotoGaleri ? JSON.stringify(finalFotoGaleri) : existing.foto_galeri,
+        finalFotoGaleri ? (typeof finalFotoGaleri === 'string' ? finalFotoGaleri : JSON.stringify(finalFotoGaleri)) : existing.foto_galeri,
         data.nama_bank !== undefined ? (data.nama_bank || null) : existing.nama_bank,
         data.nomor_rekening !== undefined ? (data.nomor_rekening || null) : existing.nomor_rekening,
         data.atas_nama_rekening !== undefined ? (data.atas_nama_rekening || null) : existing.atas_nama_rekening,
@@ -208,9 +207,17 @@ const Pesantren = {
     const [rows] = await require('../config/db').getPool().query(
       `SELECT id, nama, province, kota, alamat, tahun_berdiri, jumlah_santri,
               jumlah_pengajar, biaya_pendaftaran, biaya_bulanan, fasilitas,
-              kurikulum, email, telepon, website, deskripsi
+              kurikulum, email, telepon, website, deskripsi, foto_utama, foto_galeri
        FROM pesantren WHERE id IN (${placeholders})`,
       ids
+    )
+    return rows
+  },
+
+  async findPopular(limit = 5) {
+    const [rows] = await require('../config/db').getPool().query(
+      'SELECT id, nama, jumlah_santri FROM pesantren WHERE jumlah_santri IS NOT NULL ORDER BY jumlah_santri DESC LIMIT ?',
+      [limit]
     )
     return rows
   }

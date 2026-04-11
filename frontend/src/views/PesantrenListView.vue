@@ -1,78 +1,108 @@
 <template>
-  <div class="py-4 md:py-5">
-    <div class="container">
-      <!-- Header Section -->
-      <div class="text-center mb-4 md:mb-5">
-        <h1 class="font-bold text-3xl">
-          Jelajahi Pesantren
+  <div class="list-page paper-texture min-h-screen pb-20">
+    <div class="pattern-overlay"></div>
+    
+    <!-- Hero Header -->
+    <section class="bg-hero-gradient relative pt-24 pb-16 mb-10 overflow-hidden">
+      <div class="container relative z-10 text-center">
+        <h1 class="font-heading text-4xl md:text-5xl font-bold text-white mb-4 animate-fade-in">
+          Jelajahi <span class="italic text-accent-light">Pesantren</span>
         </h1>
-        <p class="text-muted mt-2">Temukan pesantren terbaik untuk masa depan putra-putri Anda</p>
+        <p class="text-white/80 max-w-2xl mx-auto text-lg animate-slide-up delay-1">
+          Temukan pesantren terbaik untuk masa depan putra-putri Anda sesuai kurikulum, lokasi, dan fasilitas.
+        </p>
       </div>
+    </section>
 
+    <div class="container relative z-10">
       <!-- Main Layout: Sidebar + Content -->
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
         <!-- Left Sidebar - Filters -->
         <div class="lg:col-span-1">
-          <div class="card border-0 shadow-lg sticky top-24">
-            <div class="p-5">
-              <h3 class="font-semibold text-base flex items-center gap-2 mb-4">
+          <div class="card sticky top-24 z-20 animate-slide-up delay-2">
+            <div class="p-6">
+              <h3 class="font-heading text-xl font-bold flex items-center gap-2 mb-6 text-foreground">
                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                 </svg>
-                Filter & Pencarian
+                Filter & Cari
               </h3>
               
-              <div class="space-y-4">
+              <div class="space-y-5">
                 <div>
-                  <label class="form-label text-sm font-medium mb-1.5 block">Provinsi</label>
-                  <select class="form-select w-full" v-model="filters.province" @change="onProvinceChange">
-                    <option value="">Semua Provinsi</option>
-                    <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
-                  </select>
+                  <label class="form-label">Provinsi</label>
+                  <div class="relative">
+                    <select class="form-input appearance-none pr-10" v-model="filters.province" @change="onProvinceChange">
+                      <option value="">Semua Provinsi</option>
+                      <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
                 </div>
                 
                 <div>
-                  <label class="form-label text-sm font-medium mb-1.5 block">Kota</label>
-                  <select class="form-select w-full" v-model="filters.kota" @change="fetchData" :disabled="!cities.length">
-                    <option value="">Semua Kota</option>
-                    <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
-                  </select>
+                  <label class="form-label">Kota / Kabupaten</label>
+                  <div class="relative">
+                    <select class="form-input appearance-none pr-10" v-model="filters.kota" @change="fetchData" :disabled="!cities.length">
+                      <option value="">Semua Kota</option>
+                      <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
                 </div>
                 
                 <div>
-                  <label class="form-label text-sm font-medium mb-1.5 block">Kurikulum</label>
-                  <select class="form-select w-full" v-model="filters.kurikulum" @change="fetchData">
-                    <option value="">Semua Kurikulum</option>
-                    <option value="modern">Modern</option>
-                    <option value="salaf">Salaf</option>
-                    <option value="campuran">Campuran</option>
-                  </select>
+                  <label class="form-label">Kurikulum</label>
+                  <div class="relative">
+                    <select class="form-input appearance-none pr-10" v-model="filters.kurikulum" @change="fetchData">
+                      <option value="">Semua Kurikulum</option>
+                      <option value="modern">Modern</option>
+                      <option value="salaf">Salaf</option>
+                      <option value="campuran">Campuran</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="border-t border-border pt-4 mt-4">
-                  <label class="form-label text-sm font-medium mb-1.5 block">Urutkan</label>
-                  <select class="form-select w-full" v-model="sortField" @change="fetchData">
-                    <option value="">Default</option>
-                    <option value="nama">Nama</option>
-                    <option value="tahun_berdiri">Tahun Berdiri</option>
-                    <option value="jumlah_santri">Jumlah Santri</option>
-                    <option value="biaya_bulanan">Biaya Bulanan</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="form-label text-sm font-medium mb-1.5 block">Urutan</label>
-                  <select class="form-select w-full" v-model="sortOrder" @change="fetchData">
-                    <option value="asc">Naik (A-Z)</option>
-                    <option value="desc">Turun (Z-A)</option>
-                  </select>
+                <div class="border-t border-border pt-5 mt-5">
+                  <label class="form-label">Urutkan Berdasarkan</label>
+                  <div class="relative mb-3">
+                    <select class="form-input appearance-none pr-10" v-model="sortField" @change="fetchData">
+                      <option value="">Default (Relevansi)</option>
+                      <option value="nama">Nama Pesantren</option>
+                      <option value="tahun_berdiri">Tahun Berdiri</option>
+                      <option value="jumlah_santri">Jumlah Santri</option>
+                      <option value="biaya_bulanan">Biaya Bulanan</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
+                  
+                  <div class="flex gap-2">
+                    <label class="flex-1 cursor-pointer">
+                      <input type="radio" name="sortOrder" value="asc" v-model="sortOrder" @change="fetchData" class="sr-only peer">
+                      <div class="text-center py-2 border rounded-lg peer-checked:bg-primary/10 peer-checked:border-primary peer-checked:text-primary transition-colors text-sm font-medium">Naik</div>
+                    </label>
+                    <label class="flex-1 cursor-pointer">
+                      <input type="radio" name="sortOrder" value="desc" v-model="sortOrder" @change="fetchData" class="sr-only peer">
+                      <div class="text-center py-2 border rounded-lg peer-checked:bg-primary/10 peer-checked:border-primary peer-checked:text-primary transition-colors text-sm font-medium">Turun</div>
+                    </label>
+                  </div>
                 </div>
 
                 <button 
-                  class="btn btn-outline w-full py-2 mt-2 text-sm"
+                  class="btn btn-outline w-full mt-4 justify-center py-2.5"
                   @click="resetFilters"
                 >
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                   </svg>
                   Reset Filter
@@ -84,133 +114,117 @@
 
         <!-- Right Content - Results -->
         <div class="lg:col-span-3">
-      <div v-if="loading" class="text-center py-16">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-        <p class="mt-4 text-muted text-lg">Memuat data pesantren...</p>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else-if="pesantren.length === 0" class="text-center py-16 card border-0 shadow-lg">
-        <div class="py-8">
-          <div class="text-6xl mb-4">🕌</div>
-          <h3 class="font-semibold text-2xl mb-2">Tidak ada pesantren ditemukan</h3>
-          <p class="text-muted text-lg">Coba ubah filter atau kata kunci pencarian Anda</p>
-        </div>
-      </div>
-
-      <!-- Results -->
-      <div v-else>
-        <!-- Results Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div class="flex items-center gap-2">
-            <span class="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary px-4 py-1.5 text-sm font-semibold">
-              {{ totalRecords }} Pesantren
-            </span>
-            <span class="text-muted text-sm">ditemukan</span>
+          <!-- Loading State -->
+          <div v-if="loading" class="flex flex-col items-center justify-center py-20 animate-fade-in">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary"></div>
+            <p class="mt-4 text-muted-foreground font-medium">Mencari pesantren terbaik...</p>
           </div>
-          <router-link v-if="compareStore.hasItems" to="/compare" class="btn btn-primary flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-            </svg>
-            Bandingkan ({{ compareStore.count }})
-          </router-link>
-        </div>
 
-        <!-- Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div v-for="p in pesantren" :key="p.id" 
-               class="card group block overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-            <router-link :to="`/pesantren/${p.id}`" class="block">
-              <div class="relative aspect-video overflow-hidden">
-                <img
-                  v-if="p.foto_utama"
-                  :src="getUploadUrl(p.foto_utama)"
-                  :alt="p.nama"
-                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div v-else class="h-full w-full bg-gray-100 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="text-4xl mb-2">🏫</div>
-                    <span class="text-muted text-sm">Foto belum tersedia</span>
+          <!-- Empty State -->
+          <div v-else-if="pesantren.length === 0" class="text-center py-20 card flex flex-col items-center animate-fade-in">
+            <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <h3 class="font-heading text-2xl font-bold text-foreground mb-2">Pencarian Tidak Ditemukan</h3>
+            <p class="text-muted-foreground mb-6 max-w-md">Kami tidak dapat menemukan pesantren yang cocok dengan filter yang Anda pilih. Coba sesuaikan kriteria pencarian Anda.</p>
+            <button class="btn btn-primary" @click="resetFilters">Reset Pencarian</button>
+          </div>
+
+          <!-- Results Grid -->
+          <div v-else class="animate-fade-in delay-3">
+            <!-- Results Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex items-center justify-center rounded-full bg-primary text-white px-3 py-1 font-bold shadow-sm">
+                  {{ totalRecords }}
+                </span>
+                <span class="text-foreground font-medium">Pesantren tersedia</span>
+              </div>
+              <router-link v-if="compareStore.hasItems" to="/compare" class="btn btn-outline border-accent text-accent hover:bg-accent/10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Bandingkan Pilihan ({{ compareStore.count }})
+              </router-link>
+            </div>
+
+            <!-- Cards -->
+            <div class="pesantren-grid mb-10">
+              <div v-for="p in pesantren" :key="p.id" class="card group overflow-hidden flex flex-col h-full">
+                <router-link :to="`/pesantren/${p.id}`" class="block relative aspect-video overflow-hidden border-b border-border">
+                  <img
+                    :src="p.foto_utama ? getUploadUrl(p.foto_utama) : 'https://placehold.co/600x400/0D4F4F/D4A843?text=Pesantren&font=playfair-display'"
+                    :alt="p.nama"
+                    class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <span class="absolute left-3 top-3 px-3 py-1 bg-primary/90 backdrop-blur-sm text-white text-xs font-bold uppercase tracking-wider rounded-full">
+                    {{ p.kurikulum || 'Modern' }}
+                  </span>
+                </router-link>
+                
+                <div class="p-5 flex-1 flex flex-col">
+                  <router-link :to="`/pesantren/${p.id}`" class="block mb-2 group-hover:text-primary transition-colors">
+                    <h3 class="font-heading text-xl font-bold line-clamp-1" :title="p.nama">{{ p.nama }}</h3>
+                  </router-link>
+                  
+                  <div class="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
+                    <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="line-clamp-1">{{ p.kota }}, {{ p.province }}</span>
+                  </div>
+                  
+                  <div class="mt-auto pt-4 border-t border-border flex items-center justify-between">
+                    <div>
+                      <p class="text-xs text-muted-foreground mb-0.5">Biaya Bulanan</p>
+                      <p class="font-bold text-primary">{{ formatCurrencyShort(p.biaya_bulanan) }}</p>
+                    </div>
+                    
+                    <!-- Compare Toggle -->
+                    <button
+                      @click.prevent="toggleCompare(p.id)"
+                      class="w-10 h-10 rounded-full flex items-center justify-center transition-all border shrink-0"
+                      :class="compareStore.isSelected(p.id) ? 'bg-accent border-accent text-white shadow-md' : 'bg-surface border-border text-muted-foreground hover:border-accent hover:text-accent'"
+                      :title="compareStore.isSelected(p.id) ? 'Telah ditambahkan ke perbandingan' : 'Tambahkan ke perbandingan'"
+                    >
+                      <svg v-if="compareStore.isSelected(p.id)" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    </button>
                   </div>
                 </div>
-                <span class="badge badge-primary absolute left-3 top-3">
-                  {{ p.kurikulum || 'Umum' }}
-                </span>
               </div>
-              <div class="p-5">
-                <h3 class="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                  {{ p.nama }}
-                </h3>
-                <div class="mt-2 flex items-center gap-1.5 text-sm text-muted">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span class="line-clamp-1">{{ p.kota }}, {{ p.province }}</span>
-                </div>
-                <div class="mt-4 flex items-center justify-between">
-                  <span class="text-lg font-bold text-primary">{{ p.biaya_bulanan ? formatCurrency(p.biaya_bulanan) : '-' }}</span>
-                </div>
-                <div v-if="p.fasilitas && p.fasilitas.length" class="mt-3 flex flex-wrap gap-1.5">
-                  <span v-for="f in p.fasilitas.slice(0, 4)" :key="f" class="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted">
-                    {{ f }}
-                  </span>
-                  <span v-if="p.fasilitas.length > 4" class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary font-semibold">
-                    +{{ p.fasilitas.length - 4 }}
-                  </span>
-                </div>
-              </div>
-            </router-link>
-            
-            <!-- Compare Button (outside router-link) -->
-            <div class="px-5 pb-4">
-              <button
-                class="btn w-full text-sm py-2 transition-all"
-                :class="compareStore.isSelected(p.id) ? 'bg-primary text-white' : 'btn-outline'"
-                @click="toggleCompare(p.id)"
-                :title="compareStore.isSelected(p.id) ? 'Hapus dari perbandingan' : 'Tambahkan ke perbandingan'"
-              >
-                <svg v-if="compareStore.isSelected(p.id)" class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                </svg>
-                <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
-                </svg>
-                {{ compareStore.isSelected(p.id) ? '✓ Dibandingkan' : '⚖️ Bandingkan' }}
-              </button>
             </div>
-          </div>
-        </div>
 
-        <!-- Pagination -->
-        <nav class="flex justify-center">
-          <div class="flex items-center gap-2">
-            <button 
-              class="btn btn-outline px-4 py-2" 
-              :disabled="currentPage <= 1"
-              @click="changePage(currentPage - 1)"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-              </svg>
-            </button>
-            <span class="px-4 py-2 text-sm font-medium">
-              Halaman {{ currentPage }} / {{ totalPages }}
-            </span>
-            <button 
-              class="btn btn-outline px-4 py-2" 
-              :disabled="currentPage >= totalPages"
-              @click="changePage(currentPage + 1)"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </button>
+            <!-- Pagination -->
+            <nav v-if="totalPages > 1" class="flex justify-center mt-12 mb-8">
+              <div class="inline-flex bg-card border border-border rounded-lg shadow-sm overflow-hidden p-1">
+                <button 
+                  class="px-4 py-2 text-primary hover:bg-muted font-medium rounded-md transition-colors disabled:opacity-30 disabled:pointer-events-none" 
+                  :disabled="currentPage <= 1"
+                  @click="changePage(currentPage - 1)"
+                >
+                  <span class="sr-only">Previous</span>
+                  &larr; Prev
+                </button>
+                <div class="flex items-center px-4 font-heading font-medium border-x border-border/50">
+                  <span class="text-foreground">{{ currentPage }}</span>
+                  <span class="text-muted-foreground mx-1">dari</span>
+                  <span class="text-foreground">{{ totalPages }}</span>
+                </div>
+                <button 
+                  class="px-4 py-2 text-primary hover:bg-muted font-medium rounded-md transition-colors disabled:opacity-30 disabled:pointer-events-none" 
+                  :disabled="currentPage >= totalPages"
+                  @click="changePage(currentPage + 1)"
+                >
+                  <span class="sr-only">Next</span>
+                  Next &rarr;
+                </button>
+              </div>
+            </nav>
           </div>
-        </nav>
         </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script setup>
@@ -222,7 +236,7 @@ import { useCompareStore } from '../stores/compare'
 const compareStore = useCompareStore()
 
 const pesantren = ref([])
-const loading = ref(false)
+const loading = ref(true)
 const provinces = ref([])
 const cities = ref([])
 const currentPage = ref(1)
@@ -239,30 +253,12 @@ const filters = ref({
 
 const totalPages = computed(() => Math.ceil(totalRecords.value / limit.value))
 
-function formatNumber(num) {
-  if (!num) return '-'
-  return new Intl.NumberFormat('id-ID').format(num)
-}
-
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount)
-}
-
 function formatCurrencyShort(amount) {
-  if (!amount) return '-'
+  if (!amount) return 'Hubungi Pesantren'
   if (amount >= 1000000) {
-    return 'Rp ' + (amount / 1000000).toFixed(1).replace('.0', '') + 'jt'
+    return 'Rp ' + (amount / 1000000).toFixed(1).replace('.0', '') + 'jt/bln'
   }
-  return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(amount)
-}
-
-function kurikulumBadge(kurikulum) {
-  const map = {
-    modern: 'bg-[hsl(231 84% 60%)] text-white',
-    salaf: 'bg-[#10b981] text-white',
-    campuran: 'bg-[#f59e0b] text-white'
-  }
-  return map[kurikulum] || 'bg-gray-500 text-white'
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount) + '/bln'
 }
 
 function toggleCompare(id) {
@@ -342,6 +338,10 @@ async function changePage(page) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
   loading.value = true
+  
+  // Scroll to top of list smoothly
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  
   try {
     const params = {
       page,
@@ -367,12 +367,3 @@ onMounted(async () => {
   await fetchData()
 })
 </script>
-
-<style scoped>
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>

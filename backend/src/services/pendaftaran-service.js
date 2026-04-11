@@ -7,13 +7,6 @@ const UPLOAD_DIR = path.join(__dirname, '../../uploads')
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true })
 
 const PendaftaranService = {
-  saveFile(file, fieldName) {
-    const ext = path.extname(file.filename) || '.jpg'
-    const filename = `${fieldName}-${Date.now()}${ext}`
-    const filePath = path.join(UPLOAD_DIR, filename)
-    file.toBuffer().then(buffer => fs.writeFileSync(filePath, buffer))
-    return filename
-  },
 
   async create(userId, data, files) {
     console.log('[PendaftaranService.create] Starting...');
