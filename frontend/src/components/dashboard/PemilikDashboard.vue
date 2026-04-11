@@ -1,1045 +1,853 @@
 <template>
-  <div>
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <div class="card" style="border-left: 4px solid hsl(231 84% 60%)">
-        <div class="p-4">
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="text-muted text-sm mb-1">Pesantren Saya</p>
-              <h3 class="font-bold mb-0">{{ pesantren.length }}</h3>
-            </div>
-            <div class="text-4xl text-primary opacity-50">🕌</div>
-          </div>
-        </div>
+  <div class="pemilik-dashboard">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4 px-2">
+      <div>
+        <p class="text-xs text-accent uppercase font-bold tracking-widest mb-1.5 flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg> Otoritas Institusi</p>
+        <h2 class="font-heading text-2xl md:text-3xl font-bold text-foreground">Dashboard Manajemen Pemilik</h2>
       </div>
-      <div class="card" style="border-left: 4px solid #3b82f6">
-        <div class="p-4">
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="text-muted text-sm mb-1">Total Mahasiswa</p>
-              <h3 class="font-bold mb-0">{{ totalSantri }}</h3>
-            </div>
-            <div class="text-4xl text-blue-500 opacity-50">👥</div>
-          </div>
-        </div>
-      </div>
-      <div class="card" style="border-left: 4px solid #22c55e">
-        <div class="p-4">
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="text-muted text-sm mb-1">Pendaftar Menunggu</p>
-              <h3 class="font-bold mb-0">{{ pendingCount }}</h3>
-            </div>
-            <div class="text-4xl text-green-500 opacity-50">📋</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="card mb-4">
-      <div class="border-b border-border">
-        <nav class="flex gap-1 p-2">
-          <button
-            @click="activeTab = 'pesantren'"
-            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            :class="activeTab === 'pesantren' ? 'bg-primary text-white' : 'text-muted hover:bg-muted'"
-          >
-            🕌 Pesantren Saya
-          </button>
-          <button
-            @click="activeTab = 'pendaftar'"
-            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors relative"
-            :class="activeTab === 'pendaftar' ? 'bg-primary text-white' : 'text-muted hover:bg-muted'"
-          >
-            📋 Pendaftar
-            <span v-if="pendingCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {{ pendingCount }}
-            </span>
-          </button>
-        </nav>
-      </div>
-    </div>
-
-    <!-- Pesantren Tab -->
-    <div v-if="activeTab === 'pesantren'" class="card">
-      <div class="flex justify-between items-center p-3 border-b border-border">
-        <h5 class="font-semibold mb-0">Pesantren Saya</h5>
-        <button class="btn btn-primary btn-sm" @click="openForm()" :disabled="!canAdd">
-          + Tambah Pesantren
+      
+      <!-- Segmented Control Tabs (Overrides old buttons) -->
+      <div class="flex gap-1 bg-muted/40 p-1.5 rounded-xl border border-border/60 shadow-inner w-full sm:w-auto overflow-x-auto">
+        <button
+          @click="activeTab = 'overview'"
+          class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-all focus:outline-none"
+          :class="activeTab === 'overview' ? 'bg-white text-accent shadow-md' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'"
+        >
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          Ikhtisar
+        </button>
+        <button
+          @click="activeTab = 'pesantren'"
+          class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-all focus:outline-none"
+          :class="activeTab === 'pesantren' ? 'bg-white text-accent shadow-md' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'"
+        >
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+          Inventaris Pesantren
+        </button>
+        <button
+          @click="activeTab = 'pendaftar'"
+          class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-lg transition-all focus:outline-none relative"
+          :class="activeTab === 'pendaftar' ? 'bg-white text-accent shadow-md' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'"
+        >
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          Delegasi Pendaftar
+          <span v-if="pendingCount > 0" class="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full border border-white animate-pulse"></span>
         </button>
       </div>
-      <div v-if="loading" class="text-center py-4">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-2 text-muted text-sm">Memuat data...</p>
-      </div>
-      <div v-else-if="pesantren.length === 0" class="text-center py-5">
-        <p class="text-3xl mb-3">🏫</p>
-        <h6 class="font-semibold">Belum ada pesantren</h6>
-        <p class="text-muted text-sm mb-3">Tambahkan pesantren Anda untuk mulai mengelola</p>
-        <button class="btn btn-primary btn-sm" @click="openForm()">+ Tambah Pesantren</button>
-      </div>
-      <div v-else>
-        <div
-          v-for="p in pesantren"
-          :key="p.id"
-          class="p-3 border-b border-border"
-        >
-          <div class="flex justify-between items-center">
+    </div>
+
+    <!-- Active Content Area -->
+    <div class="relative min-h-[400px]">
+      
+      <!-- TAB: OVERVIEW -->
+      <div v-show="activeTab === 'overview'" class="animate-fade-in">
+         <!-- Stat Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="card bg-white border border-border/80 shadow-md rounded-2xl p-6 relative overflow-hidden group">
+            <div class="absolute right-0 top-0 w-32 h-32 bg-accent/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+            <div class="flex justify-between items-start mb-4">
+              <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 text-accent flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+              </div>
+            </div>
             <div>
-              <h6 class="font-semibold mb-1">{{ p.nama }}</h6>
-              <small class="text-muted">📍 {{ p.kota }}, {{ p.province }}</small>
-              <span v-if="p.kurikulum" class="badge ml-2" :class="kurikulumBadge(p.kurikulum)">{{ p.kurikulum }}</span>
+              <h3 class="font-heading text-4xl font-bold text-foreground mb-1">{{ pesantren.length }}</h3>
+              <p class="text-xs font-bold text-muted-foreground uppercase tracking-widest">Pesantren Dimiliki</p>
             </div>
-            <div class="flex gap-2">
-              <button class="btn btn-outline-primary btn-sm" @click="openForm(p)">Edit</button>
-              <button class="btn btn-outline-danger btn-sm" @click="confirmDelete(p)" :disabled="deletingId === p.id">
-                <span v-if="deletingId === p.id" class="spinner-border spinner-border-sm me-1"></span>
-                {{ deletingId === p.id ? 'Menghapus...' : 'Hapus' }}
-              </button>
+          </div>
+
+          <div class="card bg-white border border-border/80 shadow-md rounded-2xl p-6 relative overflow-hidden group">
+            <div class="absolute right-0 top-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+            <div class="flex justify-between items-start mb-4">
+              <div class="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+              </div>
+            </div>
+            <div>
+              <h3 class="font-heading text-4xl font-bold text-foreground mb-1">{{ formatNumber(totalSantri) }}</h3>
+              <p class="text-xs font-bold text-muted-foreground uppercase tracking-widest">Total Kapasitas Santri</p>
+            </div>
+          </div>
+
+          <div class="card bg-white border border-border/80 shadow-md rounded-2xl p-6 relative overflow-hidden group">
+            <div class="absolute right-0 top-0 w-32 h-32 bg-destructive/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+            <div class="flex justify-between items-start mb-4">
+              <div class="w-12 h-12 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive flex items-center justify-center relative">
+                 <span v-if="pendingCount > 0" class="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full animate-ping"></span>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              </div>
+            </div>
+            <div>
+              <h3 class="font-heading text-4xl font-bold text-foreground mb-1">{{ pendingCount }}</h3>
+              <p class="text-xs font-bold text-destructive uppercase tracking-widest">Dokumen Menunggu Aksi</p>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(0,0,0,0.5)">
-      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center p-4 border-b">
-          <h5 class="font-semibold text-lg">{{ editingId ? 'Edit Pesantren' : 'Tambah Pesantren' }}</h5>
-          <button type="button" class="text-2xl" @click="closeForm">&times;</button>
-        </div>
-        <div class="p-4">
-          <form @submit="onSubmit">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="form-label font-medium">Nama Pesantren *</label>
-                <input v-model="nama" v-bind="namaProps" type="text" class="form-input" :class="{ 'border-red-500': errors.nama }" />
-                <p v-if="errors.nama" class="text-red-500 text-sm mt-1">{{ errors.nama }}</p>
+        <!-- Quick actions / Empty states for overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div class="card bg-muted/40 border border-border rounded-2xl p-8 flex flex-col items-center justify-center text-center">
+              <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 text-accent">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
               </div>
-              <div>
-                <label class="form-label font-medium">Provinsi *</label>
-                <select v-model="province" v-bind="provinceProps" class="form-select" :class="{ 'border-red-500': errors.province }" @change="onProvinceChange">
-                  <option value="">Pilih Provinsi</option>
-                  <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
-                </select>
-                <p v-if="errors.province" class="text-red-500 text-sm mt-1">{{ errors.province }}</p>
-              </div>
-              <div>
-                <label class="form-label font-medium">Kota *</label>
-                <select v-model="kota" v-bind="kotaProps" class="form-select" :class="{ 'border-red-500': errors.kota }" :disabled="!cities.length && province">
-                  <option value="">Pilih Kota</option>
-                  <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
-                </select>
-                <p v-if="errors.kota" class="text-red-500 text-sm mt-1">{{ errors.kota }}</p>
-              </div>
-              <div>
-                <label class="form-label font-medium">Alamat</label>
-                <input v-model="alamat" v-bind="alamatProps" type="text" class="form-input" />
-              </div>
-              <div>
-                <label class="form-label font-medium">Kurikulum</label>
-                <select v-model="kurikulum" v-bind="kurikulumProps" class="form-select">
-                  <option value="">Pilih Kurikulum</option>
-                  <option value="modern">Modern</option>
-                  <option value="salaf">Salaf</option>
-                  <option value="campuran">Campuran</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label font-medium">Tahun Berdiri</label>
-                <input v-model="tahun_berdiri" v-bind="tahun_berdiriProps" type="number" class="form-input" :class="{ 'border-red-500': errors.tahun_berdiri }" min="1900" :max="currentYear" />
-                <p v-if="errors.tahun_berdiri" class="text-red-500 text-sm mt-1">{{ errors.tahun_berdiri }}</p>
-              </div>
-              <div>
-                <label class="form-label font-medium">Jumlah Santri</label>
-                <input v-model="jumlah_santri" v-bind="jumlah_santriProps" type="number" class="form-input" min="0" />
-              </div>
-              <div>
-                <label class="form-label font-medium">Jumlah Pengajar</label>
-                <input v-model="jumlah_pengajar" v-bind="jumlah_pengajarProps" type="number" class="form-input" min="0" />
-              </div>
-              <div>
-                <label class="form-label font-medium">Biaya Bulanan (Rp)</label>
-                <input v-model="biaya_bulanan" v-bind="biaya_bulananProps" type="number" class="form-input" min="0" />
-              </div>
-              <div>
-                <label class="form-label font-medium">Biaya Pendaftaran (Rp)</label>
-                <input v-model="biaya_pendaftaran" v-bind="biaya_pendaftaranProps" type="number" class="form-input" min="0" />
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label font-medium">Fasilitas</label>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  <label v-for="f in fasilitasOptions" :key="f" class="flex items-center">
-                    <input type="checkbox" :value="f" v-model="fasilitas" class="w-4 h-4 mr-2" />
-                    {{ f }}
-                  </label>
-                </div>
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label font-medium">Deskripsi</label>
-                <textarea v-model="deskripsi" v-bind="deskripsiProps" class="form-input" rows="3"></textarea>
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label font-medium">Telepon</label>
-                <input v-model="telepon" type="text" class="form-input" />
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label font-medium">Email</label>
-                <input v-model="email" type="email" class="form-input" />
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label font-medium">Website</label>
-                <input v-model="website" type="url" placeholder="https://contoh.com" class="form-input" />
-              </div>
-              <div class="md:col-span-2 border-t border-border pt-4 mt-2">
-                <h6 class="font-semibold mb-3">Informasi Rekening Pembayaran</h6>
-              </div>
-              <div>
-                <label class="form-label font-medium">Nama Bank</label>
-                <input v-model="nama_bank" type="text" placeholder="Contoh: BRI, BNI, Mandiri" class="form-input" />
-              </div>
-              <div>
-                <label class="form-label font-medium">Nomor Rekening</label>
-                <input v-model="nomor_rekening" type="text" class="form-input" />
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label font-medium">Atas Nama Rekening</label>
-                <input v-model="atas_nama_rekening" type="text" class="form-input" />
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label font-medium">Foto Utama</label>
-                <input type="file" @change="onFileChange" accept="image/jpeg,image/jpg,image/png,image/webp" class="form-input" />
-                <p class="text-muted text-sm mt-1">Format: JPG, JPEG, PNG, WEBP. Maksimal 1MB</p>
-                <div v-if="fotoPreview" class="mt-3 relative">
-                  <img :src="fotoPreview" class="w-full h-48 object-cover rounded-lg border" />
-                  <button v-if="editingId" type="button" @click="removeFotoUtama" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm shadow-lg">&times;</button>
-                </div>
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label font-medium">Galeri Foto (maksimal 5)</label>
-                <input type="file" @change="onGalleryChange" accept="image/jpeg,image/jpg,image/png,image/webp" multiple class="form-input" />
-                <p class="text-muted text-sm mt-1">Format: JPG, JPEG, PNG, WEBP. Maksimal 1MB per foto</p>
-                <div v-if="galleryPreview.length" class="grid grid-cols-3 gap-2 mt-3">
-                  <div v-for="(img, idx) in galleryPreview" :key="idx" class="relative">
-                    <img :src="img" class="w-full h-32 object-cover rounded-lg border" />
-                    <button type="button" @click="removeGallery(idx)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">&times;</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="flex justify-end gap-2 mt-4">
-              <button type="button" class="btn btn-outline" @click="closeForm">Batal</button>
-              <button type="submit" class="btn btn-primary" :disabled="submitting">
-                <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
-                {{ editingId ? 'Simpan' : 'Tambah' }}
-              </button>
-            </div>
-          </form>
+              <h4 class="font-heading font-bold mb-2">Perluas Jaringan</h4>
+              <p class="text-sm text-muted-foreground mb-6">Miliki cabang pesantren lain? Tambahkan kedalam ekosistem Santri Connect.</p>
+              <button @click="openForm(); activeTab='pesantren'" class="btn bg-white border border-border hover:border-accent text-foreground font-bold shadow-sm px-6">Tambah Institusi</button>
+           </div>
+           
+           <div class="card bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-2xl p-8 flex flex-col justify-center relative overflow-hidden">
+             <!-- decorative -->
+             <svg class="absolute right-0 bottom-0 text-primary w-48 h-48 opacity-5 transform translate-x-1/4 translate-y-1/4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+             <div class="relative z-10">
+               <span class="badge bg-primary/20 text-primary mb-3 font-bold border-0">{{ pendaftar.length }} Pendaftar Aktif</span>
+               <h4 class="font-heading font-bold text-xl mb-2">Tinjau Rekrutmen</h4>
+               <p class="text-sm text-muted-foreground mb-6 max-w-[80%]">Pantau ketat arus dokumen calon santri yang mendaftar pada portal pesantren Anda secara institusional.</p>
+               <button @click="activeTab='pendaftar'" class="btn btn-primary font-bold shadow-md shadow-primary/20 px-6">Buka Log Pendaftar</button>
+             </div>
+           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Pendaftar Tab -->
-    <div v-if="activeTab === 'pendaftar'" class="card">
-      <div class="p-4 border-b border-border">
-        <h5 class="font-semibold mb-0">Daftar Pendaftar Pesantren</h5>
-        <p class="text-muted text-sm mt-1">Terima atau tolak pendaftar yang mendaftar ke pesantren Anda</p>
-      </div>
-
-      <div v-if="pendaftarLoading" class="text-center py-8">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-3 text-muted text-sm">Memuat data pendaftar...</p>
-      </div>
-
-      <div v-else-if="pendaftar.length === 0" class="text-center py-8">
-        <p class="text-4xl mb-3">📭</p>
-        <h6 class="font-semibold">Belum ada pendaftar</h6>
-        <p class="text-muted text-sm mt-1">Pendaftar akan muncul ketika ada yang mendaftar ke pesantren Anda</p>
-      </div>
-
-      <div v-else>
-        <!-- Filter by Status -->
-        <div class="p-3 border-b border-border flex gap-2 flex-wrap">
-          <button
-            v-for="status in ['semua', 'pending', 'diterima', 'ditolak']"
-            :key="status"
-            @click="filterStatus = status"
-            class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-            :class="filterStatus === status ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
-          >
-            {{ status === 'semua' ? 'Semua' : status === 'pending' ? '⏳ Pending' : status === 'diterima' ? '✅ Diterima' : '❌ Ditolak' }}
-            <span v-if="status !== 'semua'" class="ml-1 opacity-75">({{ pendaftar.filter(p => p.status === status).length }})</span>
+      <!-- TAB: PESANTREN -->
+      <div v-if="activeTab === 'pesantren'" class="animate-fade-in">
+        <div class="flex justify-end mb-4">
+          <button class="btn btn-accent shadow-md shadow-accent/20 px-6 font-bold inline-flex items-center gap-2" @click="openForm()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Entri Pesantren Baru
           </button>
         </div>
 
-        <!-- Pendaftar List -->
-        <div
-          v-for="p in filteredPendaftar"
-          :key="p.id"
-          class="p-4 border-b border-border hover:bg-muted/30 transition-colors"
-        >
-          <div class="flex flex-col md:flex-row md:items-start gap-4">
-            <!-- Info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-start gap-3">
-                <div class="flex-1 min-w-0">
-                  <h6 class="font-semibold text-base truncate">{{ p.nama_lengkap }}</h6>
-                  <p class="text-muted text-sm">📍 {{ p.pesantren?.nama || 'Pesantren' }}</p>
-                  <p class="text-xs text-muted mt-1">
-                    📋 {{ p.nomor_pendaftaran }} • {{ formatDate(p.created_at) }}
-                  </p>
-                  <div class="flex flex-wrap gap-2 mt-2 text-xs text-muted">
-                    <span>📞 {{ p.no_hp || '-' }}</span>
-                    <span v-if="p.jenis_kelamin">• {{ p.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
-                  </div>
-                </div>
-                <span class="badge text-xs px-2 py-1 whitespace-nowrap" :class="statusBadge(p.status)">
-                  {{ statusLabel(p.status) }}
-                </span>
-              </div>
+        <div v-if="loading" class="flex flex-col justify-center items-center py-20 card bg-white border border-border rounded-xl">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-accent/20 border-t-accent mb-4"></div>
+          <p class="text-sm font-medium text-muted-foreground">Melakukan sinkronisasi data institusi...</p>
+        </div>
 
-              <!-- Catatan Admin -->
-              <div v-if="p.catatan_admin" class="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-                <strong>Catatan:</strong> {{ p.catatan_admin }}
-              </div>
+        <div v-else-if="pesantren.length === 0" class="card bg-white border border-border rounded-xl p-16 text-center shadow-sm">
+          <div class="w-20 h-20 bg-muted/40 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm text-muted-foreground/60">
+             <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+          </div>
+          <h6 class="font-heading font-bold text-lg mb-2">Belum Memiliki Otoritas Pesantren</h6>
+          <p class="text-muted-foreground text-sm max-w-[300px] mx-auto mb-6">Mulai masukkan unit pendidikan yang Anda kelola untuk mengaktifkan modul penerimaan.</p>
+          <button class="btn btn-outline border-border hover:bg-muted font-bold" @click="openForm()">Daftarkan Sekarang</button>
+        </div>
 
-              <!-- Action Buttons -->
-              <div v-if="p.status === 'pending'" class="flex gap-2 mt-3">
-                <button
-                  @click="openStatusModal(p, 'diterima')"
-                  class="btn btn-success btn-sm"
-                  :disabled="processingId === p.id"
-                >
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Terima
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div v-for="p in pesantren" :key="p.id" class="card bg-white border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all group flex flex-col">
+            <!-- image cap -->
+            <div class="h-40 bg-muted relative overflow-hidden shrink-0">
+               <img v-if="p.foto_utama" :src="getImageUrl(p.foto_utama)" :alt="p.nama" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+               <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground bg-muted/50">
+                 <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+               </div>
+               <!-- overlay gradient -->
+               <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+               <span class="absolute bottom-3 left-4 text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 bg-white/20 backdrop-blur-sm rounded">ID #{{ String(p.id).padStart(4, '0') }}</span>
+            </div>
+            <!-- card body -->
+            <div class="p-5 flex-1 flex flex-col">
+              <h5 class="font-heading font-bold text-lg mb-1 line-clamp-1" :title="p.nama">{{ p.nama }}</h5>
+              <p class="text-sm text-muted-foreground flex items-center gap-1.5 mb-4">
+                <svg class="w-4 h-4 text-accent/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                {{ p.kota }}, {{ p.province }}
+              </p>
+              
+              <div class="grid grid-cols-2 gap-2 mb-5 shrink-0">
+                 <div class="bg-muted/30 border border-border/60 rounded p-2 text-center">
+                   <p class="text-[10px] uppercase font-bold text-muted-foreground mb-0.5.">Santri</p>
+                   <p class="font-mono font-bold text-sm">{{ p.jumlah_santri || '-' }}</p>
+                 </div>
+                 <div class="bg-muted/30 border border-border/60 rounded p-2 text-center">
+                   <p class="text-[10px] uppercase font-bold text-muted-foreground mb-0.5">Kurikulum</p>
+                   <p class="font-bold text-xs" :class="p.kurikulum ? 'text-foreground capitalize' : 'text-muted-foreground'">{{ p.kurikulum || 'N-A' }}</p>
+                 </div>
+              </div>
+              
+              <!-- actions -->
+              <div class="flex gap-2 mt-auto pt-4 border-t border-border/60">
+                <button class="btn btn-outline border-border hover:bg-muted font-bold text-xs py-2 flex-1 flex justify-center items-center gap-1.5" @click="openForm(p)">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                  Perbarui
                 </button>
-                <button
-                  @click="openStatusModal(p, 'ditolak')"
-                  class="btn btn-danger btn-sm"
-                  :disabled="processingId === p.id"
-                >
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Tolak
+                 <button class="btn bg-destructive/10 text-destructive hover:bg-destructive hover:text-white font-bold text-xs py-2 px-3 transition-colors shrink-0 border border-destructive/20" @click="confirmDelete(p)" title="Hapus Permanen">
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Status Update Modal -->
-    <div v-if="showStatusModal" class="fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(0,0,0,0.5)">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <div class="text-center mb-4">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-3" :class="statusAction === 'diterima' ? 'bg-green-100' : 'bg-red-100'">
-            <svg v-if="statusAction === 'diterima'" class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <svg v-else class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+      <!-- TAB: PENDAFTAR -->
+      <div v-show="activeTab === 'pendaftar'" class="animate-fade-in card bg-white border border-border shadow-sm rounded-2xl overflow-hidden min-h-[400px]">
+        <div class="px-6 py-5 border-b border-border bg-gradient-to-r from-primary/5 to-transparent flex justify-between items-center sm:hidden">
+            <h5 class="font-heading font-bold text-xl text-primary-dark">Auditor Pendaftar</h5>
+        </div>
+        
+        <div class="px-6 py-4 bg-muted/30 border-b border-border flex flex-col sm:flex-row gap-4 items-center justify-between">
+           <!-- Pesantren Filter for Pendaftar Table -->
+           <div class="flex items-center gap-3 w-full sm:w-auto">
+             <label class="text-xs font-bold text-muted-foreground uppercase tracking-wider shrink-0 hidden sm:block">Filter Institusi:</label>
+             <select v-model="filterPesantrenId" class="form-input text-sm border border-border w-full sm:w-64 py-2 font-medium bg-white rounded-lg focus:border-primary">
+               <option value="">-- Tampilkan Semua Cabang --</option>
+               <option v-for="p in pesantren" :key="p.id" :value="p.id">{{ p.nama }}</option>
+             </select>
+           </div>
+           
+           <!-- Search inline -->
+           <div class="relative w-full sm:w-64 shrink-0">
+             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pt-0.5 text-muted-foreground">
+               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+             </span>
+             <input type="text" class="w-full form-input pl-10 py-2 border border-border rounded-lg text-sm bg-white focus:border-primary" placeholder="Cari Nama / No Pendaftaran..." v-model="searchQuery">
+           </div>
+        </div>
+
+        <div v-if="loadingPendaftar" class="flex justify-center items-center py-20">
+             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary/20 border-t-primary"></div>
+        </div>
+        <div v-else-if="filteredPendaftar.length === 0" class="text-center py-20">
+          <div class="w-16 h-16 bg-muted/40 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm text-muted-foreground/50">
+             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
           </div>
-          <h3 class="text-lg font-semibold">
-            {{ statusAction === 'diterima' ? 'Terima Pendaftar?' : 'Tolak Pendaftar?' }}
-          </h3>
-          <p class="text-sm text-muted mt-1">{{ statusTarget?.nama_lengkap }}</p>
-          <p class="text-xs text-muted">{{ statusTarget?.nomor_pendaftaran }}</p>
+          <h6 class="font-bold text-lg text-foreground mb-1">Log Bersih</h6>
+          <p class="text-sm text-muted-foreground">Tidak ditemukan antrian pendaftar aktif.</p>
         </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-1.5">Catatan (Opsional)</label>
-          <textarea
-            v-model="statusCatatan"
-            rows="3"
-            class="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
-            :placeholder="statusAction === 'diterima' ? 'Contoh: Selamat, Anda diterima. Silakan lapor...' : 'Contoh: Kuota sudah penuh...'"
-          ></textarea>
-        </div>
-
-        <div class="flex gap-3">
-          <button
-            type="button"
-            class="btn btn-outline flex-1"
-            @click="closeStatusModal"
-            :disabled="processingId"
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            class="btn flex-1 "
-            :class="statusAction === 'diterima' ? 'btn-success' : 'btn-danger'"
-            @click="executeStatusUpdate"
-            :disabled="processingId"
-          >
-            <span v-if="processingId" class="spinner-border  spinner-border-sm me-2"></span>
-            {{ processingId ? 'Memproses...' : (statusAction === 'diterima' ? '✅ Terima' : '❌ Tolak') }}
-          </button>
+        
+         <!-- Pendaftar Grid/Cards instead of basic table for mobile flex -->
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-left whitespace-nowrap">
+            <thead class="bg-muted/20 border-y border-border/60 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              <tr>
+                <th class="px-6 py-4">Entitas Registran</th>
+                <th class="px-6 py-4">No. Kontak</th>
+                <th class="px-6 py-4">Status & Waktu</th>
+                <th class="px-6 py-4 text-center">Otorisasi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border/60">
+               <tr v-for="p in filteredPendaftar" :key="p.id" class="hover:bg-primary/5 transition-colors group">
+                 <td class="px-6 py-4">
+                   <p class="font-bold text-sm text-foreground mb-0.5">{{ p.nama_lengkap }}</p>
+                   <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <span class="font-mono bg-muted/50 px-1 py-0.5 rounded border border-border/50 text-foreground">{{ p.nomor_pendaftaran }}</span>
+                      <span class="truncate max-w-[150px] opacity-70" :title="p.pesantren?.nama">{{ p.pesantren?.nama }}</span>
+                   </div>
+                 </td>
+                 <td class="px-6 py-4">
+                   <p class="font-mono text-sm font-medium">{{ p.no_hp || '-' }}</p>
+                 </td>
+                 <td class="px-6 py-4">
+                    <span class="inline-flex px-2 py-0.5 rounded border text-[10px] uppercase font-bold tracking-widest shadow-[0_1px_2px_rgba(0,0,0,0.05)] mb-1" :class="statusBadge(p.status)">
+                      {{ statusLabel(p.status) }}
+                    </span>
+                    <p class="text-xs text-muted-foreground flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      {{ formatDate(p.created_at) }}
+                    </p>
+                 </td>
+                 <td class="px-6 py-4 text-center">
+                    <button class="btn btn-outline border-border hover:border-primary hover:text-primary hover:bg-primary/5 px-4 py-1.5 text-xs font-bold transition-colors shadow-sm" @click="openPendaftarModal(p)">
+                      Verifikasi Berkas
+                    </button>
+                 </td>
+               </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-    </div>
+    </div><!-- End Active Area -->
 
-    <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(0,0,0,0.5)">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-        <div class="text-center">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-            </svg>
+    <!-- Form Modal (Pesantren) - Simplified visually -->
+    <Teleport to="body">
+      <div v-if="showForm" class="fixed inset-0 z-[100] flex justify-center p-4 sm:p-6" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-full overflow-hidden flex flex-col animate-slide-up relative mt-10 md:mt-0">
+          
+          <div class="px-8 py-5 border-b border-border bg-gradient-to-r from-accent/5 to-transparent flex justify-between items-center shrink-0">
+             <div>
+               <h5 class="font-heading font-bold text-xl text-accent-foreground mb-0.5">{{ editingId ? 'Restrukturisasi Database Pesantren' : 'Onboarding Cabang Pesantren' }}</h5>
+               <p class="text-xs text-muted-foreground uppercase tracking-widest font-bold">Modul Manajemen Kepemilikan</p>
+             </div>
+             <button type="button" class="w-8 h-8 rounded-full bg-muted hover:bg-destructive hover:text-white flex items-center justify-center transition-colors" @click="closeForm">
+               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+             </button>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">Hapus Pesantren?</h3>
-          <p class="text-sm text-gray-600 mb-1">Apakah Anda yakin ingin menghapus</p>
-          <p class="text-base font-bold text-gray-900 mb-4">"{{ deleteTarget?.nama }}"?</p>
-          <p class="text-xs text-red-500 mb-6">⚠️ Tindakan ini tidak dapat dibatalkan. Semua data termasuk foto akan dihapus permanen.</p>
-        </div>
-        <div class="flex gap-3">
-          <button
-            type="button"
-            class="btn btn-outline flex-1"
-            @click="closeDeleteModal"
-            :disabled="deletingId"
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            class="btn btn-danger flex-1"
-            @click="executeDelete"
-            :disabled="deletingId"
-          >
-            <span v-if="deletingId" class="spinner-border spinner-border-sm me-2"></span>
-            {{ deletingId ? 'Menghapus...' : 'Ya, Hapus' }}
-          </button>
+
+          <div class="p-8 overflow-y-auto flex-1 custom-scrollbar">
+            <!-- We rely on same form schema as AdminPesantrenManagement, but inject stylistic updates inline here -->
+            <form @submit="onSubmit">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                <div class="md:col-span-2">
+                  <label class="form-label font-bold text-sm mb-1 block">Nama Resmi Pesantren <span class="text-destructive">*</span></label>
+                  <input v-model="nama" v-bind="namaProps" type="text" class="w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" :class="{ 'border-destructive': errors.nama }" />
+                  <p v-if="errors.nama" class="text-destructive text-xs font-bold mt-1">{{ errors.nama }}</p>
+                </div>
+                
+                <div>
+                  <label class="form-label font-bold text-sm mb-1 block">Provinsi Wilayah <span class="text-destructive">*</span></label>
+                  <select v-model="province" v-bind="provinceProps" class="form-input appearance-none w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none bg-white" :class="{ 'border-destructive': errors.province }">
+                    <option value="">Pilih Provinsi</option>
+                    <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="form-label font-bold text-sm mb-1 block">Kota Administrasi <span class="text-destructive">*</span></label>
+                  <input v-model="kota" v-bind="kotaProps" type="text" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" :class="{ 'border-destructive': errors.kota }" />
+                </div>
+                
+                <div class="md:col-span-2">
+                  <label class="form-label font-bold text-sm mb-1 block">Detail Alamat Lengkap</label>
+                  <input v-model="alamat" v-bind="alamatProps" type="text" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" />
+                </div>
+
+                 <div>
+                  <label class="form-label font-bold text-sm mb-1 block">Sistem Kurikulum</label>
+                  <select v-model="kurikulum" v-bind="kurikulumProps" class="form-input appearance-none w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none bg-white">
+                    <option value="">Tanpa Setup</option>
+                    <option value="modern">Pesantren Modern</option>
+                    <option value="salaf">Pesantren Salaf</option>
+                    <option value="campuran">Hibrida/Campuran</option>
+                  </select>
+                </div>
+                
+                 <div>
+                  <label class="form-label font-bold text-sm mb-1 block">Kapasiti Santri Aktif</label>
+                  <input v-model="jumlah_santri" v-bind="jumlah_santriProps" type="number" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none font-mono" />
+                </div>
+                 
+                 <div class="md:col-span-2 space-y-4 pt-4 border-t border-border/60">
+                    <h6 class="font-bold text-sm uppercase tracking-widest text-muted-foreground">Kalkulasi Keuangan (Rp)</h6>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="form-label text-sm mb-1 block font-semibold">Uang Masuk Pendaftaran</label>
+                        <input v-model="biaya_pendaftaran" v-bind="biaya_pendaftaranProps" type="number" class="form-input w-full px-4 py-2 border-2 rounded-xl border-border focus:border-accent" min="0" />
+                      </div>
+                      <div>
+                        <label class="form-label text-sm mb-1 block font-semibold">Tanggungan Syahriah (Bulan)</label>
+                        <input v-model="biaya_bulanan" v-bind="biaya_bulananProps" type="number" class="form-input w-full px-4 py-2 border-2 rounded-xl border-border focus:border-accent" min="0" />
+                      </div>
+                    </div>
+                 </div>
+                 
+                 <div class="md:col-span-2">
+                   <label class="form-label font-bold text-sm mb-1 block">Penjelasan Narasi Singkat</label>
+                   <textarea v-model="deskripsi" v-bind="deskripsiProps" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent resize-none" rows="3"></textarea>
+                 </div>
+                 
+                 <!-- Media Upload UI -->
+                 <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <!-- Foto Utama -->
+                   <div class="border-2 border-dashed rounded-2xl p-5 hover:border-accent/50 transition-colors bg-muted/10 relative group" :class="{ 'border-destructive': fileErrors.foto_utama }">
+                      <label class="form-label block mb-2 font-bold text-sm">Visual Thumbnail Utama *</label>
+                      <input @change="handleFileUpload('foto_utama', $event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" type="file" accept="image/jpeg,image/png,image/jpg" />
+                      <div class="text-center py-2">
+                        <div class="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center text-accent mx-auto mb-2">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <p class="text-xs font-bold text-accent">Pilih Foto Utama</p>
+                      </div>
+                      <div v-if="files.foto_utama" class="mt-2 text-[10px] font-bold bg-white p-2 border border-border rounded flex justify-between items-center relative z-20">
+                        <span class="truncate pr-2 text-success">✓ {{ files.foto_utama.name }}</span>
+                        <button type="button" class="text-destructive font-bold" @click="removeFile('foto_utama')">&times;</button>
+                      </div>
+                   </div>
+
+                   <!-- Foto Galeri -->
+                   <div class="border-2 border-dashed rounded-2xl p-5 hover:border-accent/50 transition-colors bg-muted/10 relative group" :class="{ 'border-destructive': fileErrors.foto_galeri }">
+                      <label class="form-label block mb-2 font-bold text-sm">Media Galeri (Maks 5)</label>
+                      <input @change="handleFileUpload('foto_galeri', $event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" type="file" accept="image/jpeg,image/png,image/jpg" multiple />
+                      <div class="text-center py-2">
+                        <div class="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center text-accent mx-auto mb-2">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <p class="text-xs font-bold text-accent">Pilih Foto Galeri</p>
+                      </div>
+                      <div v-if="files.foto_galeri.length > 0" class="mt-2 relative z-20">
+                        <div class="flex flex-col gap-1 max-h-20 overflow-y-auto">
+                           <div v-for="(file, index) in files.foto_galeri" :key="index" class="bg-white px-2 py-1 border border-border rounded flex justify-between items-center text-[10px] font-bold">
+                             <span class="truncate pr-2 text-success">✓ {{ file.name }}</span>
+                             <button type="button" class="text-destructive font-bold" @click="removeGalleryFile(index)">&times;</button>
+                           </div>
+                        </div>
+                      </div>
+                   </div>
+                 </div>
+              </div>
+              
+              <div v-if="serverError" class="mt-4 p-3 bg-destructive/10 text-destructive text-sm font-bold rounded-lg">{{ serverError }}</div>
+
+              <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-border bg-white sticky bottom-0 -mx-8 px-8 pb-2">
+                <button type="button" class="btn btn-outline border-border hover:bg-muted font-bold px-6 py-2.5 rounded-xl" @click="closeForm">Buang Skenario</button>
+                <button type="submit" class="btn bg-accent text-white px-8 py-2.5 rounded-xl font-bold shadow-md hover:bg-accent-light" :disabled="isSubmitting">
+                   {{ isSubmitting ? 'Mengeksekusi...' : 'Eksekusi Modifikasi' }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
+
+    <!-- Modal Pendaftar Detail -->
+    <Teleport to="body">
+       <div v-if="selectedPendaftar" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+          <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-up transform border border-border">
+             <div class="px-8 py-5 border-b border-border bg-gradient-to-r from-primary/5 to-transparent flex justify-between items-start shrink-0">
+               <div>
+                 <div class="flex items-center gap-2 mb-1">
+                    <h5 class="font-heading font-bold text-xl text-foreground m-0">Verifikasi Berkas Pendaftar</h5>
+                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded shadow-sm border" :class="statusBadge(selectedPendaftar.status)">{{ statusLabel(selectedPendaftar.status) }}</span>
+                 </div>
+                 <p class="text-xs text-muted-foreground font-mono">Kode: {{ selectedPendaftar.nomor_pendaftaran }}</p>
+               </div>
+               <button @click="closePendaftarModal" class="w-8 h-8 rounded-full bg-muted hover:bg-destructive hover:text-white flex items-center justify-center transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+               </button>
+             </div>
+             
+             <div class="p-8 overflow-y-auto flex-1">
+                <!-- Identity Info -->
+                <h6 class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3">Data Identitas</h6>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                   <div>
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-0.5">Nama Lengkap</p>
+                      <p class="font-semibold text-sm">{{ selectedPendaftar.nama_lengkap }}</p>
+                   </div>
+                   <div>
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-0.5">NIK</p>
+                      <p class="font-mono text-sm font-semibold">{{ selectedPendaftar.nik || '-' }}</p>
+                   </div>
+                   <div>
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-0.5">Jenis Kelamin</p>
+                      <p class="text-sm font-medium">{{ selectedPendaftar.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
+                   </div>
+                   <div>
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-0.5">Tempat, Tgl Lahir</p>
+                      <p class="text-sm font-medium">{{ selectedPendaftar.tempat_lahir || '-' }}, {{ formatDate(selectedPendaftar.tanggal_lahir) }}</p>
+                   </div>
+                   <div>
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-0.5">No. HP</p>
+                      <p class="font-mono text-sm font-medium">{{ selectedPendaftar.no_hp || '-' }}</p>
+                   </div>
+                   <div>
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-0.5">Pesantren Tujuan</p>
+                      <p class="font-bold text-sm text-primary">{{ selectedPendaftar.pesantren?.nama || selectedPendaftar.pesantren_nama }}</p>
+                   </div>
+                </div>
+
+                <!-- Parent Info -->
+                <h6 class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3">Data Orang Tua / Wali</h6>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                   <div>
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-0.5">Nama Ayah</p>
+                      <p class="text-sm font-medium">{{ selectedPendaftar.nama_ayah || '-' }}</p>
+                   </div>
+                   <div>
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-0.5">Nama Ibu</p>
+                      <p class="text-sm font-medium">{{ selectedPendaftar.nama_ibu || '-' }}</p>
+                   </div>
+                   <div>
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-0.5">No. HP Ortu</p>
+                      <p class="font-mono text-sm font-medium">{{ selectedPendaftar.no_hp_ortu || '-' }}</p>
+                   </div>
+                </div>
+
+                <!-- Document Preview -->
+                <h6 class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-3">Dokumen yang Diunggah</h6>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                   <div class="border border-border rounded-xl overflow-hidden">
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest px-3 py-2 bg-muted/30 border-b border-border">Foto KTP</p>
+                      <div class="aspect-[4/3] bg-muted/10 flex items-center justify-center">
+                         <img v-if="selectedPendaftar.foto_ktp" :src="getPendaftaranUrl(selectedPendaftar.foto_ktp)" alt="Foto KTP" class="w-full h-full object-contain p-2" @error="(e) => e.target.src=''" />
+                         <p v-else class="text-xs text-muted-foreground italic">Belum diunggah</p>
+                      </div>
+                   </div>
+                   <div class="border border-border rounded-xl overflow-hidden">
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest px-3 py-2 bg-muted/30 border-b border-border">Pas Foto</p>
+                      <div class="aspect-[4/3] bg-muted/10 flex items-center justify-center">
+                         <img v-if="selectedPendaftar.pas_foto" :src="getPendaftaranUrl(selectedPendaftar.pas_foto)" alt="Pas Foto" class="w-full h-full object-contain p-2" @error="(e) => e.target.src=''" />
+                         <p v-else class="text-xs text-muted-foreground italic">Belum diunggah</p>
+                      </div>
+                   </div>
+                   <div class="border border-border rounded-xl overflow-hidden">
+                      <p class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest px-3 py-2 bg-muted/30 border-b border-border">Kartu Keluarga</p>
+                      <div class="aspect-[4/3] bg-muted/10 flex items-center justify-center">
+                         <img v-if="selectedPendaftar.kartu_keluarga" :src="getPendaftaranUrl(selectedPendaftar.kartu_keluarga)" alt="Kartu Keluarga" class="w-full h-full object-contain p-2" @error="(e) => e.target.src=''" />
+                         <p v-else class="text-xs text-muted-foreground italic">Belum diunggah</p>
+                      </div>
+                   </div>
+                </div>
+
+                <!-- Existing notes -->
+                <div v-if="selectedPendaftar.catatan_admin" class="bg-destructive/5 border border-destructive/20 rounded-xl p-4 mb-4">
+                   <p class="text-[10px] uppercase font-bold text-destructive tracking-widest mb-1 mt-0 flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Catatan Sebelumnya
+                   </p>
+                   <p class="text-sm leading-relaxed">{{ selectedPendaftar.catatan_admin }}</p>
+                </div>
+
+                <!-- Notes input for action -->
+                <div class="mb-2">
+                   <label class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1 block">Catatan Verifikasi (Opsional)</label>
+                   <textarea v-model="verifikasiCatatan" rows="2" class="form-input w-full border border-border rounded-lg text-sm p-3 focus:border-primary" placeholder="Tambahkan catatan untuk pendaftar..."></textarea>
+                </div>
+             </div>
+             
+             <!-- Action Footer -->
+             <div class="px-8 py-5 bg-muted/20 border-t border-border shrink-0">
+                <div v-if="statusUpdateError" class="text-xs text-destructive font-medium mb-3 text-center">{{ statusUpdateError }}</div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                   <button class="btn bg-white border border-border shadow-sm font-bold text-sm px-6 flex-1" @click="closePendaftarModal" :disabled="updatingStatus">
+                     Tutup
+                   </button>
+                   <button 
+                     v-if="selectedPendaftar.status === 'pending' || selectedPendaftar.status === 'diproses'"
+                     class="btn bg-destructive/10 border border-destructive/30 text-destructive hover:bg-destructive hover:text-white font-bold text-sm px-6 flex-1 transition-all" 
+                     @click="handleStatusUpdate('ditolak')"
+                     :disabled="updatingStatus"
+                   >
+                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                     {{ updatingStatus ? 'Memproses...' : 'Tolak Pendaftar' }}
+                   </button>
+                   <button 
+                     v-if="selectedPendaftar.status === 'pending' || selectedPendaftar.status === 'diproses'"
+                     class="btn bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-6 flex-1 shadow-lg shadow-green-600/20 transition-all" 
+                     @click="handleStatusUpdate('diterima')"
+                     :disabled="updatingStatus"
+                   >
+                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                     {{ updatingStatus ? 'Memproses...' : 'Terima Pendaftar' }}
+                   </button>
+                </div>
+             </div>
+          </div>
+       </div>
+    </Teleport>
+    
+     <!-- Modal Delete Confirmation -->
+    <Teleport to="body">
+       <div v-if="showDeleteConfirm" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
+          <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm text-center p-6 border-2 border-destructive border-opacity-50">
+              <h3 class="font-bold text-lg text-destructive mb-2">Hapus Otoritas!</h3>
+              <p class="text-sm text-muted-foreground mb-4">Mencabut {{ deleteTarget?.nama }} dari kontrol anda tidak bisa dibatalkan.</p>
+              <div class="flex gap-2">
+                 <button class="btn btn-outline flex-1 py-2 font-bold" @click="showDeleteConfirm=false">Batal</button>
+                 <button class="btn bg-destructive hover:bg-red-700 text-white flex-1 py-2 font-bold shadow-lg shadow-destructive/20 transition-all transform active:scale-95" @click="executeDelete">SETUJU, HAPUS</button>
+              </div>
+          </div>
+       </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useToast } from 'vue-toastification'
-import { pemilik } from '../../services'
-import { wilayah } from '../../services'
+import { useForm } from 'vee-validate'
+import * as yup from 'yup'
+import { pemilik, wilayah } from '../../services'
 import { getUploadUrl } from '../../services/api'
 
-const props = defineProps({
-  user: Object
-})
+const getImageUrl = (path) => getUploadUrl(path)
 
-const emit = defineEmits(['refresh'])
-
-const toast = useToast()
-
-// Tab state
-const activeTab = ref('pesantren')
-
-// Pesantren state
+const activeTab = ref('overview')
 const pesantren = ref([])
+const pendaftar = ref([])
+const loading = ref(true)
+const loadingPendaftar = ref(true)
+const filterPesantrenId = ref('')
+const searchQuery = ref('')
+const selectedPendaftar = ref(null)
+
+// Verification Logic State
+const verifikasiCatatan = ref('')
+const updatingStatus = ref(false)
+const statusUpdateError = ref('')
+
+const getPendaftaranUrl = (filename) => {
+  if (!filename) return ''
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+  if (import.meta.env.DEV) {
+    return `/uploads/pendaftaran/${filename}`
+  }
+  const baseUrl = API_BASE_URL.replace('/api', '')
+  return `${baseUrl}/uploads/pendaftaran/${filename}`
+}
+
 const provinces = ref([])
-const cities = ref([])
-const loading = ref(false)
-const submitting = ref(false)
 const showForm = ref(false)
 const editingId = ref(null)
-const showDeleteModal = ref(false)
-const deleteTarget = ref(null)
-const deletingId = ref(null)
+const serverError = ref('')
 
-// Pendaftar state
-const pendaftar = ref([])
-const pendaftarLoading = ref(false)
-const filterStatus = ref('semua')
-const showStatusModal = ref(false)
-const statusTarget = ref(null)
-const statusAction = ref('diterima')
-const statusCatatan = ref('')
-const processingId = ref(null)
-
-const nama = ref('')
-const province = ref('')
-const kota = ref('')
-const alamat = ref('')
-const kurikulum = ref('')
-const tahun_berdiri = ref(null)
-const jumlah_santri = ref(null)
-const jumlah_pengajar = ref(null)
-const biaya_bulanan = ref(null)
-const biaya_pendaftaran = ref(null)
-const fasilitas = ref([])
-const deskripsi = ref('')
-const telepon = ref('')
-const email = ref('')
-const website = ref('')
-const nama_bank = ref('')
-const nomor_rekening = ref('')
-const atas_nama_rekening = ref('')
-const fotoFile = ref(null)
-const fotoPreview = ref('')
-const fotoDelete = ref(false) // Track if user wants to delete foto_utama
-const galleryFiles = ref([])
-const galleryPreview = ref([])
-const existingGalleryFiles = ref([]) // Track existing gallery filenames from DB
-
-const errors = ref({})
-
-const currentYear = new Date().getFullYear()
-
-const MAX_FILE_SIZE = 1 * 1024 * 1024 // 1MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-
-const fasilitasOptions = [
-  'Masjid', 'Asrama', 'Lab Komputer', 'Perpustakaan',
-  'Lapangan Olahraga', 'Kantin', 'Klinik', 'Ruang Kelas AC',
-  'Tempat Parkir', 'WiFi'
-]
-
-const totalSantri = computed(() => {
-  return pesantren.value.reduce((sum, p) => sum + (p.jumlah_santri || 0), 0)
-})
-
+// Stat computations
 const pendingCount = computed(() => {
   return pendaftar.value.filter(p => p.status === 'pending').length
 })
+const totalSantri = computed(() => {
+  return pesantren.value.reduce((total, p) => total + (parseInt(p.jumlah_santri) || 0), 0)
+})
 
 const filteredPendaftar = computed(() => {
-  if (filterStatus.value === 'semua') return pendaftar.value
-  return pendaftar.value.filter(p => p.status === filterStatus.value)
+   let result = pendaftar.value;
+   if(filterPesantrenId.value) {
+     result = result.filter(p => String(p.pesantren_id) === String(filterPesantrenId.value))
+   }
+   if(searchQuery.value) {
+     const lp = searchQuery.value.toLowerCase()
+     result = result.filter(p => 
+       p.nama_lengkap?.toLowerCase().includes(lp) || 
+       p.nomor_pendaftaran?.toLowerCase().includes(lp)
+     )
+   }
+   return result
 })
 
-const canAdd = computed(() => {
-  return true
-})
 
-function kurikulumBadge(kurikulum) {
-  const map = {
-    modern: 'bg-[hsl(231 84% 60%)] text-white',
-    salaf: 'bg-[#dcfce7] text-[#166534]',
-    campuran: 'bg-[#fef9c3] text-[#854d0e]'
-  }
-  return map[kurikulum] || 'bg-[#f3f4f6] text-[#1f2937]'
+function formatNumber(num) {
+  return new Intl.NumberFormat('id-ID').format(num)
+}
+function formatDate(dateStr) {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 function statusBadge(status) {
   const map = {
-    pending: 'bg-[#fef9c3] text-[#854d0e]',
-    diproses: 'bg-[#dbeafe] text-[#1e40af]',
-    diterima: 'bg-[#dcfce7] text-[#166534]',
-    ditolak: 'bg-[#fee2e2] text-[#991b1b]'
+    pending: 'bg-accent/10 text-accent border-accent/20',
+    diproses: 'bg-blue-100 text-blue-800 border-blue-200',
+    diterima: 'bg-success/10 text-success border-success/20',
+    ditolak: 'bg-destructive/10 text-destructive border-destructive/20'
   }
-  return map[status] || 'bg-[#f3f4f6] text-[#1f2937]'
+  return map[status] || 'bg-muted text-muted-foreground border-border'
 }
 
 function statusLabel(status) {
   const map = {
-    pending: '⏳ Pending',
-    diproses: '🔄 Diproses',
-    diterima: '✅ Diterima',
-    ditolak: '❌ Ditolak'
+    pending: 'Menunggu',
+    diproses: 'Review',
+    diterima: 'Diterima',
+    ditolak: 'Ditolak/Batal'
   }
   return map[status] || status
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+function openPendaftarModal(p) {
+  selectedPendaftar.value = p
+  verifikasiCatatan.value = ''
+  statusUpdateError.value = ''
+}
+function closePendaftarModal() {
+  selectedPendaftar.value = null
+  verifikasiCatatan.value = ''
+  statusUpdateError.value = ''
 }
 
-async function fetchPendaftar() {
-  pendaftarLoading.value = true
+async function handleStatusUpdate(newStatus) {
+  if (!selectedPendaftar.value) return
+  
+  updatingStatus.value = true
+  statusUpdateError.value = ''
+
   try {
-    const { data } = await pemilik.getPendaftaran()
-    pendaftar.value = data.data || []
-  } catch (e) {
-    console.error('Failed to load pendaftar:', e)
-    toast.error('Gagal memuat data pendaftar', { title: 'Error' })
+    const payload = { status: newStatus }
+    if (verifikasiCatatan.value.trim()) {
+      payload.catatan_admin = verifikasiCatatan.value.trim()
+    }
+    
+    await pemilik.updatePendaftaranStatus(selectedPendaftar.value.id, payload)
+    
+    // Refresh list locally
+    const index = pendaftar.value.findIndex(p => p.id === selectedPendaftar.value.id)
+    if (index !== -1) {
+      pendaftar.value[index].status = newStatus
+      if (payload.catatan_admin) {
+        pendaftar.value[index].catatan_admin = payload.catatan_admin
+      }
+    }
+    
+    closePendaftarModal()
+  } catch (err) {
+    statusUpdateError.value = err.response?.data?.error || 'Gagal memperbarui status pendaftar'
   } finally {
-    pendaftarLoading.value = false
+    updatingStatus.value = false
   }
 }
 
-function openStatusModal(pendaftarItem, action) {
-  statusTarget.value = pendaftarItem
-  statusAction.value = action
-  statusCatatan.value = ''
-  showStatusModal.value = true
+// ==== CRUD PESANTREN LOGIC ====
+const showDeleteConfirm = ref(false)
+const deleteTarget = ref(null)
+
+const currentYear = new Date().getFullYear()
+const schema = yup.object({
+  nama: yup.string().required('Legalitas nama wajib diisi'),
+  province: yup.string().required('Provinsi regional wajib.'),
+  kota: yup.string().required('Kota wajib diisi'),
+  alamat: yup.string().notRequired(),
+  kurikulum: yup.string().notRequired(),
+  tahun_berdiri: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired(),
+  jumlah_santri: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired(),
+  biaya_pendaftaran: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired(),
+  biaya_bulanan: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired(),
+  deskripsi: yup.string().notRequired()
+})
+
+const { defineField, handleSubmit, errors, isSubmitting, resetForm, setValues } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    nama: '', province: '', kota: '', alamat: '', kurikulum: '',
+    tahun_berdiri: null, jumlah_santri: null,
+    biaya_pendaftaran: null, biaya_bulanan: null, deskripsi: ''
+  }
+})
+
+const [nama, namaProps] = defineField('nama')
+const [province, provinceProps] = defineField('province')
+const [kota, kotaProps] = defineField('kota')
+const [alamat, alamatProps] = defineField('alamat')
+const [kurikulum, kurikulumProps] = defineField('kurikulum')
+const [tahun_berdiri, tahun_berdiriProps] = defineField('tahun_berdiri')
+const [jumlah_santri, jumlah_santriProps] = defineField('jumlah_santri')
+const [biaya_pendaftaran, biaya_pendaftaranProps] = defineField('biaya_pendaftaran')
+const [biaya_bulanan, biaya_bulananProps] = defineField('biaya_bulanan')
+const [deskripsi, deskripsiProps] = defineField('deskripsi')
+
+const files = ref({ foto_utama: null, foto_galeri: [] })
+const fileErrors = ref({ foto_utama: '', foto_galeri: '' })
+
+function handleFileUpload(fieldName, event) {
+   const fileInput = event.target
+   if (!fileInput.files || fileInput.files.length === 0) return
+
+   if (fieldName === 'foto_utama') {
+      const file = fileInput.files[0]
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+      if (!allowedTypes.includes(file.type)) return fileErrors.value.foto_utama = 'Gunakan format JPG/PNG.'
+      const maxSize = 1 * 1024 * 1024
+      if (file.size > maxSize) return fileErrors.value.foto_utama = 'Size berlebih. Max 1MB.'
+
+      fileErrors.value.foto_utama = ''
+      files.value.foto_utama = file
+   } else if (fieldName === 'foto_galeri') {
+      const selectedFiles = Array.from(fileInput.files)
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+      
+      let error = ''
+      for (const file of selectedFiles) {
+         if (!allowedTypes.includes(file.type)) error = 'Terdapat format ekstensi illegal.'
+         const maxSize = 1 * 1024 * 1024
+         if (file.size > maxSize) error = 'Terdapat file melebih ambang Max 1MB.'
+      }
+      if (selectedFiles.length > 5) error = 'Restriksi limit: Maksimal 5 Foto batch.'
+      
+      if(error) {
+        fileErrors.value.foto_galeri = error
+        return
+      }
+
+      fileErrors.value.foto_galeri = ''
+      files.value.foto_galeri = selectedFiles
+   }
 }
 
-function closeStatusModal() {
-  showStatusModal.value = false
-  statusTarget.value = null
-  statusAction.value = 'diterima'
-  statusCatatan.value = ''
+function removeFile(fieldName) {
+   if (fieldName === 'foto_utama') files.value.foto_utama = null
 }
 
-async function executeStatusUpdate() {
-  if (!statusTarget.value) return
-  
-  processingId.value = statusTarget.value.id
-  try {
-    await pemilik.updatePendaftaranStatus(statusTarget.value.id, {
-      status: statusAction.value,
-      catatan_admin: statusCatatan.value || null
+function removeGalleryFile(index) {
+   files.value.foto_galeri.splice(index, 1)
+}
+
+function clearGalleryFiles() {
+   files.value.foto_galeri = []
+}
+
+function openForm(p) {
+  serverError.value = ''
+  editingId.value = p?.id || null
+  if (p) {
+    setValues({
+      nama: p.nama || '', province: p.province || '', kota: p.kota || '',
+      alamat: p.alamat || '', kurikulum: p.kurikulum || '',
+      tahun_berdiri: p.tahun_berdiri || null, jumlah_santri: p.jumlah_santri || null,
+      biaya_pendaftaran: p.biaya_pendaftaran || null, biaya_bulanan: p.biaya_bulanan || null,
+      deskripsi: p.deskripsi || ''
     })
-    
-    toast.success(
-      `Pendaftar ${statusAction.value === 'diterima' ? 'diterima' : 'ditolak'}${statusCatatan.value ? ' dengan catatan' : ''}`,
-      { title: statusAction.value === 'diterima' ? '✅ Pendaftar Diterima' : '❌ Pendaftar Ditolak' }
-    )
-    
-    closeStatusModal()
-    await fetchPendaftar()
-    emit('refresh')
-  } catch (e) {
-    console.error('Failed to update status:', e)
-    toast.error(e.response?.data?.error || 'Gagal memperbarui status pendaftar', { title: 'Gagal' })
-  } finally {
-    processingId.value = null
-  }
-}
-
-async function fetchProvinces() {
-  try {
-    const { data } = await wilayah.getProvinces()
-    provinces.value = data.data || []
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-async function onProvinceChange() {
-  kota.value = ''
-  cities.value = []
-  if (!province.value) return
-  const p = provinces.value.find(p => p.name === province.value)
-  if (p) {
-    try {
-      const { data } = await wilayah.getRegencies(p.id)
-      cities.value = (data.data || []).map(r => r.name)
-    } catch (e) {
-      console.error(e)
-    }
-  }
-}
-
-function onFileChange(e) {
-  const file = e.target.files[0]
-  if (file) {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      toast.error('Gunakan file JPG, JPEG, PNG, atau WEBP', { title: 'Format Tidak Didukung' })
-      e.target.value = ''
-      return
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(2)
-      toast.error(`Ukuran file ${sizeMB}MB melebihi batas maksimal 1MB`, { title: 'Ukuran File Terlalu Besar' })
-      e.target.value = ''
-      return
-    }
-    fotoFile.value = file
-    fotoPreview.value = URL.createObjectURL(file)
-    fotoDelete.value = false
-    toast.success(`File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`, { title: 'Foto Dipilih' })
-  }
-}
-
-function onGalleryChange(e) {
-  const files = Array.from(e.target.files)
-  const validFiles = []
-  let rejectedCount = 0
-  
-  for (const file of files) {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      rejectedCount++
-      continue
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      rejectedCount++
-      continue
-    }
-    validFiles.push(file)
-  }
-
-  if (rejectedCount > 0) {
-    toast.warning(`${rejectedCount} file tidak valid (format/ukuran)`, { title: 'File Ditolak' })
-  }
-
-  if (validFiles.length + galleryFiles.value.length > 5) {
-    toast.warning('Maksimal 5 foto galeri', { title: 'Melebihi Batas' })
-    e.target.value = ''
-    return
-  }
-
-  validFiles.forEach(file => {
-    galleryFiles.value.push(file)
-    galleryPreview.value.push(URL.createObjectURL(file))
-  })
-
-  if (validFiles.length > 0) {
-    toast.success(`${validFiles.length} foto berhasil ditambahkan (total: ${galleryFiles.value.length}/5)`, { title: 'Galeri Ditambahkan' })
-  }
-}
-
-function remove_gallery(idx) {
-  const fileName = galleryFiles.value[idx]?.name || 'Foto'
-  if (galleryPreview.value[idx] && galleryPreview.value[idx].startsWith('blob:')) {
-    URL.revokeObjectURL(galleryPreview.value[idx])
-  }
-  galleryFiles.value.splice(idx, 1)
-  galleryPreview.value.splice(idx, 1)
-  toast.info(`${fileName} dihapus dari galeri (sisa: ${galleryFiles.value.length}/5)`, { title: 'Foto Dihapus' })
-}
-
-function removeFotoUtama() {
-  if (fotoPreview.value && fotoPreview.value.startsWith('blob:')) {
-    URL.revokeObjectURL(fotoPreview.value)
-  }
-  fotoFile.value = null
-  fotoPreview.value = ''
-  fotoDelete.value = true
-  toast.info('Foto utama akan dihapus saat disimpan', { title: 'Foto Utama Dihapus' })
-}
-
-function openForm(p = null) {
-  console.log('[PemilikDashboard.openForm] Received pesantren data:', JSON.stringify(p, null, 2));
-  
-  if (p) {
-    editingId.value = p.id
-    nama.value = p.nama
-    province.value = p.province
-    kota.value = p.kota
-    alamat.value = p.alamat || ''
-    kurikulum.value = p.kurikulum || ''
-    tahun_berdiri.value = p.tahun_berdiri || null
-    jumlah_santri.value = p.jumlah_santri || null
-    jumlah_pengajar.value = p.jumlah_pengajar || null
-    biaya_bulanan.value = p.biaya_bulanan || null
-    biaya_pendaftaran.value = p.biaya_pendaftaran || null
-    fasilitas.value = p.fasilitas || []
-    deskripsi.value = p.deskripsi || ''
-    telepon.value = p.telepon || ''
-    email.value = p.email || ''
-    website.value = p.website || ''
-    nama_bank.value = p.rekening?.nama_bank || ''
-    nomor_rekening.value = p.rekening?.nomor_rekening || ''
-    atas_nama_rekening.value = p.rekening?.atas_nama || ''
-    fotoPreview.value = p.foto_utama ? getUploadUrl(p.foto_utama) : ''
-    fotoDelete.value = false
-    galleryPreview.value = (p.foto_galeri || []).map(f => getUploadUrl(f))
-    existingGalleryFiles.value = p.foto_galeri || []
-    // Load cities without resetting kota
-    loadCitiesForEdit()
   } else {
     resetForm()
   }
   showForm.value = true
 }
 
-async function loadCitiesForEdit() {
-  if (!province.value) return
-  const p = provinces.value.find(pr => pr.name === province.value)
-  if (p) {
-    try {
-      const { data } = await wilayah.getRegencies(p.id)
-      cities.value = (data.data || []).map(r => r.name)
-    } catch (e) {
-      console.error(e)
-    }
-  }
-}
-
 function closeForm() {
-  // Revoke all object URLs to prevent memory leak
-  if (fotoPreview.value && fotoPreview.value.startsWith('blob:')) {
-    URL.revokeObjectURL(fotoPreview.value)
-  }
-  galleryPreview.value.forEach(url => {
-    if (url.startsWith('blob:')) {
-      URL.revokeObjectURL(url)
-    }
-  })
   showForm.value = false
-  resetForm()
-}
-
-function resetForm() {
   editingId.value = null
-  nama.value = ''
-  province.value = ''
-  kota.value = ''
-  alamat.value = ''
-  kurikulum.value = ''
-  tahun_berdiri.value = null
-  jumlah_santri.value = null
-  jumlah_pengajar.value = null
-  biaya_bulanan.value = null
-  biaya_pendaftaran.value = null
-  fasilitas.value = []
-  deskripsi.value = ''
-  telepon.value = ''
-  email.value = ''
-  website.value = ''
-  nama_bank.value = ''
-  nomor_rekening.value = ''
-  atas_nama_rekening.value = ''
-  fotoFile.value = null
-  fotoPreview.value = ''
-  galleryFiles.value = []
-  galleryPreview.value = []
-  errors.value = {}
+  resetForm()
+  files.value.foto_utama = null
+  files.value.foto_galeri = []
+  fileErrors.value.foto_utama = ''
+  fileErrors.value.foto_galeri = ''
 }
 
-async function onSubmit() {
-  errors.value = {}
-  if (!nama.value) errors.value.nama = 'Nama wajib diisi'
-  if (!province.value) errors.value.province = 'Provinsi wajib dipilih'
-  if (!kota.value) errors.value.kota = 'Kota wajib dipilih'
+const onSubmit = handleSubmit(async (values) => {
+   serverError.value = ''
+   try {
+     const formData = new FormData()
+     Object.entries(values).forEach(([key, value]) => {
+       if (value !== null && value !== undefined && value !== '') formData.append(key, value)
+     })
+     if (files.value.foto_utama) formData.append('foto_utama', files.value.foto_utama)
+     if (files.value.foto_galeri && files.value.foto_galeri.length > 0) {
+       files.value.foto_galeri.forEach(file => {
+         formData.append('foto_galeri', file)
+       })
+     }
 
-  if (Object.keys(errors.value).length > 0) {
-    toast.warning('Mohon lengkapi semua field yang wajib diisi', { title: 'Validasi Gagal' })
-    return
-  }
+     if (editingId.value) {
+       await pemilik.updatePesantren(editingId.value, formData)
+     } else {
+       await pemilik.createPesantren(formData)
+     }
+     closeForm()
+     loadData()
+   } catch (err) {
+     serverError.value = 'Distribusi basis data gagal, periksa kelengkapan form.'
+   }
+})
 
-  submitting.value = true
-  console.log('[PemilikDashboard] 🚀 Submitting form...', {
-    editingId: editingId.value,
-    nama: nama.value,
-    province: province.value,
-    kota: kota.value,
-  })
-
-  try {
-    const formData = new FormData()
-    formData.append('nama', nama.value)
-    formData.append('province', province.value)
-    formData.append('kota', kota.value)
-    formData.append('alamat', alamat.value)
-    formData.append('kurikulum', kurikulum.value)
-    formData.append('tahun_berdiri', tahun_berdiri.value || '')
-    formData.append('jumlah_santri', jumlah_santri.value || '')
-    formData.append('jumlah_pengajar', jumlah_pengajar.value || '')
-    formData.append('biaya_bulanan', biaya_bulanan.value || '')
-    formData.append('biaya_pendaftaran', biaya_pendaftaran.value || '')
-    formData.append('fasilitas', JSON.stringify(fasilitas.value))
-    formData.append('deskripsi', deskripsi.value)
-    formData.append('telepon', telepon.value)
-    formData.append('email', email.value)
-    formData.append('website', website.value)
-    formData.append('nama_bank', nama_bank.value)
-    formData.append('nomor_rekening', nomor_rekening.value)
-    formData.append('atas_nama_rekening', atas_nama_rekening.value)
-
-    if (fotoFile.value) {
-      formData.append('foto_utama', fotoFile.value)
-      console.log('[PemilikDashboard] 📸 Appending foto_utama:', {
-        name: fotoFile.value.name,
-        size: fotoFile.value.size,
-        type: fotoFile.value.type
-      })
-    } else if (editingId.value && fotoDelete.value) {
-      formData.append('foto_utama', 'null')
-      console.log('[PemilikDashboard] 🗑️ Marking foto_utama for deletion')
-    }
-
-    if (galleryFiles.value.length > 0) {
-      galleryFiles.value.forEach((file) => {
-        formData.append('foto_galeri', file)
-      })
-      console.log('[PemilikDashboard] 🖼️ Appending galeri files:', galleryFiles.value.length)
-    }
-
-    // When editing, also send existing gallery filenames so backend can merge them
-    if (editingId.value && existingGalleryFiles.value.length > 0) {
-      formData.append('existing_foto_galeri', JSON.stringify(existingGalleryFiles.value))
-      console.log('[PemilikDashboard] 📋 Sending existing gallery:', existingGalleryFiles.value)
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    } else if (editingId.value) {
-      console.log('[PemilikDashboard] 📋 No existing gallery to send (length:', existingGalleryFiles.value.length, ')')
-    }
-
-    // Debug: log all FormData entries
-    console.log('[PemilikDashboard] 📦 FormData contents:')
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(`  ${key}: File(${value.name}, ${value.size} bytes, ${value.type})`)
-      } else {
-        console.log(`  ${key}: ${value}`)
-      }
-    }
-
-    if (editingId.value) {
-      await pemilik.updatePesantren(editingId.value, formData)
-      console.log('[PemilikDashboard] ✅ Pesantren berhasil diupdate:', {
-        id: editingId.value,
-        nama: nama.value,
-        province: province.value,
-        kota: kota.value,
-        foto_utama: fotoFile.value?.name || 'tidak ada perubahan',
-        jumlah_foto_galeri: galleryFiles.value.length
-      })
-      
-      // Success toast for update
-      let updateMsg = 'Data pesantren berhasil diperbarui'
-      if (fotoFile.value) {
-        updateMsg += ` • Foto utama: ${fotoFile.value.name}`
-      }
-      if (galleryFiles.value.length > 0) {
-        updateMsg += ` • ${galleryFiles.value.length} foto galeri diupload`
-      }
-      toast.success(updateMsg, { title: 'Pesantren Diperbarui' })
-    } else {
-      const result = await pemilik.createPesantren(formData)
-      console.log('[PemilikDashboard] 🎉 Pesantren baru berhasil dibuat:', {
-        id: result?.data?.id || 'unknown',
-        nama: nama.value,
-        province: province.value,
-        kota: kota.value,
-        kurikulum: kurikulum.value,
-        foto_utama: fotoFile.value?.name || 'tidak ada',
-        jumlah_foto_galeri: galleryFiles.value.length,
-        timestamp: new Date().toISOString()
-      })
-
-      // Success toast for create
-      let createMsg = `Pesantren "${nama.value}" berhasil ditambahkan`
-      if (fotoFile.value) {
-        createMsg += ` • Foto utama: ${fotoFile.value.name}`
-      }
-      if (galleryFiles.value.length > 0) {
-        createMsg += ` • ${galleryFiles.value.length} foto galeri diupload`
-      }
-      toast.success(createMsg, { title: 'Pesantren Ditambahkan' })
-    }
-
-    closeForm()
-    await fetchData()
-    emit('refresh')
-  } catch (e) {
-    console.error('[PemilikDashboard] ❌ Error saat menyimpan pesantren:', {
-      message: e.message,
-      response: e.response?.data,
-      status: e.response?.status
-    })
-    
-    // Show specific error messages with toast
-    if (e.response?.data?.error) {
-      const errorMsg = e.response.data.error
-      if (errorMsg.includes('terlalu besar')) {
-        toast.error('Ukuran file terlalu besar. Maksimal 1MB per foto.', { title: 'Upload Gagal' })
-      } else if (errorMsg.includes('format') || errorMsg.includes('tidak didukung')) {
-        toast.error('Format file tidak didukung. Gunakan JPG, JPEG, PNG, atau WEBP.', { title: 'Upload Gagal' })
-      } else if (errorMsg.includes('galeri maksimal')) {
-        toast.error('Foto gallery maksimal 5 file.', { title: 'Upload Gagal' })
-      } else {
-        toast.error(errorMsg, { title: 'Gagal Menyimpan' })
-      }
-    } else if (e.response?.data?.errors) {
-      errors.value = e.response.data.errors
-      toast.warning('Mohon periksa kembali input Anda', { title: 'Validasi Gagal' })
-    } else {
-      toast.error('Terjadi kesalahan pada server. Silakan coba lagi.', { title: 'Server Error' })
-    }
-  } finally {
-    submitting.value = false
-  }
-}
-
-// Delete functions
-function confirmDelete(p) {
-  deleteTarget.value = p
-  showDeleteModal.value = true
-}
-
-function closeDeleteModal() {
-  showDeleteModal.value = false
-  deleteTarget.value = null
-  deletingId.value = null
-}
-
+function confirmDelete(p) { deleteTarget.value = p; showDeleteConfirm.value = true }
 async function executeDelete() {
-  if (!deleteTarget.value) return
-  
-  deletingId.value = deleteTarget.value.id
-  try {
-    await pemilik.deletePesantren(deleteTarget.value.id)
-    toast.success(`Pesantren "${deleteTarget.value.nama}" berhasil dihapus`, { title: 'Pesantren Dihapus' })
-    closeDeleteModal()
-    await fetchData()
-    emit('refresh')
-  } catch (e) {
-    console.error('[PemilikDashboard] ❌ Error saat menghapus pesantren:', {
-      message: e.message,
-      response: e.response?.data,
-      status: e.response?.status
-    })
-    
-    if (e.response?.data?.error) {
-      toast.error(e.response.data.error, { title: 'Gagal Menghapus' })
-    } else {
-      toast.error('Terjadi kesalahan saat menghapus pesantren', { title: 'Server Error' })
-    }
-  } finally {
-    deletingId.value = null
+  if (deleteTarget.value) {
+     try {
+       await pemilik.deletePesantren(deleteTarget.value.id)
+       showDeleteConfirm.value = false
+       loadData()
+     } catch(e) {}
   }
 }
 
-async function fetchData() {
+async function loadData() {
   loading.value = true
   try {
-    const { data } = await pemilik.getPesantren()
-    pesantren.value = data.data || []
-  } catch (e) {
-    console.error(e)
-    toast.error('Terjadi kesalahan saat mengambil data pesantren', { title: 'Gagal Memuat Data' })
-  } finally {
-    loading.value = false
-  }
+    const res = await pemilik.getPesantren()
+    pesantren.value = res.data.data || []
+  } catch(e) {} finally { loading.value = false }
 }
 
-onMounted(async () => {
-  await fetchProvinces()
-  await fetchData()
-  await fetchPendaftar()
+async function loadPendaftar() {
+   loadingPendaftar.value = true
+   try {
+     const res = await pemilik.getPendaftaran()
+     pendaftar.value = res.data.data || []
+   } catch(e) {} finally { loadingPendaftar.value = false }
+}
+
+onMounted(() => {
+  loadData()
+  loadPendaftar()
+  wilayah.getProvinces().then(res => provinces.value = res.data.data || []).catch(()=>{})
 })
 </script>
 
 <style scoped>
-/* All styles using Tailwind CSS */
+/* Scoped overrdies if needed */
 </style>

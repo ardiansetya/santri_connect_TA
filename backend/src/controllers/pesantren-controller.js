@@ -67,6 +67,8 @@ const PesantrenController = {
               size: fs.statSync(filePath).size
             }
 
+            uploadedFiles.push(filename)
+
             // Handle multiple files with same fieldname (e.g., foto_galeri)
             if (files[part.fieldname]) {
               if (!Array.isArray(files[part.fieldname])) {
@@ -76,8 +78,6 @@ const PesantrenController = {
             } else {
               files[part.fieldname] = fileInfo
             }
-
-            console.log(`[PesantrenController] 📁 Saved file: ${part.fieldname} → ${filename}`);
           } else {
             // part.type === 'field'
             let value = part.value
@@ -144,6 +144,8 @@ const PesantrenController = {
             size: fs.statSync(filePath).size
           }
 
+          uploadedFiles.push(filename)
+
           // Handle multiple files with same fieldname (e.g., foto_galeri)
           if (files[part.fieldname]) {
             if (!Array.isArray(files[part.fieldname])) {
@@ -153,8 +155,6 @@ const PesantrenController = {
           } else {
             files[part.fieldname] = fileInfo
           }
-
-          console.log(`[PesantrenController] 📁 Saved file: ${part.fieldname} → ${filename}`);
         } else {
           let value = part.value
           // Convert string 'null' or empty string to actual null for numeric fields

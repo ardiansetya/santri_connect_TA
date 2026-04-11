@@ -117,11 +117,3 @@ export const wilayah = {
   }
 }
 
-export const publicApi = {
-  getStats() {
-    return api.get('/public/stats')
-  },
-  getPesantren(params) {
-    return api.get('/pesantren', { params })
-  }
-}

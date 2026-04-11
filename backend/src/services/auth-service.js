@@ -59,13 +59,16 @@ const AdminService = {
   async getDashboardStats() {
     const Pesantren = require('../models/Pesantren')
     const Pendaftaran = require('../models/Pendaftaran')
+    const User = require('../models/User')
 
-    const [totalUsers, totalPesantren, totalPendaftar, totalPendaftaran, statusRows] = await Promise.all([
+    const [totalUsers, totalPesantren, totalPendaftar, totalPendaftaran, statusRows, popularPesantren, latestPendaftaran] = await Promise.all([
       User.countAll(),
       Pesantren.countAll(),
       User.countByRole('pendaftar'),
       Pendaftaran.countAll(),
-      Pendaftaran.countByStatus()
+      Pendaftaran.countByStatus(),
+      Pesantren.findPopular(5),
+      Pendaftaran.findLatest(5)
     ])
 
     const pendaftaranByStatus = { pending: 0, diproses: 0, diterima: 0, ditolak: 0 }
@@ -76,7 +79,9 @@ const AdminService = {
       total_pesantren: totalPesantren,
       total_pendaftar: totalPendaftar,
       total_pendaftaran: totalPendaftaran,
-      pendaftaran_by_status: pendaftaranByStatus
+      pendaftaran_by_status: pendaftaranByStatus,
+      popular_pesantren: popularPesantren,
+      latest_pendaftaran: latestPendaftaran
     }
   },
 
@@ -99,6 +104,7 @@ const AdminService = {
     const mappedData = data.map(row => ({
       id: row.id,
       nomor_pendaftaran: row.nomor_pendaftaran,
+      nama_lengkap: row.nama_lengkap,
       status: row.status,
       created_at: row.created_at,
       user: { id: row.user_id, email: row.user_email },
@@ -119,6 +125,7 @@ const AdminService = {
     return {
       id: data.id,
       nomor_pendaftaran: data.nomor_pendaftaran,
+      nama_lengkap: data.nama_lengkap,
       status: data.status,
       catatan_admin: data.catatan_admin,
       created_at: data.created_at,

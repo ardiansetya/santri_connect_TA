@@ -61,7 +61,7 @@ const PesantrenService = {
       if (typeof f === 'string') { try { f = JSON.parse(f) } catch { f = [] } }
       return {
         id: row.id, nama: row.nama, province: row.province,
-        kota: row.kota, biaya_bulanan: row.biaya_bulanan,
+        kota: row.kota, biaya_bulanan: row.biaya_bulanan, jumlah_santri: row.jumlah_santri,
         kurikulum: row.kurikulum, fasilitas: f,
         foto_utama: row.foto_utama, foto_galeri: row.foto_galeri
       }

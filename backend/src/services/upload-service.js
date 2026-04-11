@@ -145,7 +145,7 @@ const UploadService = {
     // Sanitize filename to prevent path traversal attacks
     // Only allow valid filename patterns: {fieldName}-{timestamp}[-{index}].{ext}
     const sanitizedFilename = path.basename(filename)
-    const validFilenameRegex = /^(foto_utama|foto_galeri)-\d+(-\d+)?\.(jpg|jpeg|png|webp)$/i
+    const validFilenameRegex = /^(foto_utama|foto_galeri)-\d+(-[a-z0-9]+)?\.(jpg|jpeg|png|webp)$/i
 
     if (!validFilenameRegex.test(sanitizedFilename)) {
       console.error('Invalid filename format:', filename)
