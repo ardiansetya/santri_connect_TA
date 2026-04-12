@@ -48,6 +48,12 @@ export const pendaftaran = {
   },
   getPesantrenInfo(pesantrenId) {
     return api.get(`/pesantren/${pesantrenId}/pendaftaran-info`)
+  },
+  getPaymentToken(id) {
+    return api.post(`/pendaftaran/${id}/pay`)
+  },
+  checkPaymentStatus(id) {
+    return api.get(`/pendaftaran/${id}/payment-status`)
   }
 }
 

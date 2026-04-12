@@ -117,17 +117,45 @@
                   </div>
                   
                   <div class="flex items-center gap-3 shrink-0">
-                    <span class="inline-flex px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded shadow-sm border whitespace-nowrap" :class="statusBadge(p.status)">
-                      {{ statusLabel(p.status) }}
-                    </span>
-                    <router-link
-                      v-if="p.nomor_pendaftaran"
-                      to="/track"
-                      class="btn bg-white border border-border shadow-sm flex items-center text-xs px-4 py-2 hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all font-bold group/btn whitespace-nowrap"
-                    >
-                      Audit
-                      <svg class="w-3.5 h-3.5 ml-1.5 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </router-link>
+                    <div class="flex flex-col items-end gap-2">
+                      <span class="inline-flex px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded shadow-sm border whitespace-nowrap" :class="statusBadge(p.status)">
+                        {{ statusLabel(p.status) }}
+                      </span>
+                      <span class="inline-flex px-2 py-1 text-[9px] font-bold uppercase tracking-widest rounded border whitespace-nowrap" :class="paymentStatusBadge(p.payment_status)">
+                        {{ paymentStatusLabel(p.payment_status) }} (Rp {{ p.payment_amount?.toLocaleString('id-ID') || 0 }})
+                      </span>
+                    </div>
+
+                    <div class="flex gap-2">
+                      <button
+                        v-if="p.payment_status === 'unpaid' || p.payment_status === 'failed' || p.payment_status === 'payment_pending'"
+                        @click="handlePayment(p)"
+                        class="btn btn-primary text-xs px-4 py-2 shadow-sm font-bold whitespace-nowrap hover:-translate-y-0.5 transition-all"
+                        :disabled="paymentLoading === p.id"
+                      >
+                        <span v-if="paymentLoading === p.id" class="animate-spin h-3.5 w-3.5 border-2 border-white/20 border-t-white rounded-full"></span>
+                        <span v-else>Bayar Sekarang</span>
+                      </button>
+
+                      <button
+                        v-if="p.payment_status === 'payment_pending'"
+                        @click="checkPaymentStatus(p.id)"
+                        class="btn bg-white border border-border text-xs px-4 py-2 shadow-sm font-bold whitespace-nowrap hover:bg-muted/50 transition-all"
+                        :disabled="checkLoading === p.id"
+                      >
+                        <span v-if="checkLoading === p.id" class="animate-spin h-3.5 w-3.5 border-2 border-primary/20 border-t-primary rounded-full"></span>
+                        <span v-else>Cek Status</span>
+                      </button>
+
+                      <router-link
+                        v-if="p.nomor_pendaftaran"
+                        to="/track"
+                        class="btn bg-white border border-border shadow-sm flex items-center text-xs px-4 py-2 hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all font-bold group/btn whitespace-nowrap"
+                      >
+                        Audit
+                        <svg class="w-3.5 h-3.5 ml-1.5 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                      </router-link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -216,6 +244,26 @@ function statusLabel(status) {
   return map[status] || status
 }
 
+function paymentStatusBadge(status) {
+  const map = {
+    unpaid: 'bg-muted text-muted-foreground border-border',
+    payment_pending: 'bg-accent/10 text-accent border-accent/20',
+    paid: 'bg-success/10 text-success border-success/20',
+    failed: 'bg-destructive/10 text-destructive border-destructive/20'
+  }
+  return map[status] || 'bg-muted text-muted-foreground border-border'
+}
+
+function paymentStatusLabel(status) {
+  const map = {
+    unpaid: 'Belum Dibayar',
+    payment_pending: 'Menunggu Pembayaran',
+    paid: 'Sudah Dibayar',
+    failed: 'Pembayaran Gagal'
+  }
+  return map[status] || 'Status Tidak Diketahui'
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -242,7 +290,10 @@ async function copyNomor(nomor) {
   }
 }
 
-onMounted(async () => {
+const paymentLoading = ref(null)
+const checkLoading = ref(null)
+
+const loadData = async () => {
   loading.value = true
   try {
     const { data } = await pendaftaran.getMyRegistrations()
@@ -254,9 +305,71 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Failed to load pendaftaran data:', error)
+    toast.error('Gagal menyinkronkan data pendaftaran')
   } finally {
     loading.value = false
   }
+}
+
+async function handlePayment(p) {
+  paymentLoading.value = p.id
+  try {
+    const { data } = await pendaftaran.getPaymentToken(p.id)
+    
+    // Check if it's already paid (fee was 0)
+    if (!data.data.token && data.data.payment_status === 'paid') {
+      toast.success('Pendaftaran dengan biaya Rp 0 berhasil ditandai lunas!')
+      loadData()
+      return
+    }
+
+    if (window.snap) {
+      window.snap.pay(data.data.token, {
+        onSuccess: function (result) {
+          toast.success('Pembayaran Dikonfirmasi!')
+          loadData()
+        },
+        onPending: function (result) {
+          toast.info('Selesaikan pembayaran sesuai instruksi')
+          loadData()
+        },
+        onError: function (result) {
+          toast.error('Terjadi kendala pada portal pembayaran')
+          loadData()
+        },
+        onClose: function () {
+          loadData()
+        }
+      })
+    } else {
+      toast.error('Library pembayaran tidak terdeteksi. Silakan refresh halaman.')
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.error || 'Gagal menyiapkan portal pembayaran')
+  } finally {
+    paymentLoading.value = null
+  }
+}
+
+async function checkPaymentStatus(id) {
+  checkLoading.value = id
+  try {
+    const { data } = await pendaftaran.checkPaymentStatus(id)
+    if (data.data.payment_status === 'paid') {
+      toast.success('Pembayaran telah terverifikasi!')
+    } else {
+      toast.info(`Status saat ini: ${paymentStatusLabel(data.data.payment_status)}`)
+    }
+    loadData()
+  } catch (err) {
+    toast.error('Gagal sinkronasi status pembayaran')
+  } finally {
+    checkLoading.value = null
+  }
+}
+
+onMounted(() => {
+  loadData()
 })
 </script>
 

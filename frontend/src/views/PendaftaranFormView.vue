@@ -47,7 +47,7 @@
 
         <!-- The Form -->
         <div class="p-8 md:p-12 relative z-10">
-          <form @submit="onSubmit">
+          <form v-show="!success" @submit="onSubmit">
             
             <!-- SECTION 1: Data Pribadi -->
             <div class="mb-12">
@@ -237,42 +237,6 @@
               <p class="text-sm font-medium">{{ serverError }}</p>
             </div>
 
-            <!-- Success State UI -->
-            <div v-if="success" class="mb-12 p-8 bg-gradient-to-r from-success/20 to-success/5 border-2 border-success/30 rounded-2xl shadow-xl flex flex-col md:flex-row items-center gap-8 justify-between animate-fade-in relative overflow-hidden">
-               <!-- Watermark -->
-               <div class="absolute right-0 bottom-0 text-9xl opacity-5 text-success pointer-events-none transform translate-y-1/4">✓</div>
-               
-              <div class="flex items-center gap-6 z-10">
-                <div class="w-16 h-16 rounded-full bg-success text-white flex items-center justify-center shrink-0 shadow-lg shadow-success/40">
-                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                </div>
-                <div>
-                  <h3 class="font-heading font-bold text-2xl text-success-foreground">Registrasi Tahap Awal Selesai!</h3>
-                  <p class="text-muted-foreground font-medium mt-1">Harap menyimpan nomor identifikasi eksklusif Anda di bawah.</p>
-                </div>
-              </div>
-              
-              <div class="flex flex-col items-start gap-4 z-10 w-full md:w-auto mt-4 md:mt-0 p-5 bg-white rounded-xl shadow-inner border border-border/80">
-                <div class="w-full text-center">
-                  <p class="text-xs uppercase tracking-widest font-bold text-muted-foreground mb-1">Kode Lacak Status Pendaftaran</p>
-                  <code class="text-2xl font-mono font-bold text-primary">{{ success }}</code>
-                </div>
-                <div class="flex gap-2 w-full justify-center">
-                  <button
-                    @click.prevent="copyNomor"
-                    class="btn btn-outline border-border flex items-center justify-center font-bold px-4 hover:border-success hover:text-success hover:bg-success/5 flex-1"
-                    :class="{ 'border-success text-success bg-success/10': copiedNomor }"
-                  >
-                    <svg v-if="copiedNomor" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                    {{ copiedNomor ? 'Tersalin!' : 'Copy Code' }}
-                  </button>
-                  <router-link to="/track" class="btn btn-primary flex-1 justify-center whitespace-nowrap shadow-md">
-                    Lacak Status >>
-                  </router-link>
-                </div>
-              </div>
-            </div>
 
             <!-- Submit Buttons -->
             <div class="flex flex-col sm:flex-row gap-4 pt-10 border-t border-border">
@@ -299,8 +263,123 @@
                 Batalkan
               </router-link>
             </div>
-
           </form>
+
+          <!-- Success Guidance Overlay -->
+          <div v-if="success" class="animate-fade-in relative z-50">
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-border/50">
+              <!-- Header -->
+              <div class="bg-gradient-to-r from-success/20 to-success/5 p-8 md:p-12 text-center relative">
+                <div class="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden">
+                  <div class="absolute -right-10 -bottom-10 text-[15rem] font-bold text-success rotate-12">✓</div>
+                </div>
+                
+                <div class="w-20 h-20 bg-success rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-success/30 relative z-10">
+                  <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <h3 class="font-heading font-bold text-3xl md:text-4xl text-foreground mb-3 relative z-10">Selamat! Registrasi Berhasil</h3>
+                <p class="text-muted-foreground text-lg max-w-2xl mx-auto relative z-10">
+                  Data Anda telah kami terima dengan nomor registrasi 
+                  <span class="font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded">{{ success.nomor_pendaftaran }}</span>. 
+                  Silakan ikuti panduan selanjutnya di bawah ini.
+                </p>
+              </div>
+
+              <!-- Next Steps Content -->
+              <div class="p-8 md:p-12 bg-white">
+                <h4 class="font-heading font-bold text-xl mb-8 flex items-center gap-2">
+                  <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-sm">💡</span>
+                  Tahapan Selanjutnya:
+                </h4>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                  <!-- Step 1: Payment -->
+                  <div class="flex flex-col gap-4 relative">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-md shadow-primary/20 shrink-0">1</div>
+                      <h5 class="font-bold text-lg">Biaya Administrasi</h5>
+                    </div>
+                    <div class="flex-1 p-5 rounded-2xl bg-muted/30 border border-border/50">
+                      <p class="text-sm text-muted-foreground mb-4">Lakukan pembayaran biaya pendaftaran agar berkas Anda dapat segera diproses oleh admin.</p>
+                      <div class="flex flex-col gap-3">
+                        <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-border shadow-sm">
+                          <span class="text-xs font-bold uppercase text-muted-foreground">Nominal</span>
+                          <span class="font-bold text-primary">Rp {{ success.payment_amount?.toLocaleString('id-ID') || 0 }}</span>
+                        </div>
+                        
+                        <button 
+                          v-if="success.payment_status !== 'paid'"
+                          @click="handlePayment"
+                          class="btn btn-primary w-full shadow-lg shadow-primary/20 flex items-center justify-center gap-2 py-3"
+                          :disabled="paymentLoading"
+                        >
+                          <span v-if="paymentLoading" class="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full"></span>
+                          <span v-else>Bayar Sekarang</span>
+                          <svg v-if="!paymentLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                        </button>
+                        <div v-else class="flex items-center justify-center gap-2 p-3 bg-success/10 text-success rounded-xl border border-success/20 font-bold text-sm">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                          Sudah Terbayar
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: Verification -->
+                  <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-md shadow-primary/20 shrink-0">2</div>
+                      <h5 class="font-bold text-lg">Verifikasi Berkas</h5>
+                    </div>
+                    <div class="flex-1 p-5 rounded-2xl bg-muted/30 border border-border/50">
+                      <p class="text-sm text-muted-foreground mb-4">Admin pesantren akan meninjau dokumen yang Anda unggah. Proses ini biasanya memakan waktu:</p>
+                      <div class="flex items-center gap-3 bg-white p-3 rounded-xl border border-border shadow-sm">
+                        <div class="w-8 h-8 rounded bg-accent/10 flex items-center justify-center text-accent">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <span class="font-bold text-sm text-foreground">1 - 3 Hari Kerja</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3: Result -->
+                  <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-md shadow-primary/20 shrink-0">3</div>
+                      <h5 class="font-bold text-lg">Lacak Status</h5>
+                    </div>
+                    <div class="flex-1 p-5 rounded-2xl bg-muted/30 border border-border/50">
+                      <p class="text-sm text-muted-foreground mb-4">Pantau terus status pendaftaran Anda melalui halaman Lacak Status secara berkala.</p>
+                      <router-link to="/track" class="btn bg-white border border-border w-full flex items-center justify-center gap-2 py-3 font-bold hover:bg-primary/5 hover:border-primary/20 transition-all">
+                        Ke Halaman Lacak
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                      </router-link>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div class="flex items-center gap-4">
+                      <button @click="copyNomor" class="text-sm font-bold text-primary hover:underline flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        {{ copiedNomor ? 'Tersalin ke Clipboard!' : 'Salin Nomor Registrasi' }}
+                      </button>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <router-link to="/dashboard" class="btn btn-outline border-border font-bold">Ke Dashboard Saya</router-link>
+                    <router-link to="/" class="btn bg-muted/50 hover:bg-muted font-bold text-foreground">Kembali ke Beranda</router-link>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tip -->
+            <div class="mt-6 flex items-center justify-center gap-2 text-muted-foreground text-sm font-medium">
+              <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Tip: Simpan halaman ini atau catat nomor registrasi Anda sebagai bukti.
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -426,12 +505,13 @@ function handleFile(field, event) {
 async function copyNomor() {
   if (!success.value) return
   try {
-    await navigator.clipboard.writeText(success.value)
+    const textToCopy = success.value.nomor_pendaftaran || success.value
+    await navigator.clipboard.writeText(textToCopy)
     copiedNomor.value = true
     setTimeout(() => { copiedNomor.value = false }, 2500)
   } catch (err) {
     const textArea = document.createElement('textarea')
-    textArea.value = success.value
+    textArea.value = success.value.nomor_pendaftaran || success.value
     textArea.style.position = 'fixed'
     textArea.style.left = '-999999px'
     document.body.appendChild(textArea)
@@ -459,8 +539,8 @@ const onSubmit = handleSubmit(async (values) => {
     })
 
     const { data } = await pendaftaran.create(formData, { timeout: 30000 })
-    success.value = data.data?.nomor_pendaftaran || 'Berhasil'
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth'})
+    success.value = data.data
+    window.scrollTo({ top: 0, behavior: 'smooth'})
   } catch (err) {
     if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
       serverError.value = 'Mesin peladen sibuk menanggapi lonjakan. Silahkan ulangi kembali.'
@@ -469,6 +549,34 @@ const onSubmit = handleSubmit(async (values) => {
     }
   }
 })
+
+const paymentLoading = ref(false)
+async function handlePayment() {
+  if (!success.value?.id) return
+  paymentLoading.value = true
+  try {
+    const { data } = await pendaftaran.getPaymentToken(success.value.id)
+    
+    if (window.snap) {
+      window.snap.pay(data.data.token, {
+        onSuccess: function (result) {
+          toast.success('Pembayaran Berhasil! Berkas akan segera diverifikasi.')
+          success.value.payment_status = 'paid'
+        },
+        onPending: function (result) {
+          toast.info('Selesaikan pembayaran sesuai instruksi')
+        },
+        onError: function (result) {
+          toast.error('Pembayaran gagal, silakan coba lagi nanti.')
+        }
+      })
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.error || 'Gagal memuat portal pembayaran')
+  } finally {
+    paymentLoading.value = false
+  }
+}
 
 // Focus fix
 watch([() => isSubmitting.value, () => Object.keys(errors.value).length], ([submitting, errCount]) => {

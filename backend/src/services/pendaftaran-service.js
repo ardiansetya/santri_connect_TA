@@ -29,9 +29,16 @@ const PendaftaranService = {
       nomorPendaftaran = `REG-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000) + 100000}`
     } while (await Pendaftaran.checkNomorExists(nomorPendaftaran))
 
+    const paymentAmount = pesantren.biaya_pendaftaran || 0
+    const paymentStatus = paymentAmount === 0 ? 'paid' : 'unpaid'
+
+    console.log(`[PendaftaranService.create] Biaya: ${paymentAmount}, Status: ${paymentStatus}`);
+
     console.log('[PendaftaranService.create] Creating registration...');
-    await Pendaftaran.create({
+    const result = await Pendaftaran.create({
       nomor_pendaftaran: nomorPendaftaran, user_id: userId, pesantren_id: data.pesantren_id,
+      payment_amount: paymentAmount,
+      payment_status: paymentStatus,
       nama_lengkap: data.nama_lengkap, nik: data.nik, tempat_lahir: data.tempat_lahir || null,
       tanggal_lahir: data.tanggal_lahir || null, jenis_kelamin: data.jenis_kelamin,
       alamat: data.alamat || null, no_hp: data.no_hp || null, nama_ayah: data.nama_ayah || null,
@@ -42,12 +49,134 @@ const PendaftaranService = {
     const totalTime = Date.now() - startTime
     console.log(`[PendaftaranService.create] ✅ Done in ${totalTime}ms`);
     
-    return { nomor_pendaftaran: nomorPendaftaran }
+    return { 
+      id: result.insertId,
+      nomor_pendaftaran: nomorPendaftaran, 
+      payment_amount: paymentAmount, 
+      payment_status: paymentStatus 
+    }
+  },
+
+  async getPaymentToken(pendaftaranId, userId) {
+    const data = await Pendaftaran.findById(pendaftaranId)
+    if (!data) throw new Error('Pendaftaran tidak ditemukan')
+    if (data.user_id !== userId) throw new Error('Akses ditolak')
+    if (data.payment_status === 'paid') throw new Error('Pendaftaran sudah dibayar')
+
+    // If order_id doesn't exist, create it
+    let orderId = data.order_id
+    if (!orderId) {
+      orderId = `ORD-${data.nomor_pendaftaran}-${Date.now()}`
+      await Pendaftaran.updatePayment(pendaftaranId, { order_id: orderId })
+    }
+
+    const snap = require('../config/midtrans')
+    const parameter = {
+      transaction_details: {
+        order_id: orderId,
+        gross_amount: data.payment_amount
+      },
+      customer_details: {
+        first_name: data.nama_lengkap,
+        email: data.user_email
+      },
+      item_details: [
+        {
+          id: `REG-${data.pesantren_id}`,
+          price: data.payment_amount,
+          quantity: 1,
+          name: `Biaya Pendaftaran ${data.pesantren_nama}`
+        }
+      ]
+    }
+
+    const transaction = await snap.createTransaction(parameter)
+    await Pendaftaran.updatePayment(pendaftaranId, { 
+      payment_token: transaction.token,
+      payment_status: 'payment_pending'
+    })
+
+    return { token: transaction.token, redirect_url: transaction.redirect_url }
+  },
+
+  async checkPaymentStatus(pendaftaranId, userId) {
+    const data = await Pendaftaran.findById(pendaftaranId)
+    if (!data) throw new Error('Pendaftaran tidak ditemukan')
+    if (data.user_id !== userId) throw new Error('Akses ditolak')
+    if (!data.order_id) throw new Error('Belum ada transaksi untuk pendaftaran ini')
+
+    const snap = require('../config/midtrans')
+    try {
+      const statusResponse = await snap.transaction.status(data.order_id)
+      console.log(`[PendaftaranService.checkStatus] Midtrans response for ${data.order_id}:`, statusResponse.transaction_status);
+      
+      let newStatus = data.payment_status
+      const midtransStatus = statusResponse.transaction_status
+      const fraudStatus = statusResponse.fraud_status
+
+      if (midtransStatus === 'capture') {
+        if (fraudStatus === 'challenge') newStatus = 'payment_pending'
+        else if (fraudStatus === 'accept') newStatus = 'paid'
+      } else if (midtransStatus === 'settlement') {
+        newStatus = 'paid'
+      } else if (midtransStatus === 'cancel' || midtransStatus === 'deny' || midtransStatus === 'expire') {
+        newStatus = 'failed'
+      } else if (midtransStatus === 'pending') {
+        newStatus = 'payment_pending'
+      }
+
+      if (newStatus !== data.payment_status) {
+        await Pendaftaran.updatePayment(pendaftaranId, { 
+          payment_status: newStatus,
+          payment_method: statusResponse.payment_type
+        })
+      }
+
+      return { payment_status: newStatus, midtrans_status: midtransStatus }
+    } catch (err) {
+      console.error('[PendaftaranService.checkStatus] Error:', err.message);
+      // If error from midtrans (e.g. 404 not found), just return current status
+      return { payment_status: data.payment_status, error: err.message }
+    }
   },
 
   async getTrackingStatus(nomor) {
     const data = await Pendaftaran.findByNomor(nomor)
     if (!data) throw new Error('Data pendaftaran tidak ditemukan')
+
+    let currentPaymentStatus = data.payment_status
+
+    // Auto-sync status with Midtrans if we have an order_id
+    if (data.order_id && data.payment_status !== 'paid') {
+      try {
+        const snap = require('../config/midtrans')
+        const statusResponse = await snap.transaction.status(data.order_id)
+        const midtransStatus = statusResponse.transaction_status
+        const fraudStatus = statusResponse.fraud_status
+
+        let newStatus = data.payment_status
+        if (midtransStatus === 'capture') {
+          if (fraudStatus === 'challenge') newStatus = 'payment_pending'
+          else if (fraudStatus === 'accept') newStatus = 'paid'
+        } else if (midtransStatus === 'settlement') {
+          newStatus = 'paid'
+        } else if (midtransStatus === 'cancel' || midtransStatus === 'deny' || midtransStatus === 'expire') {
+          newStatus = 'failed'
+        } else if (midtransStatus === 'pending') {
+          newStatus = 'payment_pending'
+        }
+
+        if (newStatus !== data.payment_status) {
+          await Pendaftaran.updatePayment(data.id, { 
+            payment_status: newStatus,
+            payment_method: statusResponse.payment_type
+          })
+          currentPaymentStatus = newStatus
+        }
+      } catch (err) {
+        console.error('[PendaftaranService.getTrackingStatus] Sync error:', err.message)
+      }
+    }
 
     return {
       id: data.id,
@@ -55,6 +184,8 @@ const PendaftaranService = {
       user_id: data.user_id,
       pesantren_id: data.pesantren_id,
       status: data.status,
+      payment_status: currentPaymentStatus,
+      payment_amount: data.payment_amount,
       nama_lengkap: data.nama_lengkap,
       nik: data.nik,
       tempat_lahir: data.tempat_lahir || '-',
