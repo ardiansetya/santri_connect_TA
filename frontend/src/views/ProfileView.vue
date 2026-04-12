@@ -12,7 +12,7 @@
           <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
         </div>
         
-        <div class="relative pt-16 pb-8 px-8 flex flex-col md:flex-row items-center md:items-end gap-6">
+        <div class="relative pt-20 pb-10 px-8 flex flex-col md:flex-row items-center md:items-end gap-6 sm:gap-8">
           <!-- Avatar Section -->
           <div class="relative -mt-4">
             <div class="w-32 h-32 rounded-3xl bg-white p-1.5 shadow-2xl rotate-3 group-hover:rotate-0 transition-transform duration-500">
@@ -27,7 +27,7 @@
           </div>
 
           <!-- Info Section -->
-          <div class="flex-1 text-center md:text-left">
+          <div class="flex-none text-center md:text-left pb-1">
             <h1 class="font-heading text-3xl md:text-4xl font-black text-foreground mb-2">{{ authStore.user?.username }}</h1>
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
               <span class="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border border-primary/20">
@@ -41,20 +41,14 @@
             </div>
           </div>
           
-          <!-- Quick Status Actions -->
-          <div class="flex gap-2">
-            <div class="px-4 py-2 bg-muted/50 rounded-xl border border-border/40 text-center">
-              <p class="text-[0.625rem] uppercase font-black text-muted-foreground tracking-widest leading-none mb-1">Status Keamanan</p>
-              <p class="text-xs font-bold text-success flex items-center justify-center gap-1">Optimal <span class="block w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span></p>
-            </div>
-          </div>
+
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+      <div class="flex flex-col md:flex-row gap-8">
         
         <!-- Tab Navigation (Desktop: Left Col, Mobile: Top) -->
-        <div class="md:col-span-4 animate-slide-up">
+        <div class="w-full md:w-1/3 animate-slide-up">
           <div class="card p-4 shadow-lg border border-border/60 sticky top-24 rounded-2xl bg-white/80 backdrop-blur-md">
             <nav class="flex flex-col gap-2">
               <button 
@@ -85,7 +79,7 @@
         </div>
 
         <!-- Forms Content -->
-        <div class="md:col-span-8 animate-slide-up delay-1">
+        <div class="w-full md:w-2/3 animate-slide-up delay-1">
           
           <!-- TAB: Profile Data -->
           <div v-show="activeTab === 'profile'" class="card bg-white rounded-2xl shadow-xl border border-border/80 overflow-hidden transform transition-all">
@@ -106,7 +100,7 @@
                         v-model="username" 
                         v-bind="usernameProps" 
                         type="text" 
-                        class="form-input block w-full pl-10 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl transition-all outline-none" 
+                        class="form-input block w-full !pl-10 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl transition-all outline-none" 
                         :class="{ 'border-destructive focus:border-destructive': errors.username }" 
                       />
                     </div>
@@ -125,7 +119,7 @@
                         v-model="email" 
                         v-bind="emailProps" 
                         type="email" 
-                        class="form-input block w-full pl-12 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl transition-all outline-none" 
+                        class="form-input block w-full !pl-12 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl transition-all outline-none" 
                         :class="{ 'border-destructive focus:border-destructive': errors.email }" 
                       />
                     </div>
@@ -180,7 +174,7 @@
                         v-model="currentPassword" 
                         v-bind="currentPasswordProps" 
                         type="password" 
-                        class="form-input block w-full pl-12 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-accent focus:bg-white rounded-xl transition-all outline-none" 
+                        class="form-input block w-full !pl-12 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-accent focus:bg-white rounded-xl transition-all outline-none" 
                         :class="{ 'border-destructive focus:border-destructive': passwordErrors.currentPassword }" 
                         placeholder="••••••••"
                       />
@@ -199,7 +193,7 @@
                         v-model="newPassword" 
                         v-bind="newPasswordProps" 
                         type="password" 
-                        class="form-input block w-full pl-12 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-accent focus:bg-white rounded-xl transition-all outline-none" 
+                        class="form-input block w-full !pl-12 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-accent focus:bg-white rounded-xl transition-all outline-none" 
                         :class="{ 'border-destructive focus:border-destructive': passwordErrors.newPassword }" 
                          placeholder="••••••••"
                       />
@@ -218,7 +212,7 @@
                         v-model="confirmPassword" 
                         v-bind="confirmPasswordProps" 
                         type="password" 
-                        class="form-input block w-full pl-12 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-accent focus:bg-white rounded-xl transition-all outline-none" 
+                        class="form-input block w-full !pl-12 pr-4 py-3.5 bg-muted/20 border-2 border-transparent focus:border-accent focus:bg-white rounded-xl transition-all outline-none" 
                         :class="{ 'border-destructive focus:border-destructive': passwordErrors.confirmPassword }" 
                          placeholder="••••••••"
                       />

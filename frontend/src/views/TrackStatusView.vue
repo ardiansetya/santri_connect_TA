@@ -28,7 +28,7 @@
                   <input
                     v-model="nomor"
                     type="text"
-                    class="block w-full pl-12 pr-4 py-4 text-lg bg-muted/20 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl placeholder:text-muted-foreground/60 transition-all focus:shadow-[0_0_0_4px_rgba(13,79,79,0.1)] focus:outline-none"
+                    class="block w-full !pl-12 pr-4 py-4 text-lg bg-muted/20 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl placeholder:text-muted-foreground/60 transition-all focus:shadow-[0_0_0_4px_rgba(13,79,79,0.1)] focus:outline-none"
                     placeholder="Contoh: REG-2024-0001"
                     required
                   />

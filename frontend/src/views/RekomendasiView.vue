@@ -40,7 +40,7 @@
                       <input
                         v-model.number="form.budget"
                         type="number"
-                        class="form-input pl-12 pr-4 bg-background border-2 focus:border-primary transition-all shadow-sm"
+                        class="form-input !pl-12 pr-4 bg-background border-2 focus:border-primary transition-all shadow-sm"
                         required
                         min="0"
                         placeholder="Contoh: 1500000"
@@ -56,7 +56,7 @@
                   <div>
                     <label class="form-label">Tentukan Provinsi</label>
                     <div class="relative">
-                      <select v-model="form.provinsi" class="form-input appearance-none pr-10 shadow-sm border-2 focus:border-primary cursor-pointer bg-background">
+                      <select v-model="form.provinsi" class="form-input appearance-none !pr-10 shadow-sm border-2 focus:border-primary cursor-pointer bg-background">
                         <option value="">Semua Provinsi di Indonesia</option>
                         <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
                       </select>

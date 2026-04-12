@@ -75,7 +75,7 @@
                 <div>
                   <label class="form-label block mb-2">Jenis Kelamin Identitas <span class="text-destructive">*</span></label>
                   <div class="relative">
-                    <select v-model="jenis_kelamin" v-bind="jenis_kelaminProps" class="form-input appearance-none w-full px-4 py-3.5 border-2 rounded-xl border-border focus:border-primary outline-none transition-all focus:ring-4 focus:ring-primary/10 bg-white" :class="{ 'border-destructive focus:border-destructive focus:ring-destructive/10 ring-1 ring-destructive': errors.jenis_kelamin }">
+                    <select v-model="jenis_kelamin" v-bind="jenis_kelaminProps" class="form-input appearance-none w-full !pr-12 px-4 py-3.5 border-2 rounded-xl border-border focus:border-primary outline-none transition-all focus:ring-4 focus:ring-primary/10 bg-white" :class="{ 'border-destructive focus:border-destructive focus:ring-destructive/10 ring-1 ring-destructive': errors.jenis_kelamin }">
                       <option value="" disabled>Pilih Kategori</option>
                       <option value="L">Laki-laki (Putra)</option>
                       <option value="P">Perempuan (Putri)</option>

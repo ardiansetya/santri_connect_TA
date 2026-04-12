@@ -33,7 +33,7 @@
                 <div>
                   <label class="form-label">Provinsi</label>
                   <div class="relative">
-                    <select class="form-input appearance-none pr-10" v-model="filters.province" @change="onProvinceChange">
+                    <select class="form-input appearance-none !pr-10" v-model="filters.province" @change="onProvinceChange">
                       <option value="">Semua Provinsi</option>
                       <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
                     </select>
@@ -46,7 +46,7 @@
                 <div>
                   <label class="form-label">Kota / Kabupaten</label>
                   <div class="relative">
-                    <select class="form-input appearance-none pr-10" v-model="filters.kota" @change="fetchData" :disabled="!cities.length">
+                    <select class="form-input appearance-none !pr-10" v-model="filters.kota" @change="fetchData" :disabled="!cities.length">
                       <option value="">Semua Kota</option>
                       <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
                     </select>
@@ -59,7 +59,7 @@
                 <div>
                   <label class="form-label">Kurikulum</label>
                   <div class="relative">
-                    <select class="form-input appearance-none pr-10" v-model="filters.kurikulum" @change="fetchData">
+                    <select class="form-input appearance-none !pr-10" v-model="filters.kurikulum" @change="fetchData">
                       <option value="">Semua Kurikulum</option>
                       <option value="modern">Modern</option>
                       <option value="salaf">Salaf</option>
@@ -74,7 +74,7 @@
                 <div class="border-t border-border pt-5 mt-5">
                   <label class="form-label">Urutkan Berdasarkan</label>
                   <div class="relative mb-3">
-                    <select class="form-input appearance-none pr-10" v-model="sortField" @change="fetchData">
+                    <select class="form-input appearance-none !pr-10" v-model="sortField" @change="fetchData">
                       <option value="">Default (Relevansi)</option>
                       <option value="nama">Nama Pesantren</option>
                       <option value="tahun_berdiri">Tahun Berdiri</option>

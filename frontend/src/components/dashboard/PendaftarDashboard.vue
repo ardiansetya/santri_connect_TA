@@ -78,50 +78,54 @@
             </div>
             
             <!-- Content -->
-            <div v-else class="flex-1 overflow-y-auto max-h-[500px]">
+            <div v-else class="flex-1 overflow-y-auto overflow-x-hidden max-h-[500px]">
               <div
                 v-for="(p, i) in pendaftaranList"
                 :key="p.id"
-                class="p-6 border-b border-border hover:bg-muted/10 transition-colors group relative"
+                class="p-4 sm:px-6 sm:py-5 border-b border-border hover:bg-muted/10 transition-colors group relative"
               >
                 <!-- Numbering indicator -->
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-primary transition-colors"></div>
                 
-                <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 sm:gap-6 pl-2 sm:pl-0">
                   <div class="flex-1">
-                    <h6 class="font-heading font-bold text-lg mb-1.5 text-foreground group-hover:text-primary transition-colors">{{ p.pesantren?.nama || 'Pesantren Tidak Terdeteksi' }}</h6>
+                    <h6 class="font-heading font-bold text-base mb-1.5 text-foreground group-hover:text-primary transition-colors">{{ p.pesantren?.nama || p.pesantren_nama || 'Pesantren Tidak Terdeteksi' }}</h6>
                     
-                    <div class="flex flex-wrap items-center gap-3 mb-2">
-                      <span class="inline-flex items-center gap-1 text-muted-foreground text-sm font-mono bg-muted/30 px-2 py-0.5 rounded border border-border/50">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                      <div class="inline-flex items-center gap-1.5 text-muted-foreground text-xs font-mono bg-muted/30 px-2 py-1 rounded border border-border/50 whitespace-nowrap">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
                         {{ p.nomor_pendaftaran }}
-                      </span>
+                      </div>
                       <button
                         @click="copyNomor(p.nomor_pendaftaran)"
-                        class="text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-dark transition-colors inline-flex items-center"
+                        class="text-[10px] font-bold uppercase tracking-wider text-primary hover:text-primary-dark transition-colors inline-flex items-center whitespace-nowrap bg-primary/5 px-2 py-1 rounded"
                         title="Salin nomor Registrasi"
                       >
                         <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                         Copy
                       </button>
+                      <div class="text-muted-foreground text-xs font-medium flex items-center gap-1.5 opacity-80 whitespace-nowrap hidden sm:flex border-l border-border pl-2.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        {{ formatDate(p.created_at) }}
+                      </div>
                     </div>
-                    
-                    <p class="text-muted-foreground text-xs font-medium flex items-center gap-1.5 opacity-70">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                      {{ formatDate(p.created_at) }}
-                    </p>
+                    <!-- Mobile only date -->
+                    <div class="text-muted-foreground text-xs font-medium flex items-center gap-1.5 opacity-80 whitespace-nowrap sm:hidden mt-2">
+                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                       {{ formatDate(p.created_at) }}
+                    </div>
                   </div>
                   
-                  <div class="sm:text-right shrink-0 flex flex-col sm:items-end w-full sm:w-auto mt-2 sm:mt-0">
-                    <span class="inline-flex px-3 py-1 text-xs font-bold uppercase tracking-widest rounded shadow-[0_1px_2px_rgba(0,0,0,0.05)] border mb-3" :class="statusBadge(p.status)">
+                  <div class="flex items-center gap-3 shrink-0">
+                    <span class="inline-flex px-3 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded shadow-sm border whitespace-nowrap" :class="statusBadge(p.status)">
                       {{ statusLabel(p.status) }}
                     </span>
                     <router-link
                       v-if="p.nomor_pendaftaran"
                       to="/track"
-                      class="btn btn-outline border-border flex items-center text-xs px-3 py-1.5 hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all font-bold group/btn"
+                      class="btn bg-white border border-border shadow-sm flex items-center text-xs px-4 py-2 hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all font-bold group/btn whitespace-nowrap"
                     >
-                      Audit Detail
+                      Audit
                       <svg class="w-3.5 h-3.5 ml-1.5 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </router-link>
                   </div>
@@ -140,24 +144,24 @@
             <div class="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-primary/5 to-transparent"></div>
           </div>
           <div class="p-6 space-y-3">
-            <router-link to="/pesantren" class="btn relative w-full flex items-center justify-start bg-muted/20 border-transparent hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all p-3.5 rounded-xl group overflow-hidden">
+            <router-link to="/pesantren" class="relative w-full flex items-center justify-start bg-muted/20 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all p-3.5 rounded-xl group overflow-hidden border border-transparent">
               <span class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0 mr-3 group-hover:scale-110 transition-transform"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span>
               <span class="font-bold text-sm">Cari Pesantren Publik</span>
             </router-link>
             
-            <router-link to="/rekomendasi" class="btn relative w-full flex items-center justify-start bg-muted/20 border-transparent hover:border-accent/30 hover:bg-accent/5 hover:text-accent transition-all p-3.5 rounded-xl group overflow-hidden">
+            <router-link to="/rekomendasi" class="relative w-full flex items-center justify-start bg-muted/20 hover:border-accent/30 hover:bg-accent/5 hover:text-accent transition-all p-3.5 rounded-xl group overflow-hidden border border-transparent">
               <span class="w-8 h-8 rounded bg-accent/10 flex items-center justify-center text-accent shrink-0 mr-3 group-hover:scale-110 transition-transform"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></span>
               <span class="font-bold text-sm">Algoritma Rekomendasi</span>
             </router-link>
             
-            <router-link to="/compare" class="btn relative w-full flex items-center justify-start bg-muted/20 border-transparent hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all p-3.5 rounded-xl group overflow-hidden">
+            <router-link to="/compare" class="relative w-full flex items-center justify-start bg-muted/20 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all p-3.5 rounded-xl group overflow-hidden border border-transparent">
               <span class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0 mr-3 group-hover:scale-110 transition-transform"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg></span>
               <span class="font-bold text-sm">Table Analisis Perbandingan</span>
             </router-link>
             
             <div class="h-px bg-border my-2"></div>
             
-            <router-link to="/track" class="btn relative w-full flex items-center justify-start bg-muted/20 border-transparent hover:border-success/30 hover:bg-success/5 hover:text-success transition-all p-3.5 rounded-xl group overflow-hidden">
+            <router-link to="/track" class="relative w-full flex items-center justify-start bg-muted/20 hover:border-success/30 hover:bg-success/5 hover:text-success transition-all p-3.5 rounded-xl group overflow-hidden border border-transparent">
               <span class="w-8 h-8 rounded bg-success/10 flex items-center justify-center text-success shrink-0 mr-3 group-hover:scale-110 transition-transform"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span>
               <span class="font-bold text-sm">Lacak Berkas Mandiri</span>
             </router-link>

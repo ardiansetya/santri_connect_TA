@@ -544,7 +544,10 @@ h1, h2, h3, h4, h5, h6 {
 .form-input {
   display: block;
   width: 100%;
-  padding: 0.625rem 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
   font-size: 0.875rem;
   font-family: 'DM Sans', sans-serif;
   border: 1.5px solid hsl(var(--border));
