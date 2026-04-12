@@ -80,6 +80,24 @@ const PendaftaranController = {
     } catch (err) {
       return reply.code(500).send({ error: 'Terjadi kesalahan pada server' })
     }
+  },
+
+  async getPaymentToken(request, reply) {
+    try {
+      const result = await PendaftaranService.getPaymentToken(request.params.id, request.user.id)
+      return reply.code(200).send({ data: result })
+    } catch (err) {
+      return reply.code(400).send({ error: err.message })
+    }
+  },
+
+  async checkPaymentStatus(request, reply) {
+    try {
+      const result = await PendaftaranService.checkPaymentStatus(request.params.id, request.user.id)
+      return reply.code(200).send({ data: result })
+    } catch (err) {
+      return reply.code(400).send({ error: err.message })
+    }
   }
 }
 

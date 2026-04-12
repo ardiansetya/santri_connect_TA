@@ -38,6 +38,7 @@
     "fastify": "^5.8.4",
     "fastify-plugin": "^5.1.0",
     "form-data": "^4.0.5",
+    "midtrans-client": "^1.4.3",
     "mysql2": "^3.20.0",
     "node-fetch": "^2.7.0"
   },

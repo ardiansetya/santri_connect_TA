@@ -91,11 +91,32 @@
                   </div>
                 </div>
                 
-                <div class="shrink-0 flex flex-col items-start md:items-end gap-2">
-                  <p class="text-xs text-muted-foreground uppercase tracking-widest font-bold">Status Saat Ini</p>
-                  <span class="inline-flex px-5 py-2.5 rounded-full text-sm font-bold shadow-sm uppercase tracking-wider" :class="statusBadge(data.status)">
-                    {{ statusLabel(data.status) }}
-                  </span>
+                <div class="shrink-0 flex flex-col items-start md:items-end gap-3">
+                  <div class="flex flex-col items-start md:items-end gap-1">
+                    <p class="text-xs text-muted-foreground uppercase tracking-widest font-bold">Status Verifikasi</p>
+                    <span class="inline-flex px-5 py-2.5 rounded-full text-sm font-bold shadow-sm uppercase tracking-wider" :class="statusBadge(data.status)">
+                      {{ statusLabel(data.status) }}
+                    </span>
+                  </div>
+                  
+                  <div class="flex flex-col items-start md:items-end gap-1">
+                    <p class="text-xs text-muted-foreground uppercase tracking-widest font-bold">Status Pembayaran</p>
+                    <div class="flex items-center gap-2">
+                      <span class="inline-flex px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm uppercase tracking-wider border" :class="paymentStatusBadge(data.payment_status)">
+                        {{ paymentStatusLabel(data.payment_status) }}
+                      </span>
+                      <button 
+                        v-if="data.payment_status !== 'paid' && data.payment_amount > 0"
+                        @click="handlePayment"
+                        class="btn btn-primary py-1.5 px-3 text-xs font-bold shadow-md shadow-primary/20 flex items-center gap-1.5"
+                        :disabled="paymentLoading"
+                      >
+                        <span v-if="paymentLoading" class="animate-spin h-3 w-3 border-2 border-white/30 border-t-white rounded-full"></span>
+                        <span v-else>Bayar</span>
+                        <svg v-if="!paymentLoading" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -214,7 +235,9 @@
 <script setup>
 import { ref } from 'vue'
 import { pendaftaran } from '../services'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const nomor = ref('')
 const data = ref(null)
 const loading = ref(false)
@@ -244,6 +267,26 @@ function statusLabel(status) {
     ditolak: 'Gagal Tes/Verifikasi'
   }
   return map[status] || status
+}
+
+function paymentStatusBadge(status) {
+  const map = {
+    unpaid: 'bg-muted text-muted-foreground border-border',
+    payment_pending: 'bg-accent/10 text-accent border-accent/20',
+    paid: 'bg-success/10 text-success border-success/20',
+    failed: 'bg-destructive/10 text-destructive border-destructive/20'
+  }
+  return map[status] || 'bg-muted text-muted-foreground border-border'
+}
+
+function paymentStatusLabel(status) {
+  const map = {
+    unpaid: 'Belum Dibayar',
+    payment_pending: 'Menunggu Pembayaran',
+    paid: 'Sudah Dibayar',
+    failed: 'Pembayaran Gagal'
+  }
+  return map[status] || 'Status Tidak Diketahui'
 }
 
 // Logic for progress bar width
@@ -343,6 +386,35 @@ async function cekStatus() {
     error.value = err.response?.data?.error || 'Pendaftaran tidak terdaftar dalam database kami. Periksa kembali Nomor Registrasi Anda.'
   } finally {
     loading.value = false
+  }
+}
+
+const paymentLoading = ref(false)
+async function handlePayment() {
+  if (!data.value?.id) return
+  paymentLoading.value = true
+  try {
+    const { data: res } = await pendaftaran.getPaymentToken(data.value.id)
+    
+    if (window.snap) {
+      window.snap.pay(res.data.token, {
+        onSuccess: function (result) {
+          toast.success('Pembayaran Berhasil! Berkas akan segera diverifikasi.')
+          data.value.payment_status = 'paid'
+        },
+        onPending: function (result) {
+          toast.info('Selesaikan pembayaran sesuai instruksi')
+          data.value.payment_status = 'payment_pending'
+        },
+        onError: function (result) {
+          toast.error('Pembayaran gagal, silakan coba lagi nanti.')
+        }
+      })
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.error || 'Gagal memuat portal pembayaran')
+  } finally {
+    paymentLoading.value = false
   }
 }
 </script>

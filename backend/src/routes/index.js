@@ -84,6 +84,8 @@ const pendaftaranRoutes = async (fastify) => {
   fastify.post('/api/pendaftaran', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.create(request, reply))
   fastify.get('/api/pendaftaran/status/:nomor', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.getTrackingStatus(request, reply))
   fastify.get('/api/pendaftaran/saya', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.getMyRegistrations(request, reply))
+  fastify.post('/api/pendaftaran/:id/pay', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.getPaymentToken(request, reply))
+  fastify.get('/api/pendaftaran/:id/payment-status', { preHandler: authMiddleware }, (request, reply) => PendaftaranController.checkPaymentStatus(request, reply))
 }
 
 const pemilikRoutes = async (fastify) => {
