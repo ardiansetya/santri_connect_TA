@@ -5,7 +5,7 @@ async function checkDatabase() {
     host: 'localhost',
     user: 'root',
     password: 'Ardiansetya1',
-    database: 'santo_connect'
+    database: 'santri_connect'
   });
 
   console.log('✅ Connected to database\n');
@@ -15,7 +15,7 @@ async function checkDatabase() {
   const [columns] = await connection.query(`
     SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT
     FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = 'santo_connect' AND TABLE_NAME = 'pesantren'
+    WHERE TABLE_SCHEMA = 'santri_connect' AND TABLE_NAME = 'pesantren'
     ORDER BY ORDINAL_POSITION
   `);
   columns.forEach(col => {
