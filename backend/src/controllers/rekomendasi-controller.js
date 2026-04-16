@@ -3,8 +3,15 @@ const RekomendasiService = require('../services/rekomendasi-service')
 const RekomendasiController = {
   async getRekomendasi(request, reply) {
     const { budget, provinsi, fasilitas } = request.body
-    if (!budget || !provinsi || !fasilitas || !Array.isArray(fasilitas)) return reply.code(400).send({ error: 'Input tidak valid' })
-    if (typeof budget !== 'number' || budget <= 0) return reply.code(400).send({ error: 'Input tidak valid' })
+    
+    // Validation: budget must be a positive number, provinsi can be string, fasilitas must be array
+    if (!budget || typeof budget !== 'number' || budget <= 0) {
+      return reply.code(400).send({ success: false, error: 'Budget harus berupa angka positif' })
+    }
+    
+    if (provinsi === undefined || !Array.isArray(fasilitas)) {
+      return reply.code(400).send({ success: false, error: 'Input tidak valid (Provinsi atau Fasilitas)' })
+    }
 
     try {
       const data = await RekomendasiService.getRekomendasi({ budget, provinsi, fasilitas })

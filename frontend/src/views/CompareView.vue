@@ -28,10 +28,35 @@
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-else-if="loading" class="flex flex-col items-center justify-center py-20 animate-fade-in">
-        <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary"></div>
-        <p class="mt-6 text-muted-foreground font-medium text-lg">Menyusun data perbandingan...</p>
+      <!-- Loading State (Skeleton Table) -->
+      <div v-else-if="loading" class="animate-pulse">
+        <div class="bg-white rounded-2xl shadow-xl border border-border/50 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr>
+                  <th class="p-6 bg-muted/20 w-56 sticky left-0 z-10 border-b border-border">
+                    <div class="h-6 w-32 bg-muted rounded-md mb-2"></div>
+                  </th>
+                  <th v-for="i in 3" :key="i" class="p-6 border-b border-border min-w-[300px]">
+                    <div class="border border-border/60 rounded-2xl p-5 h-64 bg-muted/10"></div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="i in 5" :key="i">
+                  <td class="p-5 sticky left-0 bg-white border-b border-border/60">
+                    <div class="h-4 w-24 bg-muted rounded-md tracking-widest"></div>
+                  </td>
+                  <td v-for="j in 3" :key="j" class="p-5 border-b border-border/60">
+                    <div class="h-6 w-3/4 bg-muted/20 rounded-md mx-auto"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="mt-6 text-center text-muted-foreground font-medium animate-bounce italic">Algoritma sedang menyeimbangkan data...</p>
       </div>
 
       <!-- Error State -->
@@ -62,39 +87,45 @@
           </button>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-xl border border-border/50 overflow-hidden relative z-20">
+        <div class="bg-white rounded-2xl shadow-2xl border border-border/50 overflow-hidden relative z-20">
           <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse table-fixed md:table-auto">
               <thead>
                 <tr>
-                  <th class="p-6 bg-muted/30 border-b-2 border-primary/20 w-48 font-heading text-lg text-primary align-top shadow-[inset_-1px_0_0_0_rgba(0,0,0,0.05)] sticky left-0 z-10 hidden md:table-cell">
-                    Kriteria Utama
+                  <th class="p-4 md:p-6 bg-muted/40 border-b-2 border-primary/20 w-40 md:w-56 font-heading text-xl text-primary align-middle shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)] sticky left-0 z-30 backdrop-blur-md">
+                    <div class="flex items-center gap-2">
+                      <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                      Kriteria
+                    </div>
                   </th>
-                  <th v-for="p in pesantrenData" :key="p.id" class="p-6 bg-white border-b-2 border-primary/20 align-top min-w-[280px]">
-                    <div class="flex flex-col h-full border border-border rounded-xl p-4 relative group shadow-sm transition-shadow hover:shadow-md">
+                  <th v-for="p in pesantrenData" :key="p.id" class="p-4 md:p-6 bg-white border-b-2 border-primary/20 align-top min-w-[300px] sticky top-0 z-20">
+                    <div class="flex flex-col h-full bg-surface border border-border/60 rounded-2xl p-4 md:p-5 relative group shadow-sm transition-all duration-300 hover:shadow-xl hover:border-primary/30">
                       <button 
-                        class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white border border-border text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100" 
+                        class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white border border-border text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive shadow-lg flex items-center justify-center transition-all z-10" 
                         @click="removeItem(p.id)"
-                        title="Hapus dari perbandingan"
+                        title="Hapus"
                       >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                       </button>
                       
-                      <div class="aspect-video w-full rounded-lg overflow-hidden mb-4 bg-muted">
+                      <div class="aspect-video w-full rounded-xl overflow-hidden mb-4 bg-muted ring-1 ring-border shadow-inner">
                         <img 
                           v-if="p.foto_utama" 
                           :src="getUploadUrl(p.foto_utama)" 
                           :alt="p.nama" 
-                          class="w-full h-full object-cover"
+                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
-                        <div v-else class="w-full h-full flex items-center justify-center bg-primary/5 text-primary/30 text-3xl">🕌</div>
+                        <div v-else class="w-full h-full flex items-center justify-center bg-primary/5 text-primary/20 text-4xl italic">SC</div>
                       </div>
                       
-                      <h3 class="font-heading font-bold text-xl text-center text-primary-dark mb-1">{{ p.nama }}</h3>
-                      <p class="text-sm text-center text-muted-foreground mb-4">{{ p.kota }}, {{ p.province }}</p>
+                      <h3 class="font-heading font-black text-xl text-center text-primary-dark mb-1 leading-tight line-clamp-1">{{ p.nama }}</h3>
+                      <div class="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mb-4">
+                        <svg class="w-3 h-3 text-accent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+                        {{ p.kota }}
+                      </div>
                       
-                      <router-link :to="`/pesantren/${p.id}`" class="btn btn-outline border-primary text-primary w-full mt-auto text-sm justify-center py-2 hover:bg-primary hover:text-white">
-                        Lihat Profil Penuh
+                      <router-link :to="`/pesantren/${p.id}`" class="btn btn-outline border-primary/40 text-primary w-full mt-auto text-xs font-bold tracking-widest uppercase py-2.5 transition-all hover:bg-primary hover:text-white hover:border-primary">
+                        Detail Profil
                       </router-link>
                     </div>
                   </th>
@@ -102,77 +133,116 @@
               </thead>
               <tbody class="divide-y divide-border/60">
                 <!-- Provinsi -->
-                <tr class="hover:bg-muted/10 transition-colors">
-                  <td class="p-4 font-semibold text-muted-foreground bg-muted/20 md:bg-transparent shadow-[inset_-1px_0_0_0_rgba(0,0,0,0.05)] sticky left-0 z-10 md:static block md:table-cell uppercase tracking-wider text-xs md:text-sm">Lokasi</td>
-                  <td v-for="p in pesantrenData" :key="p.id" class="p-4 text-center">
-                    <p class="font-medium text-foreground">{{ p.kota }}</p>
-                    <p class="text-sm text-muted-foreground">{{ p.province }}</p>
+                <tr class="hover:bg-muted/10 transition-colors group">
+                  <td class="p-5 font-bold text-muted-foreground bg-muted/20 md:bg-white/90 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] sticky left-0 z-10 block md:table-cell uppercase tracking-widest text-[10px] md:text-xs backdrop-blur-sm">
+                    <div class="flex items-center gap-2">
+                       <span class="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center text-primary">📍</span>
+                       Lokasi
+                    </div>
+                  </td>
+                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
+                    <p class="font-bold text-foreground">{{ p.kota }}</p>
+                    <p class="text-xs text-muted-foreground font-medium uppercase tracking-wide mt-0.5">{{ p.province }}</p>
                   </td>
                 </tr>
                 
                 <!-- Kurikulum -->
-                <tr class="hover:bg-muted/10 transition-colors">
-                  <td class="p-4 font-semibold text-muted-foreground bg-muted/20 md:bg-transparent shadow-[inset_-1px_0_0_0_rgba(0,0,0,0.05)] sticky left-0 z-10 md:static block md:table-cell uppercase tracking-wider text-xs md:text-sm">Kurikulum</td>
-                  <td v-for="p in pesantrenData" :key="p.id" class="p-4 text-center">
-                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider" :class="badgeClass(p.kurikulum)">
+                <tr class="hover:bg-muted/10 transition-colors group bg-muted/5">
+                  <td class="p-5 font-bold text-muted-foreground bg-muted/20 md:bg-white/90 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] sticky left-0 z-10 block md:table-cell uppercase tracking-widest text-[10px] md:text-xs backdrop-blur-sm">
+                    <div class="flex items-center gap-2">
+                       <span class="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center text-accent">📚</span>
+                       Kurikulum
+                    </div>
+                  </td>
+                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
+                    <span class="inline-flex px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border-2 shadow-sm" :class="badgeClass(p.kurikulum)">
                       {{ p.kurikulum || 'Umum' }}
                     </span>
                   </td>
                 </tr>
                 
                 <!-- Est -->
-                <tr class="hover:bg-muted/10 transition-colors">
-                  <td class="p-4 font-semibold text-muted-foreground bg-muted/20 md:bg-transparent shadow-[inset_-1px_0_0_0_rgba(0,0,0,0.05)] sticky left-0 z-10 md:static block md:table-cell uppercase tracking-wider text-xs md:text-sm">Sejarah</td>
-                  <td v-for="p in pesantrenData" :key="p.id" class="p-4 text-center">
-                    <span v-if="p.tahun_berdiri" class="text-foreground">Berdiri {{ p.tahun_berdiri }}</span>
-                    <span v-else class="text-muted-foreground">-</span>
+                <tr class="hover:bg-muted/10 transition-colors group">
+                  <td class="p-5 font-bold text-muted-foreground bg-muted/20 md:bg-white/90 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] sticky left-0 z-10 block md:table-cell uppercase tracking-widest text-[10px] md:text-xs backdrop-blur-sm">
+                    <div class="flex items-center gap-2">
+                       <span class="w-6 h-6 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">🏛️</span>
+                       Sejarah
+                    </div>
+                  </td>
+                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
+                    <div v-if="p.tahun_berdiri" class="inline-flex items-center gap-2 px-3 py-1 bg-surface border border-border rounded-lg shadow-sm">
+                       <span class="text-xs text-muted-foreground font-medium italic">Berdiri</span>
+                       <span class="font-black text-foreground">{{ p.tahun_berdiri }}</span>
+                    </div>
+                    <span v-else class="text-muted-foreground/40 italic text-sm">Data tidak tersedia</span>
                   </td>
                 </tr>
                 
                 <!-- Jumlah Stats -->
-                <tr class="hover:bg-muted/10 transition-colors bg-primary/5">
-                  <td class="p-4 font-semibold text-primary bg-primary/10 md:bg-transparent shadow-[inset_-1px_0_0_0_rgba(0,0,0,0.05)] sticky left-0 z-10 md:static block md:table-cell uppercase tracking-wider text-xs md:text-sm">Kapasitas</td>
-                  <td v-for="p in pesantrenData" :key="p.id" class="p-4 text-center">
-                    <div class="flex flex-col items-center gap-2">
-                      <div class="text-center">
-                        <p class="font-heading font-bold text-xl text-primary">{{ formatNumber(p.jumlah_santri) }}</p>
-                        <p class="text-xs text-muted-foreground">Santri Aktif</p>
+                <tr class="hover:bg-muted/10 transition-colors group bg-primary/[0.03]">
+                  <td class="p-5 font-bold text-primary bg-primary/10 md:bg-white/90 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] sticky left-0 z-10 block md:table-cell uppercase tracking-widest text-[10px] md:text-xs backdrop-blur-sm">
+                    <div class="flex items-center gap-2">
+                       <span class="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center text-primary">👥</span>
+                       Kapasitas
+                    </div>
+                  </td>
+                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
+                    <div class="grid grid-cols-2 gap-4 max-w-[200px] mx-auto">
+                      <div class="text-center p-2 bg-white rounded-xl shadow-sm border border-border/50">
+                        <p class="font-black text-xl text-primary leading-tight">{{ formatNumber(p.jumlah_santri) }}</p>
+                        <p class="text-[9px] uppercase font-black text-muted-foreground tracking-tighter">Santri</p>
                       </div>
-                      <div class="w-12 h-px bg-border my-1"></div>
-                      <div class="text-center">
-                        <p class="font-heading font-bold text-lg text-primary">{{ formatNumber(p.jumlah_pengajar) }}</p>
-                        <p class="text-xs text-muted-foreground">Tenaga Ahli</p>
+                      <div class="text-center p-2 bg-white rounded-xl shadow-sm border border-border/50">
+                        <p class="font-black text-xl text-primary leading-tight">{{ formatNumber(p.jumlah_pengajar) }}</p>
+                        <p class="text-[9px] uppercase font-black text-muted-foreground tracking-tighter">SDM</p>
                       </div>
                     </div>
                   </td>
                 </tr>
                 
                 <!-- Biaya Bulanan -->
-                <tr class="hover:bg-muted/10 transition-colors">
-                  <td class="p-4 font-semibold text-muted-foreground bg-muted/20 md:bg-transparent shadow-[inset_-1px_0_0_0_rgba(0,0,0,0.05)] sticky left-0 z-10 md:static block md:table-cell uppercase tracking-wider text-xs md:text-sm">Biaya SPP / Bln</td>
-                  <td v-for="p in pesantrenData" :key="p.id" class="p-4 text-center">
-                    <span class="font-bold text-primary text-lg">{{ formatCurrency(p.biaya_bulanan) }}</span>
+                <tr class="hover:bg-muted/10 transition-colors group">
+                  <td class="p-5 font-bold text-muted-foreground bg-muted/20 md:bg-white/90 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] sticky left-0 z-10 block md:table-cell uppercase tracking-widest text-[10px] md:text-xs backdrop-blur-sm">
+                    <div class="flex items-center gap-2">
+                       <span class="w-6 h-6 rounded-lg bg-success/10 flex items-center justify-center text-success">💳</span>
+                       SPP Bulanan
+                    </div>
+                  </td>
+                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
+                    <div class="inline-block px-4 py-2 bg-success/[0.02] border-2 border-success/20 rounded-xl">
+                      <span class="font-black text-success text-lg">{{ formatCurrency(p.biaya_bulanan) }}</span>
+                    </div>
                   </td>
                 </tr>
                 
                 <!-- Biaya Pendaftaran -->
-                <tr class="hover:bg-muted/10 transition-colors">
-                  <td class="p-4 font-semibold text-muted-foreground bg-muted/20 md:bg-transparent shadow-[inset_-1px_0_0_0_rgba(0,0,0,0.05)] sticky left-0 z-10 md:static block md:table-cell uppercase tracking-wider text-xs md:text-sm">Uang Pangkal</td>
-                  <td v-for="p in pesantrenData" :key="p.id" class="p-4 text-center">
-                    <span class="font-semibold text-foreground">{{ formatCurrency(p.biaya_pendaftaran) }}</span>
+                <tr class="hover:bg-muted/10 transition-colors group bg-muted/5">
+                  <td class="p-5 font-bold text-muted-foreground bg-muted/20 md:bg-white/90 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] sticky left-0 z-10 block md:table-cell uppercase tracking-widest text-[10px] md:text-xs backdrop-blur-sm">
+                    <div class="flex items-center gap-2">
+                       <span class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">📝</span>
+                       Uang Pangkal
+                    </div>
+                  </td>
+                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
+                    <span class="font-bold text-foreground text-md">{{ formatCurrency(p.biaya_pendaftaran) }}</span>
                   </td>
                 </tr>
                 
                 <!-- Fasilitas -->
-                <tr class="hover:bg-muted/10 transition-colors">
-                  <td class="p-4 font-semibold text-muted-foreground bg-muted/20 md:bg-transparent shadow-[inset_-1px_0_0_0_rgba(0,0,0,0.05)] sticky left-0 z-10 md:static block md:table-cell uppercase tracking-wider text-xs md:text-sm align-top pt-6">Fasilitas Pokok</td>
-                  <td v-for="p in pesantrenData" :key="p.id" class="p-4 align-top">
-                    <div v-if="p.fasilitas && p.fasilitas.length" class="flex flex-wrap gap-1.5 justify-center">
-                      <span v-for="f in p.fasilitas" :key="f" class="px-2.5 py-1 bg-muted/50 text-foreground text-xs rounded border border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <tr class="hover:bg-muted/10 transition-colors group">
+                  <td class="p-5 font-bold text-muted-foreground bg-muted/20 md:bg-white/90 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] sticky left-0 z-10 block md:table-cell uppercase tracking-widest text-[10px] md:text-xs backdrop-blur-sm align-top">
+                    <div class="flex items-center gap-2 mt-2">
+                       <span class="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center text-accent">✨</span>
+                       Fasilitas
+                    </div>
+                  </td>
+                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 align-top">
+                    <div v-if="p.fasilitas && p.fasilitas.length" class="flex flex-wrap gap-2 justify-center">
+                      <span v-for="f in p.fasilitas" :key="f" class="px-3 py-1.5 bg-muted/20 text-foreground text-[11px] font-bold rounded-lg border border-border shadow-sm transition-transform hover:scale-105">
                         {{ f }}
                       </span>
                     </div>
-                    <div v-else class="text-center text-muted-foreground">-</div>
+                    <div v-else class="text-center text-muted-foreground/30 italic text-sm">Belum ada data fasilitas</div>
                   </td>
                 </tr>
               </tbody>
@@ -239,10 +309,25 @@ async function loadComparison() {
   error.value = ''
 
   try {
-    const { data } = await pesantrenApi.compare(compareStore.selectedIds)
-    pesantrenData.value = data.data || []
-  } catch {
-    error.value = 'Gagal memuat data perbandingan dari server. Silakan coba lagi.'
+    const requestedIds = [...compareStore.selectedIds].map(id => Number(id))
+    const { data } = await pesantrenApi.compare(requestedIds)
+    const results = data.data || []
+    
+    pesantrenData.value = results
+
+    // Cross-check: If some IDs were not found, sync the store
+    if (results.length < requestedIds.length) {
+      const foundIds = results.map(p => p.id)
+      requestedIds.forEach(id => {
+        if (!foundIds.includes(parseInt(id, 10))) {
+          console.warn(`[CompareView] Removing missing pesantren ID from store: ${id}`)
+          compareStore.remove(id)
+        }
+      })
+    }
+  } catch (err) {
+    const errorMsg = err.response?.data?.error || err.message
+    error.value = errorMsg || 'Gagal memuat data perbandingan dari server. Silakan coba lagi.'
     pesantrenData.value = []
   } finally {
     loading.value = false

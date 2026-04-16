@@ -112,7 +112,7 @@
       <!-- TAB: PESANTREN -->
       <div v-if="activeTab === 'pesantren'" class="animate-fade-in">
         <div class="flex justify-end mb-4">
-          <button class="btn btn-accent shadow-md shadow-accent/20 px-6 font-bold inline-flex items-center gap-2" @click="openForm()">
+          <button class="btn btn-accent shadow-md shadow-accent/20 px-6 font-bold inline-flex items-center gap-2 hover:bg-amber-600 hover:text-white transition-all transform hover:scale-[1.02] active:scale-[0.98]" @click="openForm()">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Entri Pesantren Baru
           </button>
@@ -165,7 +165,7 @@
               
               <!-- actions -->
               <div class="flex gap-2 mt-auto pt-4 border-t border-border/60">
-                <button class="btn btn-outline border-border hover:bg-muted font-bold text-xs py-2 flex-1 flex justify-center items-center gap-1.5" @click="openForm(p)">
+                <button class="btn btn-outline border-border hover:bg-muted text-foreground font-bold text-xs py-2 flex-1 flex justify-center items-center gap-1.5 transition-all" @click="openForm(p)">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                   Perbarui
                 </button>
@@ -293,7 +293,17 @@
                 
                 <div>
                   <label class="form-label font-bold text-sm mb-1 block">Kota Administrasi <span class="text-destructive">*</span></label>
-                  <input v-model="kota" v-bind="kotaProps" type="text" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" :class="{ 'border-destructive': errors.kota }" />
+                  <div class="relative">
+                    <select v-model="kota" v-bind="kotaProps" class="form-input appearance-none w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none bg-white font-medium shadow-sm transition-all" :class="{ 'border-destructive': errors.kota, 'opacity-60 cursor-not-allowed': !province || loadingRegencies }" :disabled="!province || loadingRegencies">
+                      <option value="">{{ loadingRegencies ? 'Memuat Data...' : (province ? 'Pilih Kota/Kabupaten' : 'Pilih Provinsi Terlebih Dahulu') }}</option>
+                      <option v-for="r in regencies" :key="r.id" :value="r.name">{{ r.name }}</option>
+                    </select>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground group">
+                      <svg v-if="loadingRegencies" class="animate-spin h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
+                  <p v-if="errors.kota" class="text-destructive text-xs font-bold mt-1">{{ errors.kota }}</p>
                 </div>
                 
                 <div class="md:col-span-2">
@@ -340,16 +350,35 @@
                    <!-- Foto Utama -->
                    <div class="border-2 border-dashed rounded-2xl p-5 hover:border-accent/50 transition-colors bg-muted/10 relative group" :class="{ 'border-destructive': fileErrors.foto_utama }">
                       <label class="form-label block mb-2 font-bold text-sm">Visual Thumbnail Utama *</label>
+                      
+                      <!-- Existing Thumbnail Preview -->
+                      <div v-if="!files.foto_utama && existing_foto_utama" class="mb-3 relative z-20 pointer-events-auto flex justify-center">
+                         <div class="relative w-32 h-32 rounded-xl border-4 border-white shadow-md overflow-hidden group/thumb">
+                            <img :src="getImageUrl(existing_foto_utama)" class="w-full h-full object-cover" />
+                            <button type="button" @click.stop="removeExistingUtama" class="absolute top-1 right-1 p-1.5 bg-destructive rounded-full text-white shadow-lg opacity-100 sm:opacity-0 sm:group-hover/thumb:opacity-100 transition-all transform hover:scale-110 flex items-center justify-center">
+                               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                            <div class="absolute inset-x-0 bottom-0 bg-black/40 py-1 text-[8px] text-white text-center font-bold">Thumbnail Aktif</div>
+                         </div>
+                      </div>
+
                       <input @change="handleFileUpload('foto_utama', $event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" type="file" accept="image/jpeg,image/png,image/jpg" />
-                      <div class="text-center py-2">
+                      <div class="text-center py-2" v-if="!files.foto_utama && !existing_foto_utama">
                         <div class="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center text-accent mx-auto mb-2">
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
                         <p class="text-xs font-bold text-accent">Pilih Foto Utama</p>
                       </div>
-                      <div v-if="files.foto_utama" class="mt-2 text-[10px] font-bold bg-white p-2 border border-border rounded flex justify-between items-center relative z-20">
-                        <span class="truncate pr-2 text-success">✓ {{ files.foto_utama.name }}</span>
-                        <button type="button" class="text-destructive font-bold" @click="removeFile('foto_utama')">&times;</button>
+                      
+                      <!-- Pending New Thumbnail -->
+                      <div v-if="files.foto_utama" class="mt-2 text-[10px] font-bold bg-white p-2 border border-border rounded flex justify-between items-center relative z-20 shadow-sm">
+                        <span class="truncate pr-2 text-success flex items-center gap-1.5">
+                          <span class="w-2 h-2 rounded-full bg-success"></span>
+                          Siap Ganti: {{ files.foto_utama.name }}
+                        </span>
+                        <button type="button" class="text-destructive font-bold hover:bg-destructive/10 p-1 rounded" @click.stop="removeFile('foto_utama')">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
                       </div>
                    </div>
 
@@ -363,11 +392,31 @@
                         </div>
                         <p class="text-xs font-bold text-accent">Pilih Foto Galeri</p>
                       </div>
-                      <div v-if="files.foto_galeri.length > 0" class="mt-2 relative z-20">
-                        <div class="flex flex-col gap-1 max-h-20 overflow-y-auto">
-                           <div v-for="(file, index) in files.foto_galeri" :key="index" class="bg-white px-2 py-1 border border-border rounded flex justify-between items-center text-[10px] font-bold">
-                             <span class="truncate pr-2 text-success">✓ {{ file.name }}</span>
-                             <button type="button" class="text-destructive font-bold" @click="removeGalleryFile(index)">&times;</button>
+
+                      <!-- Existing Gallery Section -->
+                      <div v-if="existing_foto_galeri.length > 0" class="mt-4 relative z-20 pointer-events-auto">
+                        <p class="text-[10px] uppercase font-bold text-muted-foreground mb-2">Foto Saat Ini ({{ existing_foto_galeri.length }})</p>
+                        <div class="grid grid-cols-5 gap-2 pb-2">
+                           <div v-for="(filename, index) in existing_foto_galeri" :key="index" class="relative group/img aspect-square rounded-lg border border-border overflow-hidden bg-white shadow-sm">
+                              <img :src="getImageUrl(filename)" class="w-full h-full object-cover" />
+                              <button type="button" @click.stop="removeExistingGallery(index)" class="absolute top-0 right-0 p-1 bg-destructive/90 text-white opacity-100 sm:opacity-0 sm:group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                              </button>
+                           </div>
+                        </div>
+                      </div>
+                      <!-- Pending Uploads Section -->
+                      <div v-if="files.foto_galeri.length > 0" class="mt-4 relative z-20 pointer-events-auto">
+                        <p class="text-[10px] uppercase font-bold text-muted-foreground mb-2">Unggahan Baru ({{ files.foto_galeri.length }})</p>
+                        <div class="flex flex-col gap-1 max-h-32 overflow-y-auto pr-1">
+                           <div v-for="(file, index) in files.foto_galeri" :key="index" class="bg-white px-2 py-1.5 border border-border rounded flex justify-between items-center text-[10px] font-bold shadow-sm">
+                             <span class="truncate pr-2 text-success flex items-center gap-1.5">
+                               <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                               {{ file.name }}
+                             </span>
+                             <button type="button" class="text-destructive font-bold hover:bg-destructive/10 p-1 rounded" @click.stop="removeGalleryFile(index)">
+                               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                             </button>
                            </div>
                         </div>
                       </div>
@@ -378,8 +427,8 @@
               <div v-if="serverError" class="mt-4 p-3 bg-destructive/10 text-destructive text-sm font-bold rounded-lg">{{ serverError }}</div>
 
               <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-border bg-white sticky bottom-0 -mx-8 px-8 pb-2">
-                <button type="button" class="btn btn-outline border-border hover:bg-muted font-bold px-6 py-2.5 rounded-xl" @click="closeForm">Buang Skenario</button>
-                <button type="submit" class="btn bg-accent text-white px-8 py-2.5 rounded-xl font-bold shadow-md hover:bg-accent-light" :disabled="isSubmitting">
+                <button type="button" class="btn btn-outline border-border hover:bg-muted text-foreground font-bold px-6 py-2.5 rounded-xl transition-all" @click="closeForm">Buang Skenario</button>
+                <button type="submit" class="btn bg-accent text-white px-8 py-2.5 rounded-xl font-bold shadow-md hover:bg-amber-600 hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]" :disabled="isSubmitting">
                    {{ isSubmitting ? 'Mengeksekusi...' : 'Eksekusi Modifikasi' }}
                 </button>
               </div>
@@ -542,7 +591,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import { pemilik, wilayah } from '../../services'
@@ -575,9 +624,13 @@ const getPendaftaranUrl = (filename) => {
 }
 
 const provinces = ref([])
+const regencies = ref([])
+const loadingRegencies = ref(false)
 const showForm = ref(false)
 const editingId = ref(null)
 const serverError = ref('')
+const existing_foto_galeri = ref([])
+const existing_foto_utama = ref(null)
 
 // Stat computations
 const pendingCount = computed(() => {
@@ -711,6 +764,33 @@ const [biaya_pendaftaran, biaya_pendaftaranProps] = defineField('biaya_pendaftar
 const [biaya_bulanan, biaya_bulananProps] = defineField('biaya_bulanan')
 const [deskripsi, deskripsiProps] = defineField('deskripsi')
 
+// Watch province to fetch regencies
+watch(province, async (newProvince) => {
+  if (!newProvince) {
+    regencies.value = []
+    setValues({ kota: '' })
+    return
+  }
+
+  const selectedProv = provinces.value.find(p => p.name === newProvince)
+  if (selectedProv) {
+    loadingRegencies.value = true
+    try {
+      const res = await wilayah.getRegencies(selectedProv.id)
+      regencies.value = res.data.data || []
+      
+      // If editing and current kota is not in regencies, we might need to keep it or clear it.
+      // Usually, when editing, we load regencies but don't want to clear 'kota' immediately if it's already set.
+      // However, if the user manually changes province, we should clear kota.
+      // We can check if the form is just opening or if it's a manual change.
+    } catch (e) {
+      regencies.value = []
+    } finally {
+      loadingRegencies.value = false
+    }
+  }
+})
+
 const files = ref({ foto_utama: null, foto_galeri: [] })
 const fileErrors = ref({ foto_utama: '', foto_galeri: '' })
 
@@ -728,24 +808,30 @@ function handleFileUpload(fieldName, event) {
       fileErrors.value.foto_utama = ''
       files.value.foto_utama = file
    } else if (fieldName === 'foto_galeri') {
-      const selectedFiles = Array.from(fileInput.files)
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-      
-      let error = ''
-      for (const file of selectedFiles) {
-         if (!allowedTypes.includes(file.type)) error = 'Terdapat format ekstensi illegal.'
-         const maxSize = 1 * 1024 * 1024
-         if (file.size > maxSize) error = 'Terdapat file melebih ambang Max 1MB.'
-      }
-      if (selectedFiles.length > 5) error = 'Restriksi limit: Maksimal 5 Foto batch.'
-      
-      if(error) {
-        fileErrors.value.foto_galeri = error
-        return
-      }
+       const selectedFiles = Array.from(fileInput.files)
+       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+       
+       let error = ''
+       for (const file of selectedFiles) {
+          if (!allowedTypes.includes(file.type)) error = 'Terdapat format ekstensi illegal.'
+          const maxSize = 2 * 1024 * 1024 // Increased to 2MB as common for galleries
+          if (file.size > maxSize) error = 'Terdapat file melebih ambang Max 2MB.'
+       }
+       
+       if (existing_foto_galeri.value.length + files.value.foto_galeri.length + selectedFiles.length > 5) {
+         error = 'Restriksi limit: Total maksimal 5 Foto (Eksisting + Baru).'
+       }
+       
+       if(error) {
+         fileErrors.value.foto_galeri = error
+         return
+       }
 
-      fileErrors.value.foto_galeri = ''
-      files.value.foto_galeri = selectedFiles
+       fileErrors.value.foto_galeri = ''
+       // Append instead of overwrite
+       files.value.foto_galeri.push(...selectedFiles)
+       // Reset input so user can pick same file again if they deleted it from list
+       fileInput.value = ''
    }
 }
 
@@ -753,8 +839,16 @@ function removeFile(fieldName) {
    if (fieldName === 'foto_utama') files.value.foto_utama = null
 }
 
+function removeExistingUtama() {
+   existing_foto_utama.value = null
+}
+
 function removeGalleryFile(index) {
    files.value.foto_galeri.splice(index, 1)
+}
+
+function removeExistingGallery(index) {
+   existing_foto_galeri.value.splice(index, 1)
 }
 
 function clearGalleryFiles() {
@@ -772,6 +866,21 @@ function openForm(p) {
       biaya_pendaftaran: p.biaya_pendaftaran || null, biaya_bulanan: p.biaya_bulanan || null,
       deskripsi: p.deskripsi || ''
     })
+    
+    // Parse existing gallery from pesantren data
+    existing_foto_utama.value = p.foto_utama || null
+    try {
+      if (p.foto_galeri) {
+        existing_foto_galeri.value = typeof p.foto_galeri === 'string' 
+          ? JSON.parse(p.foto_galeri) 
+          : Array.isArray(p.foto_galeri) ? p.foto_galeri : []
+      } else {
+        existing_foto_galeri.value = []
+      }
+    } catch (e) {
+      console.error('Failed to parse gallery:', e)
+      existing_foto_galeri.value = []
+    }
   } else {
     resetForm()
   }
@@ -784,6 +893,8 @@ function closeForm() {
   resetForm()
   files.value.foto_utama = null
   files.value.foto_galeri = []
+  existing_foto_galeri.value = []
+  existing_foto_utama.value = null
   fileErrors.value.foto_utama = ''
   fileErrors.value.foto_galeri = ''
 }
@@ -795,6 +906,16 @@ const onSubmit = handleSubmit(async (values) => {
      Object.entries(values).forEach(([key, value]) => {
        if (value !== null && value !== undefined && value !== '') formData.append(key, value)
      })
+     
+     // Send existing gallery filenames
+     if (editingId.value) {
+       formData.append('existing_foto_galeri', JSON.stringify(existing_foto_galeri.value))
+       // If existing thumbnail was removed and no new one selected, send null
+       if (!existing_foto_utama.value && !files.value.foto_utama) {
+         formData.append('foto_utama', '') // This will be treated as null by backend logic for numerical/file fields
+       }
+     }
+     
      if (files.value.foto_utama) formData.append('foto_utama', files.value.foto_utama)
      if (files.value.foto_galeri && files.value.foto_galeri.length > 0) {
        files.value.foto_galeri.forEach(file => {

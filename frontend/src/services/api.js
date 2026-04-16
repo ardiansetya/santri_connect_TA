@@ -11,6 +11,9 @@ const api = axios.create({
 // In production, uses full backend URL
 export function getUploadUrl(filename) {
   if (!filename) return ''
+  // If the filename is an absolute URL (like placeholder images), return it as is
+  if (filename.startsWith('http')) return filename
+  
   if (import.meta.env.DEV) {
     return `/uploads/pesantrenImages/${filename}`
   }

@@ -7,7 +7,7 @@
         <h5 class="font-heading font-bold text-xl text-foreground">Direktori Lembaga</h5>
         <p class="text-sm text-muted-foreground mt-0.5">Kelola data seluruh pesantren terdaftar di ekosistem terpusat.</p>
       </div>
-      <button class="btn btn-primary shadow-lg shadow-primary/30 mt-4 md:mt-0 font-bold px-6 py-2.5 flex items-center shrink-0" @click="openForm()">
+      <button class="btn btn-primary shadow-lg shadow-primary/30 mt-4 md:mt-0 font-bold px-6 py-2.5 flex items-center shrink-0 hover:bg-primary-dark hover:text-white transition-all transform hover:scale-[1.02] active:scale-[0.98]" @click="openForm()">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
         Entri Lembaga Baru
       </button>
@@ -77,10 +77,10 @@
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center justify-center gap-2">
-                  <button class="btn btn-outline-primary px-3 py-1.5 text-xs font-bold border-border/80 hover:border-primary" @click="openForm(p)">
+                  <button class="btn btn-outline border-border/80 text-foreground hover:bg-primary hover:text-white hover:border-primary px-3 py-1.5 text-xs font-bold transition-all" @click="openForm(p)">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                   </button>
-                  <button class="btn bg-destructive/10 text-destructive hover:bg-destructive hover:text-white px-3 py-1.5 text-xs font-bold transition-colors border border-destructive/20" @click="confirmDelete(p)">
+                  <button class="btn bg-red-500/10 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 text-xs font-bold transition-all border border-red-500/20" @click="confirmDelete(p)" title="Hapus">
                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                   </button>
                 </div>
@@ -277,8 +277,8 @@
               
               <!-- Submit Footer -->
               <div class="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row justify-end gap-3 bg-white sticky bottom-0 -mx-8 px-8 pb-2">
-                <button type="button" class="btn btn-outline border-border hover:bg-muted font-bold px-8 py-3 rounded-xl transition-all" @click="closeForm">Batalkan Entri</button>
-                <button type="submit" class="btn btn-primary shadow-lg shadow-primary/30 font-bold px-10 py-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" :disabled="isSubmitting">
+                <button type="button" class="btn btn-outline border-border hover:bg-muted text-foreground font-bold px-8 py-3 rounded-xl transition-all" @click="closeForm">Batalkan Entri</button>
+                <button type="submit" class="btn btn-primary shadow-lg shadow-primary/30 text-white font-bold px-10 py-3 rounded-xl transition-all hover:bg-primary-dark hover:scale-[1.02] active:scale-[0.98]" :disabled="isSubmitting">
                    {{ isSubmitting ? 'Memsinkronkan...' : (editingId ? 'Simpan Perubahan' : 'Finalisasi Integrasi') }}
                 </button>
               </div>

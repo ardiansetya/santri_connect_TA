@@ -71,6 +71,61 @@
                   </div>
                 </div>
 
+                <!-- Budget Filter Section -->
+                <div class="border-t border-border pt-5 mt-5">
+                   <label class="form-label mb-3">Rentang Biaya Bulanan</label>
+                   <div class="grid grid-cols-2 gap-2 mb-3">
+                      <div class="relative group/input">
+                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground group-focus-within/input:text-primary transition-colors">MIN</span>
+                         <input 
+                           type="number" 
+                           v-model.number="filters.biaya_min" 
+                           placeholder="0" 
+                           class="form-input !pl-10 !py-2 text-xs focus:ring-1 focus:ring-primary/20" 
+                           @change="fetchData"
+                         />
+                      </div>
+                      <div class="relative group/input">
+                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground group-focus-within/input:text-primary transition-colors">MAX</span>
+                         <input 
+                           type="number" 
+                           v-model.number="filters.biaya_max" 
+                           placeholder="Tanpa Batas" 
+                           class="form-input !pl-10 !py-2 text-xs focus:ring-1 focus:ring-primary/20" 
+                           @change="fetchData"
+                         />
+                      </div>
+                   </div>
+                   
+                   <!-- Presets -->
+                   <div class="flex flex-wrap gap-1.5">
+                      <button 
+                        @click="setBudgetPreset(0, 500000)" 
+                        type="button"
+                        class="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-surface hover:bg-primary/5 hover:border-primary/30 transition-all border border-border flex-1 text-center shadow-sm"
+                        :class="filters.biaya_min === 0 && filters.biaya_max === 500000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
+                      >
+                        &lt; 500rb
+                      </button>
+                      <button 
+                        @click="setBudgetPreset(500000, 1500000)" 
+                        type="button"
+                        class="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-surface hover:bg-primary/5 hover:border-primary/30 transition-all border border-border flex-1 text-center shadow-sm"
+                        :class="filters.biaya_min === 500000 && filters.biaya_max === 1500000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
+                      >
+                        500k - 1.5jt
+                      </button>
+                      <button 
+                        @click="setBudgetPreset(1500000, '')" 
+                        type="button"
+                        class="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-surface hover:bg-primary/5 hover:border-primary/30 transition-all border border-border flex-1 text-center shadow-sm"
+                        :class="filters.biaya_min === 1500000 && !filters.biaya_max ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
+                      >
+                        &gt; 1.5jt
+                      </button>
+                   </div>
+                </div>
+
                 <div class="border-t border-border pt-5 mt-5">
                   <label class="form-label">Urutkan Berdasarkan</label>
                   <div class="relative mb-3">
@@ -248,7 +303,9 @@ const sortOrder = ref('asc')
 const filters = ref({
   province: '',
   kota: '',
-  kurikulum: ''
+  kurikulum: '',
+  biaya_min: '',
+  biaya_max: ''
 })
 
 const totalPages = computed(() => Math.ceil(totalRecords.value / limit.value))
@@ -273,11 +330,19 @@ function resetFilters() {
   filters.value = {
     province: '',
     kota: '',
-    kurikulum: ''
+    kurikulum: '',
+    biaya_min: '',
+    biaya_max: ''
   }
   sortField.value = ''
   sortOrder.value = 'asc'
   cities.value = []
+  fetchData()
+}
+
+function setBudgetPreset(min, max) {
+  filters.value.biaya_min = min || ''
+  filters.value.biaya_max = max || ''
   fetchData()
 }
 
@@ -322,6 +387,8 @@ async function fetchData() {
     if (filters.value.province) params.province = filters.value.province
     if (filters.value.kota) params.kota = filters.value.kota
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
+    if (filters.value.biaya_min) params.biaya_min = filters.value.biaya_min
+    if (filters.value.biaya_max) params.biaya_max = filters.value.biaya_max
 
     const { data } = await pesantrenApi.list(params)
     pesantren.value = data.data || []
@@ -352,6 +419,8 @@ async function changePage(page) {
     if (filters.value.province) params.province = filters.value.province
     if (filters.value.kota) params.kota = filters.value.kota
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
+    if (filters.value.biaya_min) params.biaya_min = filters.value.biaya_min
+    if (filters.value.biaya_max) params.biaya_max = filters.value.biaya_max
 
     const { data } = await pesantrenApi.list(params)
     pesantren.value = data.data || []

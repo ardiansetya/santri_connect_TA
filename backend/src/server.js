@@ -4,6 +4,7 @@ const fastify = require('fastify')({
   logger: process.env.NODE_ENV === 'production',
   ajv: {
     customOptions: {
+      coerceTypes: true,
       formats: { email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/ }
     }
   }

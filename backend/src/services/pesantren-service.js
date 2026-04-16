@@ -245,65 +245,61 @@ const PesantrenService = {
       }
       // If no file provided and not explicitly null, keep existing foto_utama
 
-      // Handle foto_galeri (multiple files)
-      if (files.foto_galeri !== undefined) {
-        // Convert single file to array if needed
-        const newGalleryFiles = Array.isArray(files.foto_galeri) ? files.foto_galeri : [files.foto_galeri]
+      // Handle gallery management (selective removal and/or new uploads)
+      const hasExistingGalleryInfo = data.existing_foto_galeri !== undefined
+      const newGalleryFiles = files.foto_galeri 
+        ? (Array.isArray(files.foto_galeri) ? files.foto_galeri : [files.foto_galeri]) 
+        : []
 
-        // Get existing gallery files from frontend (sent as JSON string)
+      if (hasExistingGalleryInfo || newGalleryFiles.length > 0) {
         let existingGalleryFromClient = []
-        if (data.existing_foto_galeri) {
+        if (hasExistingGalleryInfo) {
           try {
             existingGalleryFromClient = JSON.parse(data.existing_foto_galeri)
-            console.log('[PesantrenService.update] Existing gallery from client:', existingGalleryFromClient);
           } catch (e) {
-            console.error('Failed to parse existing_foto_galeri:', e)
+            console.error('[PesantrenService.update] Failed to parse existing_foto_galeri:', e)
+            // Fallback to current DB if parsing fails to avoid data loss
+            existingGalleryFromClient = existing.foto_galeri ? JSON.parse(existing.foto_galeri) : []
+          }
+          delete data.existing_foto_galeri
+        } else {
+          // No gallery removal info, keep all current ones
+          try {
+            existingGalleryFromClient = existing.foto_galeri ? JSON.parse(existing.foto_galeri) : []
+          } catch(e) { existingGalleryFromClient = [] }
+        }
+
+        // 1. Cleanup specific files removed by the user
+        if (existing.foto_galeri) {
+          try {
+            const dbGallery = JSON.parse(existing.foto_galeri)
+            const removedFiles = dbGallery.filter(f => !existingGalleryFromClient.includes(f))
+            for (const f of removedFiles) {
+              console.log('[PesantrenService.update] Deleting removed gallery file:', f)
+              UploadService.deleteFile(f)
+            }
+          } catch(e) {
+            console.error('[PesantrenService.update] Gallery cleanup error:', e)
           }
         }
-        // Remove from data so it doesn't get saved to DB
-        delete data.existing_foto_galeri
 
-        // Handle new gallery files
+        // 2. Validate and stage new files
         if (newGalleryFiles.length > 0) {
-          // Validate new files
           for (let i = 0; i < newGalleryFiles.length; i++) {
-            const validation = UploadService.validateUploadedFile(newGalleryFiles[i], `Foto Gallery ${i + 1}`)
-            if (!validation.valid) {
-              throw new Error(validation.message)
-            }
+            const validation = UploadService.validateUploadedFile(newGalleryFiles[i], `Foto Gallery Baru ${i + 1}`)
+            if (!validation.valid) throw new Error(validation.message)
+            uploadedFiles.push(newGalleryFiles[i].filename)
           }
-
-          // Merge: existing + new (if client sent existing files)
-          // OR: just new files (if client didn't send existing - means replacing all)
-          const allGalleryFiles = existingGalleryFromClient.length > 0
-            ? [...existingGalleryFromClient, ...newGalleryFiles.map(f => f.filename)]
-            : newGalleryFiles.map(f => f.filename)
-
-          // Validate max 5 files
-          if (allGalleryFiles.length > MAX_GALLERY_FILES) {
-            throw new Error(`Foto gallery maksimal ${MAX_GALLERY_FILES} file`)
-          }
-
-          // Only delete old gallery files if we're REPLACING (not merging)
-          if (existingGalleryFromClient.length === 0 && existing.foto_galeri) {
-            try {
-              const existingGallery = JSON.parse(existing.foto_galeri)
-              for (const filename of existingGallery) {
-                UploadService.deleteFile(filename)
-              }
-            } catch (e) {
-              // If parsing fails, continue
-            }
-          }
-
-          // Save new gallery files
-          const newFilenames = newGalleryFiles.map(f => f.filename)
-          newFilenames.forEach(f => uploadedFiles.push(f))
-
-          data.foto_galeri = JSON.stringify(allGalleryFiles)
-          console.log('[PesantrenService.update] Final gallery files:', allGalleryFiles);
         }
-        // No new files - keep existing gallery (don't delete)
+
+        // 3. Construct final gallery array
+        const finalGallery = [...existingGalleryFromClient, ...newGalleryFiles.map(f => f.filename)]
+        if (finalGallery.length > MAX_GALLERY_FILES) {
+           throw new Error(`Restriksi limit: Total maksimal ${MAX_GALLERY_FILES} foto galeri (Eksisting + Baru).`)
+        }
+
+        data.foto_galeri = JSON.stringify(finalGallery)
+        console.log('[PesantrenService.update] ✅ Final gallery assigned:', finalGallery)
       }
       // If files.foto_galeri is undefined, keep existing foto_galeri
 

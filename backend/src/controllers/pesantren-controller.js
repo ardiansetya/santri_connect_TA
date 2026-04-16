@@ -114,6 +114,7 @@ const PesantrenController = {
       const result = await PesantrenService.createByPemilik(request.user.id, normalizedData, files, uploadedFiles)
       return reply.code(201).send(result)
     } catch (err) {
+      console.error('[PesantrenController] ❌ Gagal membuat pesantren:', err.message)
       // Cleanup uploaded files on error
       for (const filename of uploadedFiles) {
         UploadService.deleteFile(filename)

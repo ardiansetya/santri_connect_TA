@@ -14,8 +14,8 @@ const CompareService = {
 
     const pesantrenList = await Pesantren.findByIds(uniqueIds)
 
-    if (pesantrenList.length !== uniqueIds.length) {
-      throw new Error('Beberapa pesantren tidak ditemukan')
+    if (pesantrenList.length === 0) {
+      throw new Error('Pesantren yang dipilih tidak ditemukan')
     }
 
     return pesantrenList.map(p => {

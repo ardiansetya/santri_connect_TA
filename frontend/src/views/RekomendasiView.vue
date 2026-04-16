@@ -175,143 +175,137 @@
               <div 
                 v-for="(item, index) in results" 
                 :key="item.pesantren?.id"
-                class="card relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group"
-                :class="index === 0 ? 'border-2 border-accent shadow-xl bg-gradient-to-r from-accent/5 via-white to-white' : 'border border-border'"
+                class="card relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group border border-border"
+                :class="{ 'border-2 border-accent shadow-xl bg-gradient-to-r from-accent/[0.02] via-white to-white': index === 0 }"
               >
-                <!-- Gold ribbon for top match -->
-                <div v-if="index === 0" class="absolute -right-12 top-6 bg-accent text-white font-bold py-1 px-12 rotate-45 shadow-md z-10 text-xs tracking-widest uppercase">
-                  Paling Cocok
-                </div>
+                <div class="flex flex-col md:flex-row h-full relative z-0">
+                  <!-- Thumbnail Section -->
+                  <div class="md:w-1/3 relative shrink-0 overflow-hidden bg-muted/20 min-h-[180px]">
+                    <img 
+                      :src="item.pesantren?.foto_utama ? getUploadUrl(item.pesantren.foto_utama) : 'https://placehold.co/600x600/0D4F4F/D4A843?text=Pesantren&font=playfair-display'"
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    
+                    <!-- Overlays Container -->
+                    <div class="absolute inset-0 p-3 flex flex-col justify-between pointer-events-none">
+                      <!-- Top row: Rank & Best Match Badge -->
+                      <div class="flex justify-between items-start">
+                        <div class="w-10 h-10 rounded-full bg-white/95 backdrop-blur shadow-lg flex items-center justify-center text-xl border-2 border-primary/20 pointer-events-auto">
+                          <span v-if="index === 0">🥇</span>
+                          <span v-else-if="index === 1">🥈</span>
+                          <span v-else-if="index === 2">🥉</span>
+                          <span v-else class="text-sm font-bold text-primary">#{{ index + 1 }}</span>
+                        </div>
+                        
+                        <!-- Best Match Label (Replaces the overlapping ribbon) -->
+                        <div v-if="index === 0" class="bg-accent text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest pointer-events-auto animate-pulse">
+                          Paling Cocok
+                        </div>
+                      </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 h-full relative z-0">
-                  <!-- Rank & Score Column -->
-                  <div class="md:col-span-1 bg-muted/30 p-6 flex flex-col justify-center items-center border-b md:border-b-0 md:border-r border-border/60">
-                    <div class="text-center">
-                      <div class="mb-4">
-                        <div v-if="index === 0" class="w-16 h-16 mx-auto rounded-full bg-accent/20 flex items-center justify-center text-4xl shadow-inner border border-accent/30">🥇</div>
-                        <div v-else-if="index === 1" class="w-14 h-14 mx-auto rounded-full bg-slate-200/60 flex items-center justify-center text-3xl shadow-inner border border-slate-300">🥈</div>
-                        <div v-else-if="index === 2" class="w-14 h-14 mx-auto rounded-full bg-orange-200/50 flex items-center justify-center text-3xl shadow-inner border border-orange-300">🥉</div>
-                        <div v-else class="w-12 h-12 mx-auto rounded-full bg-background flex items-center justify-center text-xl font-bold text-muted-foreground border border-border shadow-sm">#{{ index + 1 }}</div>
-                      </div>
-                      
-                      <div class="text-5xl font-heading font-bold" :class="index === 0 ? 'text-accent' : 'text-primary'">
-                        {{ Math.round((item.score || 0) * 100) }}<span class="text-2xl text-muted-foreground ml-1">%</span>
-                      </div>
-                      <div class="text-xs uppercase tracking-widest font-bold text-muted-foreground mt-2 mb-6">Skor Relevansi</div>
-                      
-                      <!-- Score Breakdown -->
-                      <div class="w-full space-y-3">
-                        <div>
-                          <div class="flex justify-between text-[10px] font-bold uppercase tracking-wider mb-1">
-                            <span class="text-muted-foreground">Anggaran</span>
-                            <span class="text-success">{{ Math.round((item.budget_score || 0) * 100) }}%</span>
-                          </div>
-                          <div class="w-full bg-border rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-success h-full rounded-full transition-all duration-1000" :style="{ width: `${(item.budget_score || 0) * 100}%` }"></div>
-                          </div>
-                        </div>
-                        <div>
-                          <div class="flex justify-between text-[10px] font-bold uppercase tracking-wider mb-1">
-                            <span class="text-muted-foreground">Lokasi</span>
-                            <span class="text-primary">{{ Math.round((item.location_score || 0) * 100) }}%</span>
-                          </div>
-                          <div class="w-full bg-border rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-primary h-full rounded-full transition-all duration-1000" :style="{ width: `${(item.location_score || 0) * 100}%` }"></div>
-                          </div>
-                        </div>
-                        <div>
-                          <div class="flex justify-between text-[10px] font-bold uppercase tracking-wider mb-1">
-                            <span class="text-muted-foreground">Fasilitas</span>
-                            <span class="text-accent">{{ Math.round((item.fasilitas_score || 0) * 100) }}%</span>
-                          </div>
-                          <div class="w-full bg-border rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-accent h-full rounded-full transition-all duration-1000" :style="{ width: `${(item.fasilitas_score || 0) * 100}%` }"></div>
-                          </div>
+                      <!-- Bottom row: Total Score -->
+                      <div class="flex justify-end">
+                        <div class="w-14 h-14 rounded-full bg-primary/95 text-white flex flex-col items-center justify-center shadow-lg backdrop-blur-sm border-2 border-white/20 pointer-events-auto">
+                          <span class="text-sm font-bold leading-none">{{ Math.round((item.score || 0) * 100) }}%</span>
+                          <span class="text-[8px] uppercase font-bold opacity-80 mt-0.5">MATCH</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Main Info Column -->
-                  <div class="md:col-span-3 p-6 flex flex-col justify-center">
-                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                      <div class="flex-1">
-                        <router-link 
-                          :to="`/pesantren/${item.pesantren?.id}`" 
-                          class="font-heading text-2xl font-bold text-foreground hover:text-primary transition-colors mb-2 block group-hover:text-primary-dark"
-                        >
-                          {{ item.pesantren?.nama }}
-                        </router-link>
-                        <p class="text-muted-foreground text-sm mb-4 flex items-center gap-1.5">
-                          <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <!-- Content Section -->
+                  <div class="flex-1 flex flex-col min-w-0">
+                    <div class="p-6 pb-2">
+                       <div class="flex justify-between items-start gap-4 mb-2">
+                          <router-link 
+                            :to="`/pesantren/${item.pesantren?.id}`" 
+                            class="font-heading text-xl font-bold text-foreground hover:text-primary transition-colors line-clamp-1 flex-1"
+                          >
+                            {{ item.pesantren?.nama }}
+                          </router-link>
+                          <span class="shrink-0 px-2 py-0.5 bg-accent/10 text-accent text-[10px] font-bold uppercase tracking-wider rounded border border-accent/20">
+                             {{ item.pesantren?.kurikulum }}
+                          </span>
+                       </div>
+
+                       <div class="flex items-center gap-1.5 text-xs text-muted-foreground mb-4">
+                          <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                           </svg>
                           <span class="font-medium text-foreground">{{ item.pesantren?.kota }}</span>, {{ item.pesantren?.province }}
-                        </p>
+                       </div>
 
-                        <!-- Highlights -->
-                        <div class="flex flex-wrap gap-2.5 mb-5">
-                          <div v-if="item.pesantren?.biaya_bulanan" class="flex items-center gap-1.5 px-3 py-1.5 bg-background border border-border rounded-lg shadow-sm">
-                            <svg class="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span class="text-sm font-bold text-foreground">
-                              {{ formatCurrency(item.pesantren.biaya_bulanan) }}<span class="text-xs text-muted-foreground font-normal">/bln</span>
-                            </span>
+                       <div class="flex flex-wrap items-center gap-x-6 gap-y-3 mb-4">
+                          <div>
+                             <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Biaya Bulanan</p>
+                             <p class="font-bold text-success">{{ formatCurrency(item.pesantren?.biaya_bulanan) }}</p>
                           </div>
-                          <div v-if="item.pesantren?.kurikulum" class="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg shadow-sm">
-                            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                            <span class="text-sm font-bold text-primary">{{ item.pesantren.kurikulum }}</span>
+                          <div class="hidden sm:block h-8 w-px bg-border"></div>
+                          <div class="flex-1 min-w-[120px]">
+                             <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1.5">Fasilitas Prioritas Cocok:</p>
+                             <div class="flex flex-wrap gap-1">
+                                <span v-for="f in item.fasilitas_match?.slice(0, 3)" :key="f" class="px-2 py-0.5 bg-muted text-[10px] font-medium rounded border border-border/50">
+                                   {{ f }}
+                                </span>
+                                <span v-if="item.fasilitas_match?.length > 3" class="text-[10px] text-primary font-bold self-center ml-1">
+                                   +{{ item.fasilitas_match.length - 3 }}
+                                </span>
+                                <span v-if="!item.fasilitas_match?.length" class="text-[10px] text-muted-foreground italic">Zonasi & Budget sangat dominan</span>
+                             </div>
                           </div>
-                        </div>
-
-                        <!-- Fasilitas Match -->
-                        <div v-if="item.fasilitas_match && item.fasilitas_match.length > 0">
-                          <div class="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            Fasilitas yang Dicocokkan:
-                          </div>
-                          <div class="flex flex-wrap gap-1.5">
-                            <span v-for="f in item.fasilitas_match.slice(0, 5)" :key="f" class="px-2.5 py-1 bg-accent/10 border border-accent/20 text-accent-foreground font-medium rounded text-xs shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                              {{ f }}
-                            </span>
-                            <span v-if="item.fasilitas_match.length > 5" class="px-2.5 py-1 bg-muted/40 text-muted-foreground font-medium rounded text-xs">
-                              +{{ item.fasilitas_match.length - 5 }} lainnya
-                            </span>
-                          </div>
-                        </div>
-                        <div v-else class="text-sm text-muted-foreground italic border-l-2 border-border pl-3">
-                          Pesantren ini masuk nominasi karena sangat dominan dalam sisi anggaran atau zonasi Anda.
-                        </div>
-                      </div>
-
-                      <!-- Action Buttons -->
-                      <div class="flex md:flex-col gap-3 shrink-0 justify-center">
-                        <router-link 
-                          :to="`/pesantren/${item.pesantren?.id}`" 
-                          class="btn btn-primary px-6 py-2.5 shadow-md flex-1 md:flex-none justify-center group-hover:scale-105"
-                        >
-                          Lihat Kampus
-                        </router-link>
-                        <button
-                          @click="toggleCompare(item.pesantren?.id)"
-                          class="btn px-4 py-2.5 flex-1 md:flex-none justify-center border-2 transition-all font-semibold"
-                          :class="compareStore.isSelected(item.pesantren?.id) ? 'bg-accent/10 border-accent text-accent' : 'bg-transparent border-input text-foreground hover:border-accent hover:text-accent'"
-                        >
-                          <svg v-if="compareStore.isSelected(item.pesantren?.id)" class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                          </svg>
-                          <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                          </svg>
-                          {{ compareStore.isSelected(item.pesantren?.id) ? 'Disimpan' : 'Bandingkan' }}
-                        </button>
-                      </div>
+                       </div>
                     </div>
-                  </div>
+
+                    <!-- Simplified Footer Bar -->
+                    <div class="mt-auto border-t border-border flex flex-col sm:flex-row items-stretch bg-muted/5">
+                       <div class="flex-1 px-5 py-3 flex items-center justify-between gap-6 border-b sm:border-b-0 sm:border-r border-border">
+                          <div class="flex flex-col gap-1.5 flex-1 min-w-0">
+                             <div class="flex justify-between text-[8px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                                <span>Budget</span>
+                                <span class="text-success">{{ Math.round((item.budget_score || 0) * 100) }}%</span>
+                             </div>
+                             <div class="w-full bg-border rounded-full h-1">
+                                <div class="bg-success h-full rounded-full transition-all duration-1000" :style="{ width: `${(item.budget_score || 0) * 100}%` }"></div>
+                             </div>
+                          </div>
+                          <div class="flex flex-col gap-1.5 flex-1 min-w-0">
+                             <div class="flex justify-between text-[8px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                                <span>Zonasi</span>
+                                <span class="text-primary">{{ Math.round((item.location_score || 0) * 100) }}%</span>
+                             </div>
+                             <div class="w-full bg-border rounded-full h-1">
+                                <div class="bg-primary h-full rounded-full transition-all duration-1000" :style="{ width: `${(item.location_score || 0) * 100}%` }"></div>
+                             </div>
+                          </div>
+                       </div>
+                       
+                       <div class="shrink-0 flex gap-2 p-3 bg-white/50 sm:bg-transparent min-w-0">
+                          <button
+                             @click="toggleCompare(item.pesantren?.id)"
+                             type="button"
+                             class="flex-1 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border shrink-0"
+                             :class="compareStore.isSelected(item.pesantren?.id) ? 'bg-accent border-accent text-white shadow-sm' : 'bg-surface border-border text-muted-foreground hover:border-accent hover:text-accent'"
+                             :title="compareStore.isSelected(item.pesantren?.id) ? 'Hapus perbandingan' : 'Bandingkan'"
+                          >
+                             <svg class="w-4 h-4" :fill="compareStore.isSelected(item.pesantren?.id) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                             </svg>
+                             <span class="sm:hidden ml-2 text-xs font-bold uppercase tracking-wider">{{ compareStore.isSelected(item.pesantren?.id) ? 'Disimpan' : 'Bandingkan' }}</span>
+                          </button>
+                          <router-link 
+                             :to="`/pesantren/${item.pesantren?.id}`" 
+                             class="btn btn-primary px-6 py-2.5 text-xs font-bold uppercase tracking-wider shadow-md flex-1 sm:flex-none flex items-center justify-center whitespace-nowrap"
+                          >
+                             Lihat Detail
+                          </router-link>
+                       </div>
+                    </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
           <!-- Initial State -->
           <div v-else class="card shadow-xl border-border bg-white rounded-2xl animate-fade-in text-center flex flex-col items-center justify-center py-24 min-h-[500px]">
@@ -345,6 +339,7 @@
 import { ref, onMounted } from 'vue'
 import { useCompareStore } from '../stores/compare'
 import { pesantren as pesantrenApi, wilayah } from '../services'
+import { getUploadUrl } from '../services/api'
 
 const compareStore = useCompareStore()
 

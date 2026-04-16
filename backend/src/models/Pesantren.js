@@ -98,6 +98,7 @@ const Pesantren = {
         data.biaya_pendaftaran || null,
         data.biaya_bulanan || null,
         data.fasilitas ? (typeof data.fasilitas === 'string' ? data.fasilitas : JSON.stringify(data.fasilitas)) : null,
+        data.kurikulum || null,
         data.email || null,
         data.telepon || null,
         data.website || null,

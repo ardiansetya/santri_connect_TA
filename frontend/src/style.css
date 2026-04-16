@@ -616,25 +616,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .progress { height: 6px; background-color: hsl(var(--muted)); border-radius: 9999px; overflow: hidden; }
 .progress-bar { height: 100%; transition: width 0.3s ease; }
-.bg-success { background-color: hsl(160 60% 35%) !important; }
-.bg-warning { background-color: hsl(40 65% 52%) !important; }
-.bg-info { background-color: hsl(190 70% 40%) !important; }
-.bg-secondary { background-color: hsl(var(--muted-foreground)) !important; color: white; }
-.bg-danger { background-color: hsl(var(--destructive)) !important; }
-.text-dark { color: hsl(var(--foreground)) !important; }
-.text-success { color: hsl(160 60% 35%) !important; }
-.text-warning { color: hsl(40 65% 45%) !important; }
-.text-info { color: hsl(190 70% 40%) !important; }
-.text-danger { color: hsl(var(--destructive)) !important; }
-.text-secondary { color: hsl(var(--muted-foreground)) !important; }
-
 /* ===================== ALERT ===================== */
 
 .alert { padding: 1rem 1.25rem; border-radius: 0.625rem; border: none; }
 .alert-danger { background-color: hsl(var(--destructive) / 0.08); color: hsl(var(--destructive)); }
 .alert-info { background-color: hsl(190 70% 40% / 0.08); color: hsl(190 70% 40%); }
-.text-destructive { color: hsl(var(--destructive)) !important; }
-.bg-destructive { background-color: hsl(var(--destructive)) !important; }
+
 
 /* ===================== PAGINATION ===================== */
 

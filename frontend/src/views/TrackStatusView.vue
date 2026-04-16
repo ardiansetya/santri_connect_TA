@@ -121,33 +121,42 @@
               </div>
             </div>
 
-            <!-- Tracker Nodes -->
-            <div class="px-6 md:px-8 py-10 border-y border-border/60 bg-muted/10 relative">
-              <h3 class="font-heading font-bold text-xl mb-8 flex items-center gap-2">
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Tahapan Verifikasi
+            <!-- Tracker Nodes (Integrated Timeline) -->
+            <div class="px-6 md:px-8 py-10 border-b border-border/60 bg-muted/10 relative">
+              <h3 class="font-heading font-bold text-xl mb-12 flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                Alur Pendaftaran & Verifikasi
               </h3>
               
-              <div class="relative max-w-lg mx-auto">
+              <div class="relative max-w-2xl mx-auto">
                 <!-- Connecting Line -->
-                <div class="absolute top-[28px] left-[10%] right-[10%] h-1 bg-border rounded-full z-0"></div>
-                <div class="absolute top-[28px] left-[10%] h-1 rounded-full z-0 transition-all duration-1000 ease-in-out" 
+                <div class="absolute top-[28px] left-[6%] right-[6%] h-1 bg-border rounded-full z-0"></div>
+                <div class="absolute top-[28px] left-[6%] h-1 rounded-full z-0 transition-all duration-1000 ease-in-out" 
                      :class="data.status === 'ditolak' ? 'bg-destructive' : 'bg-primary'"
-                     :style="{ width: progressWidth(data.status) }"></div>
+                     :style="{ width: progressWidth(data.status, data.payment_status) }"></div>
 
                 <div class="flex justify-between items-start relative z-10">
                   <div v-for="(step, index) in timelineSteps" :key="step.key" class="flex flex-col items-center flex-1">
                     <!-- Node Bubble -->
                     <div 
-                      class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg mb-3 shadow-[0_4px_10px_rgba(0,0,0,0.05)] border-4 transition-all duration-500"
-                      :class="nodeClasses(data.status, index)"
+                      class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg mb-4 shadow-[0_4px_10px_rgba(0,0,0,0.05)] border-4 transition-all duration-500 bg-white relative"
+                      :class="nodeClasses(data, index)"
                     >
-                      <svg v-if="isStepActive(data.status, index) && data.status !== 'ditolak'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                      <svg v-else-if="data.status === 'ditolak' && index === 2" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                      <span v-else>{{ index + 1 }}</span>
+                      <!-- Step Number (Always Visible) -->
+                      <span>{{ index + 1 }}</span>
+                      
+                      <!-- Small Success Badge if Completed -->
+                      <div v-if="isStepCompleted(data, index)" class="absolute -top-1 -right-1 w-6 h-6 bg-success text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm scale-90">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                      </div>
+                      
+                      <!-- Error Icon for Rejected -->
+                      <div v-else-if="data.status === 'ditolak' && index === 3" class="absolute -top-1 -right-1 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      </div>
                     </div>
                     <!-- Label -->
-                    <span class="text-sm font-semibold text-center whitespace-nowrap" :class="labelClasses(data.status, index)">{{ step.label }}</span>
+                    <span class="text-[11px] md:text-xs font-black uppercase tracking-widest text-center leading-tight px-1" :class="labelClasses(data, index)">{{ step.label }}</span>
                   </div>
                 </div>
               </div>
@@ -244,9 +253,10 @@ const loading = ref(false)
 const error = ref('')
 
 const timelineSteps = [
-  { key: 'pending', label: 'Berkas Masuk' },
-  { key: 'diproses', label: 'Verifikasi' },
-  { key: 'selesai', label: 'Keputusan' }
+  { key: 'pending', label: 'Registrasi Berhasil' },
+  { key: 'payment', label: 'Pembayaran Lunas' },
+  { key: 'diproses', label: 'Verifikasi Berkas' },
+  { key: 'selesai', label: 'Keputusan Final' }
 ]
 
 function statusBadge(status) {
@@ -290,59 +300,54 @@ function paymentStatusLabel(status) {
 }
 
 // Logic for progress bar width
-function progressWidth(status) {
-  if (status === 'ditolak') return '100%' // Show full line but red
-  const map = {
-    pending: '0%',
-    diproses: '50%',
-    diterima: '80%',   // Or 100%, adjust based on design
-  }
-  return map[status] || '0%'
+function progressWidth(status, paymentStatus) {
+  if (status === 'ditolak') return '100%'
+  if (status === 'diterima') return '100%'
+  if (status === 'diproses') return '66%'
+  if (paymentStatus === 'paid') return '33%'
+  return '0%'
 }
 
 // Check if a specific step node is "active" or "completed"
-function isStepActive(status, index) {
-  const order = ['pending', 'diproses', 'diterima', 'ditolak']
-  const statusIndex = order.indexOf(status)
-  
-  if (status === 'ditolak') {
-    // If rejected, process failed at final step or middle step. Show step 1 & 2 as active, step 3 as failed.
-    return index <= 2 
-  }
-  // Max index is 2 (selesai)
-  return index <= Math.min(statusIndex, 2)
+function isStepCompleted(data, index) {
+  if (index === 0) return true // Registration always done
+  if (index === 1) return data.payment_status === 'paid'
+  if (index === 2) return ['diproses', 'diterima', 'ditolak'].includes(data.status)
+  if (index === 3) return data.status === 'diterima'
+  return false
 }
 
-function nodeClasses(status, index) {
-  const order = ['pending', 'diproses', 'diterima', 'ditolak']
-  const statusIndex = order.indexOf(status)
-
-  // Explicit Rejection state styling
-  if (status === 'ditolak') {
-    if (index === 2) return 'bg-destructive/10 border-destructive text-destructive' // The failed node
-    return 'bg-primary border-primary text-white' // The passed nodes
+function nodeClasses(data, index) {
+  const isCompleted = isStepCompleted(data, index)
+  
+  // Handle Rejection state
+  if (data.status === 'ditolak' && index === 3) {
+    return 'border-destructive text-destructive bg-destructive/5'
   }
 
-  // Normal progression
-  if (index < statusIndex) {
-    // Passed steps
-    return 'bg-primary border-primary text-white font-bold'
-  } else if (index === statusIndex || (statusIndex > 2 && index === 2)) {
-    // Current step
-    return 'bg-white border-primary text-primary shadow-[0_0_0_6px_rgba(13,79,79,0.1)]'
-  } else {
-    // Future steps
-    return 'bg-white border-border text-muted-foreground'
+  if (isCompleted) {
+    // Completed nodes: white background, primary border and text for maximum readability
+    return 'bg-white border-primary text-primary shadow-lg ring-1 ring-primary/20'
   }
+  
+  // Handle Current Step
+  const isCurrent = 
+    (index === 1 && data.payment_status !== 'paid') ||
+    (index === 2 && data.payment_status === 'paid' && data.status === 'pending') ||
+    (index === 3 && data.status === 'diproses')
+
+  if (isCurrent) {
+    return 'bg-white border-primary text-primary shadow-[0_0_0_8px_rgba(13,79,79,0.1)] animate-pulse ring-2 ring-primary/30 font-black'
+  }
+
+  return 'bg-muted/10 border-border text-muted-foreground'
 }
 
-function labelClasses(status, index) {
-  const order = ['pending', 'diproses', 'diterima', 'ditolak']
-  const statusIndex = order.indexOf(status)
-  
-  if (status === 'ditolak' && index === 2) return 'text-destructive font-bold'
-  if (index <= statusIndex || (statusIndex > 2 && index === 2)) return 'text-primary font-bold'
-  return 'text-muted-foreground font-medium'
+function labelClasses(data, index) {
+  const isCompleted = isStepCompleted(data, index)
+  if (data.status === 'ditolak' && index === 3) return 'text-destructive font-black'
+  if (isCompleted) return 'text-primary font-black'
+  return 'text-muted-foreground font-bold'
 }
 
 function formatDate(dateStr) {
