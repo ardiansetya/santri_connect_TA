@@ -2,7 +2,7 @@ const RekomendasiService = require('../services/rekomendasi-service')
 
 const RekomendasiController = {
   async getRekomendasi(request, reply) {
-    const { budget, provinsi, kota, fasilitas, bobot } = request.body
+    const { budget, provinsi, kota, kurikulum, fasilitas, bobot } = request.body
     
     // Validation: budget must be a positive number, provinsi can be string, fasilitas must be array
     if (!budget || typeof budget !== 'number' || budget <= 0) {
@@ -14,7 +14,7 @@ const RekomendasiController = {
     }
 
     try {
-      const data = await RekomendasiService.getRekomendasi({ budget, provinsi, kota, fasilitas, bobot })
+      const data = await RekomendasiService.getRekomendasi({ budget, provinsi, kota, kurikulum, fasilitas, bobot })
       return reply.code(200).send({ data })
     } catch {
       return reply.code(500).send({ error: 'Terjadi kesalahan pada server' })

@@ -80,6 +80,22 @@
                     </div>
                   </div>
 
+                  <!-- Kurikulum Select -->
+                  <div>
+                    <label class="form-label">Jenis Kurikulum</label>
+                    <div class="relative">
+                      <select v-model="form.kurikulum" class="form-input appearance-none !pr-10 shadow-sm border-2 focus:border-primary cursor-pointer bg-background">
+                        <option value="">Semua Kurikulum</option>
+                        <option value="modern">Modern</option>
+                        <option value="salaf">Salaf</option>
+                        <option value="campuran">Campuran</option>
+                      </select>
+                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-primary">
+                        <svg class="h-4 w-4 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                      </div>
+                    </div>
+                  </div>
+
                   <!-- Fasilitas Checkboxes -->
                   <div class="pt-2">
                     <label class="form-label">Fasilitas Prioritas</label>
@@ -111,56 +127,65 @@
                 </form>
               </div>
 
-              <!-- Scoring Info Card -> Interactive Weights -->
+              <!-- Scoring Info Card -> Preset Profiles -->
               <div class="p-6 border-t-4 border-accent bg-accent/5 rounded-b-xl">
-                <h4 class="font-heading font-bold text-lg mb-4 flex items-center gap-2 text-accent-foreground">
+                <h4 class="font-heading font-bold text-lg mb-1 flex items-center gap-2 text-accent-foreground">
                   <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
-                  Atur Bobot Prioritas
+                  Prioritas Pencarian
                 </h4>
-                <div class="space-y-5">
-                  <div class="flex justify-between items-center text-xs font-bold text-muted-foreground uppercase">
-                     <span>Total Bobot</span>
-                     <span :class="(form.bobot.budget + form.bobot.lokasi + form.bobot.fasilitas) !== 100 ? 'text-destructive' : 'text-success'">{{ form.bobot.budget + form.bobot.lokasi + form.bobot.fasilitas }}%</span>
-                  </div>
-                  
-                  <div>
-                    <div class="flex items-center justify-between mb-2">
-                      <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-success rounded-full shadow-sm"></div>
-                        <span class="text-sm font-medium text-foreground">Anggaran (Budget)</span>
-                      </div>
-                      <span class="font-bold font-heading text-success">{{ form.bobot.budget }}%</span>
+                <p class="text-xs text-muted-foreground mb-4">Pilih strategi yang paling sesuai dengan kebutuhan Anda.</p>
+                
+                <div class="grid grid-cols-2 gap-2.5">
+                  <button
+                    v-for="preset in bobotPresets"
+                    :key="preset.key"
+                    type="button"
+                    @click="applyBobotPreset(preset.key)"
+                    class="bobot-preset-card text-left"
+                    :class="activePreset === preset.key ? 'bobot-preset-active' : 'bobot-preset-idle'"
+                  >
+                    <span class="text-xl mb-1 block">{{ preset.icon }}</span>
+                    <span class="text-xs font-bold text-foreground block leading-tight">{{ preset.label }}</span>
+                    <span class="text-[10px] text-muted-foreground leading-tight block mt-0.5">{{ preset.desc }}</span>
+                  </button>
+                </div>
+
+                <!-- Visual Weight Breakdown -->
+                <div class="mt-4 space-y-2">
+                  <div class="flex rounded-lg overflow-hidden h-3 shadow-inner border border-border/50">
+                    <div class="bg-success transition-all duration-500 flex items-center justify-center" :style="{ width: `${form.bobot.budget}%` }">
+                      <span v-if="form.bobot.budget >= 20" class="text-[7px] font-bold text-white">{{ form.bobot.budget }}%</span>
                     </div>
-                    <input type="range" v-model.number="form.bobot.budget" min="0" max="100" class="w-full accent-success" />
-                  </div>
-                  
-                  <div>
-                    <div class="flex items-center justify-between mb-2">
-                      <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-primary rounded-full shadow-sm"></div>
-                        <span class="text-sm font-medium text-foreground">Lokasi (Provinsi)</span>
-                      </div>
-                      <span class="font-bold font-heading text-primary">{{ form.bobot.lokasi }}%</span>
+                    <div class="bg-primary transition-all duration-500 flex items-center justify-center" :style="{ width: `${form.bobot.lokasi}%` }">
+                      <span v-if="form.bobot.lokasi >= 20" class="text-[7px] font-bold text-white">{{ form.bobot.lokasi }}%</span>
                     </div>
-                    <input type="range" v-model.number="form.bobot.lokasi" min="0" max="100" class="w-full accent-primary" />
-                  </div>
-                  
-                  <div>
-                    <div class="flex items-center justify-between mb-2">
-                      <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-accent rounded-full shadow-sm"></div>
-                        <span class="text-sm font-medium text-foreground">Fasilitas</span>
-                      </div>
-                      <span class="font-bold font-heading text-accent">{{ form.bobot.fasilitas }}%</span>
+                    <div class="bg-accent transition-all duration-500 flex items-center justify-center" :style="{ width: `${form.bobot.fasilitas}%` }">
+                      <span v-if="form.bobot.fasilitas >= 15" class="text-[7px] font-bold text-white">{{ form.bobot.fasilitas }}%</span>
                     </div>
-                    <input type="range" v-model.number="form.bobot.fasilitas" min="0" max="100" class="w-full accent-accent" />
+                    <div class="bg-warning transition-all duration-500 flex items-center justify-center" :style="{ width: `${form.bobot.kurikulum}%` }">
+                      <span v-if="form.bobot.kurikulum >= 10" class="text-[7px] font-bold text-white">{{ form.bobot.kurikulum }}%</span>
+                    </div>
                   </div>
-                  
-                  <p v-if="(form.bobot.budget + form.bobot.lokasi + form.bobot.fasilitas) !== 100" class="text-xs text-destructive mt-2 animate-pulse">
-                    Total bobot akan dinormalisasi ke 100% otomatis oleh sistem.
-                  </p>
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] font-bold uppercase tracking-wider text-muted-foreground px-0.5">
+                    <div class="flex items-center gap-1">
+                      <div class="w-2 h-2 rounded-full bg-success"></div>
+                      <span>Budget {{ form.bobot.budget }}%</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <div class="w-2 h-2 rounded-full bg-primary"></div>
+                      <span>Lokasi {{ form.bobot.lokasi }}%</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <div class="w-2 h-2 rounded-full bg-accent"></div>
+                      <span>Fasilitas {{ form.bobot.fasilitas }}%</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <div class="w-2 h-2 rounded-full bg-warning"></div>
+                      <span>Kurikulum {{ form.bobot.kurikulum }}%</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -377,15 +402,34 @@ import { getUploadUrl } from '../services/api'
 
 const compareStore = useCompareStore()
 
+const bobotPresets = [
+  { key: 'seimbang', icon: '⚖️', label: 'Seimbang', desc: 'Semua aspek dipertimbangkan rata', bobot: { budget: 40, lokasi: 30, fasilitas: 20, kurikulum: 10 } },
+  { key: 'hemat', icon: '💰', label: 'Hemat', desc: 'Utamakan biaya terjangkau', bobot: { budget: 50, lokasi: 20, fasilitas: 15, kurikulum: 15 } },
+  { key: 'dekat', icon: '📍', label: 'Dekat Rumah', desc: 'Prioritas lokasi terdekat', bobot: { budget: 20, lokasi: 50, fasilitas: 15, kurikulum: 15 } },
+  { key: 'fasilitas', icon: '🏫', label: 'Fasilitas Lengkap', desc: 'Fokus kualitas fasilitas', bobot: { budget: 20, lokasi: 15, fasilitas: 50, kurikulum: 15 } }
+]
+
+const activePreset = ref('seimbang')
+
+function applyBobotPreset(key) {
+  const preset = bobotPresets.find(p => p.key === key)
+  if (preset) {
+    activePreset.value = key
+    form.value.bobot = { ...preset.bobot }
+  }
+}
+
 const form = ref({
   budget: null,
   provinsi: '',
   kota: '',
+  kurikulum: '',
   fasilitas: [],
   bobot: {
     budget: 40,
     lokasi: 30,
-    fasilitas: 30
+    fasilitas: 20,
+    kurikulum: 10
   }
 })
 
@@ -491,6 +535,32 @@ onMounted(async () => {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary)/0.4);
+}
+
+.bobot-preset-card {
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.bobot-preset-idle {
+  background: hsl(var(--background));
+  border-color: hsl(var(--border) / 0.5);
+}
+
+.bobot-preset-idle:hover {
+  border-color: hsl(var(--accent) / 0.4);
+  background: hsl(var(--accent) / 0.03);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px hsl(var(--foreground) / 0.06);
+}
+
+.bobot-preset-active {
+  background: hsl(var(--accent) / 0.08);
+  border-color: hsl(var(--accent) / 0.5);
+  box-shadow: 0 0 0 3px hsl(var(--accent) / 0.1);
 }
 </style>
 

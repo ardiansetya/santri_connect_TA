@@ -23,6 +23,7 @@
 
   /* Destructive */
   --color-destructive: hsl(var(--destructive));
+  --color-warning: hsl(var(--warning));
   --color-success: hsl(var(--success));
 
   /* Radius */
@@ -78,6 +79,7 @@
   --radius: 0.875rem;
   
   --destructive: 0 65% 50%;
+  --warning: 35 90% 52%;
   --success: 160 60% 35%;
 
   /* Semantic */
