@@ -1,23 +1,40 @@
 const Pesantren = require('../models/Pesantren')
 
 const RekomendasiService = {
-  async getRekomendasi({ budget, provinsi, fasilitas }) {
+  async getRekomendasi({ budget, provinsi, kota, fasilitas, bobot }) {
     const [pesantren] = await require('../config/db').getPool().query(
       'SELECT id, nama, province, kota, biaya_bulanan, fasilitas, kurikulum, foto_utama FROM pesantren'
     )
 
-    const WEIGHTS = { budget: 0.4, lokasi: 0.3, fasilitas: 0.3 }
+    // Normalize weights
+    const defaultBobot = { budget: 40, lokasi: 30, fasilitas: 30 }
+    const actualBobot = bobot || defaultBobot
+    const totalBobot = (actualBobot.budget || 0) + (actualBobot.lokasi || 0) + (actualBobot.fasilitas || 0) || 100
+    
+    const WEIGHTS = { 
+      budget: (actualBobot.budget || 0) / totalBobot, 
+      lokasi: (actualBobot.lokasi || 0) / totalBobot, 
+      fasilitas: (actualBobot.fasilitas || 0) / totalBobot 
+    }
 
     const scored = pesantren.map(p => {
-      // 1. Budget Score (40%)
+      // 1. Budget Score
       const biaya = parseFloat(p.biaya_bulanan) || 0
       const budget_score = biaya <= budget ? 1 : Math.max(0, 1 - ((biaya - budget) / budget))
       
-      // 2. Location Score (30%)
-      // If user selected empty provinsi, location score is 1 (neutral)
-      const location_score = !provinsi || p.province === provinsi ? 1 : 0
+      // 2. Location Score
+      let location_score = 0;
+      if (!provinsi && !kota) {
+        location_score = 1;
+      } else if (provinsi && kota) {
+        location_score = (p.province === provinsi && p.kota === kota) ? 1 : 0;
+      } else if (provinsi) {
+        location_score = (p.province === provinsi) ? 1 : 0;
+      } else if (kota) {
+        location_score = (p.kota === kota) ? 1 : 0;
+      }
 
-      // 3. Facilities Score (30%)
+      // 3. Facilities Score
       let pFasilitas = p.fasilitas
       if (typeof pFasilitas === 'string') { try { pFasilitas = JSON.parse(pFasilitas) } catch { pFasilitas = [] } }
 
@@ -25,7 +42,8 @@ const RekomendasiService = {
         ? fasilitas.filter(f => pFasilitas.includes(f))
         : []
       
-      const fasilitas_score = fasilitas.length > 0 ? (matchedFasilitas.length / fasilitas.length) : 0
+      // BUG FIX: Jika tidak ada fasilitas yang direquest, anggap 100% cocok (1)
+      const fasilitas_score = fasilitas.length > 0 ? (matchedFasilitas.length / fasilitas.length) : 1
       
       // Combined Score
       const total_score = (budget_score * WEIGHTS.budget) + (location_score * WEIGHTS.lokasi) + (fasilitas_score * WEIGHTS.fasilitas)

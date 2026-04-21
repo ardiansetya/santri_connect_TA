@@ -56,9 +56,23 @@
                   <div>
                     <label class="form-label">Tentukan Provinsi</label>
                     <div class="relative">
-                      <select v-model="form.provinsi" class="form-input appearance-none !pr-10 shadow-sm border-2 focus:border-primary cursor-pointer bg-background">
+                      <select v-model="form.provinsi" @change="onProvinceChange" class="form-input appearance-none !pr-10 shadow-sm border-2 focus:border-primary cursor-pointer bg-background">
                         <option value="">Semua Provinsi di Indonesia</option>
                         <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
+                      </select>
+                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-primary">
+                        <svg class="h-4 w-4 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- City Select -->
+                  <div v-if="form.provinsi">
+                    <label class="form-label">Tentukan Kota/Kabupaten</label>
+                    <div class="relative">
+                      <select v-model="form.kota" :disabled="loadingCities" class="form-input appearance-none !pr-10 shadow-sm border-2 focus:border-primary cursor-pointer bg-background disabled:opacity-50">
+                        <option value="">Semua Kota/Kabupaten</option>
+                        <option v-for="c in cities" :key="c.id" :value="c.name">{{ c.name }}</option>
                       </select>
                       <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-primary">
                         <svg class="h-4 w-4 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
@@ -97,36 +111,56 @@
                 </form>
               </div>
 
-              <!-- Scoring Info Card -->
+              <!-- Scoring Info Card -> Interactive Weights -->
               <div class="p-6 border-t-4 border-accent bg-accent/5 rounded-b-xl">
                 <h4 class="font-heading font-bold text-lg mb-4 flex items-center gap-2 text-accent-foreground">
                   <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
-                  Bobot Penilaian
+                  Atur Bobot Prioritas
                 </h4>
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div class="w-2 h-2 bg-success rounded-full shadow-sm"></div>
-                      <span class="text-sm font-medium text-foreground">Kesesuaian Anggaran</span>
-                    </div>
-                    <span class="font-bold font-heading text-success">40%</span>
+                <div class="space-y-5">
+                  <div class="flex justify-between items-center text-xs font-bold text-muted-foreground uppercase">
+                     <span>Total Bobot</span>
+                     <span :class="(form.bobot.budget + form.bobot.lokasi + form.bobot.fasilitas) !== 100 ? 'text-destructive' : 'text-success'">{{ form.bobot.budget + form.bobot.lokasi + form.bobot.fasilitas }}%</span>
                   </div>
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div class="w-2 h-2 bg-primary rounded-full shadow-sm"></div>
-                      <span class="text-sm font-medium text-foreground">Lokasi Preferensi</span>
+                  
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-success rounded-full shadow-sm"></div>
+                        <span class="text-sm font-medium text-foreground">Anggaran (Budget)</span>
+                      </div>
+                      <span class="font-bold font-heading text-success">{{ form.bobot.budget }}%</span>
                     </div>
-                    <span class="font-bold font-heading text-primary">30%</span>
+                    <input type="range" v-model.number="form.bobot.budget" min="0" max="100" class="w-full accent-success" />
                   </div>
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <div class="w-2 h-2 bg-accent rounded-full shadow-sm"></div>
-                      <span class="text-sm font-medium text-foreground">Fasilitas Ekstrakurikuler</span>
+                  
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-primary rounded-full shadow-sm"></div>
+                        <span class="text-sm font-medium text-foreground">Lokasi (Provinsi)</span>
+                      </div>
+                      <span class="font-bold font-heading text-primary">{{ form.bobot.lokasi }}%</span>
                     </div>
-                    <span class="font-bold font-heading text-accent">30%</span>
+                    <input type="range" v-model.number="form.bobot.lokasi" min="0" max="100" class="w-full accent-primary" />
                   </div>
+                  
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-accent rounded-full shadow-sm"></div>
+                        <span class="text-sm font-medium text-foreground">Fasilitas</span>
+                      </div>
+                      <span class="font-bold font-heading text-accent">{{ form.bobot.fasilitas }}%</span>
+                    </div>
+                    <input type="range" v-model.number="form.bobot.fasilitas" min="0" max="100" class="w-full accent-accent" />
+                  </div>
+                  
+                  <p v-if="(form.bobot.budget + form.bobot.lokasi + form.bobot.fasilitas) !== 100" class="text-xs text-destructive mt-2 animate-pulse">
+                    Total bobot akan dinormalisasi ke 100% otomatis oleh sistem.
+                  </p>
                 </div>
               </div>
             </div>
@@ -251,7 +285,7 @@
                                 <span v-if="item.fasilitas_match?.length > 3" class="text-[10px] text-primary font-bold self-center ml-1">
                                    +{{ item.fasilitas_match.length - 3 }}
                                 </span>
-                                <span v-if="!item.fasilitas_match?.length" class="text-[10px] text-muted-foreground italic">Zonasi & Budget sangat dominan</span>
+                                <span v-if="!item.fasilitas_match?.length" class="text-[10px] text-muted-foreground italic">Budget dominan</span>
                              </div>
                           </div>
                        </div>
@@ -271,11 +305,11 @@
                           </div>
                           <div class="flex flex-col gap-1.5 flex-1 min-w-0">
                              <div class="flex justify-between text-[8px] font-extrabold uppercase tracking-widest text-muted-foreground">
-                                <span>Zonasi</span>
-                                <span class="text-primary">{{ Math.round((item.location_score || 0) * 100) }}%</span>
+                                <span>Fasilitas</span>
+                                <span class="text-accent">{{ Math.round((item.fasilitas_score || 0) * 100) }}%</span>
                              </div>
                              <div class="w-full bg-border rounded-full h-1">
-                                <div class="bg-primary h-full rounded-full transition-all duration-1000" :style="{ width: `${(item.location_score || 0) * 100}%` }"></div>
+                                <div class="bg-accent h-full rounded-full transition-all duration-1000" :style="{ width: `${(item.fasilitas_score || 0) * 100}%` }"></div>
                              </div>
                           </div>
                        </div>
@@ -322,7 +356,7 @@
             
             <h3 class="font-heading text-3xl font-bold text-foreground mb-4">Mesin Rekomendasi Cerdas</h3>
             <p class="text-muted-foreground text-lg max-w-lg mx-auto mb-8 leading-relaxed">
-              Biarkan algoritma <strong class="text-foreground">Santri Connect</strong> menjelajah ribuan data secara harfiah dalam milih detik. Masukkan parameter finansial, target fasilitas, dan zonasi Anda di panel kontrol.
+              Biarkan algoritma <strong class="text-foreground">Santri Connect</strong> menjelajah ribuan data secara harfiah dalam milih detik. Masukkan parameter finansial dan target fasilitas impian Anda di panel kontrol.
             </p>
             
             <button @click="autoFocusBudget" class="btn btn-outline border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 rounded-full text-sm tracking-wide uppercase font-bold shadow-[0_4px_14px_0_rgba(13,79,79,0.39)] hover:shadow-[0_6px_20px_rgba(13,79,79,0.23)]">
@@ -346,10 +380,18 @@ const compareStore = useCompareStore()
 const form = ref({
   budget: null,
   provinsi: '',
-  fasilitas: []
+  kota: '',
+  fasilitas: [],
+  bobot: {
+    budget: 40,
+    lokasi: 30,
+    fasilitas: 30
+  }
 })
 
 const provinces = ref([])
+const cities = ref([])
+const loadingCities = ref(false)
 const results = ref([])
 const loading = ref(false)
 const searched = ref(false)
@@ -388,6 +430,25 @@ async function loadProvinces() {
     provinces.value = data.data || []
   } catch {
     provinces.value = []
+  }
+}
+
+async function onProvinceChange() {
+  form.value.kota = ''
+  cities.value = []
+  if (!form.value.provinsi) return
+  
+  const selectedProv = provinces.value.find(p => p.name === form.value.provinsi)
+  if (selectedProv) {
+    loadingCities.value = true
+    try {
+      const { data } = await wilayah.getRegencies(selectedProv.id)
+      cities.value = data.data || []
+    } catch {
+      cities.value = []
+    } finally {
+      loadingCities.value = false
+    }
   }
 }
 
@@ -432,3 +493,5 @@ onMounted(async () => {
   background: hsl(var(--primary)/0.4);
 }
 </style>
+
+
