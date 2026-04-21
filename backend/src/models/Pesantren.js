@@ -7,7 +7,7 @@ const Pesantren = {
     return rows[0]
   },
 
-  async findAll({ search, provinsi, kota, biaya_min, biaya_max, fasilitas, kurikulum, page, limit, sort }) {
+  async findAll({ search, provinsi, province, kota, biaya_min, biaya_max, fasilitas, kurikulum, page, limit, sort, order }) {
     let query = 'SELECT id, nama, province, kota, biaya_bulanan, jumlah_santri, kurikulum, fasilitas, foto_utama FROM pesantren WHERE 1=1'
     let countQuery = 'SELECT COUNT(*) as total FROM pesantren WHERE 1=1'
     const params = []
@@ -19,11 +19,12 @@ const Pesantren = {
       params.push(`%${search}%`)
       countParams.push(`%${search}%`)
     }
-    if (provinsi) {
+    const targetProvinsi = province || provinsi
+    if (targetProvinsi) {
       query += ' AND province = ?'
       countQuery += ' AND province = ?'
-      params.push(provinsi)
-      countParams.push(provinsi)
+      params.push(targetProvinsi)
+      countParams.push(targetProvinsi)
     }
     if (kota) {
       query += ' AND kota = ?'
@@ -56,12 +57,25 @@ const Pesantren = {
       countParams.push(kurikulum)
     }
 
+    // Handle legacy frontend sort types (biaya_asc, dll) map as well as dynamic ones
     const sortMap = {
       biaya_asc: 'biaya_bulanan ASC',
       biaya_desc: 'biaya_bulanan DESC',
       terbaru: 'created_at DESC'
     }
-    query += ` ORDER BY ${sortMap[sort] || sortMap.terbaru}`
+    
+    // Modern sorting
+    const validSortFields = ['nama', 'tahun_berdiri', 'jumlah_santri', 'biaya_bulanan', 'created_at']
+    const sortField = validSortFields.includes(sort) ? sort : 'created_at'
+    const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC'
+    
+    if (sortMap[sort]) {
+      query += ` ORDER BY ${sortMap[sort]}`
+    } else if (sortField !== 'created_at' || order) {
+      query += ` ORDER BY ${sortField} ${sortOrder}`
+    } else {
+      query += ` ORDER BY ${sortMap.terbaru}`
+    }
 
     const offset = (page - 1) * limit
     query += ' LIMIT ? OFFSET ?'
