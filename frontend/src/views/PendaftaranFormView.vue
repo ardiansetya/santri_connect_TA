@@ -147,7 +147,7 @@
                 <span class="flex items-center justify-center w-10 h-10 rounded-full bg-success shadow-md shadow-success/30 text-white font-bold font-heading text-lg shrink-0">3</span>
                 <div>
                   <h3 class="font-heading font-bold text-2xl text-foreground">Berkas Faktual</h3>
-                  <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Lampiran Syarat Administrasi (Opsional / Max 2MB)</p>
+                  <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Lampiran Syarat Administrasi (Opsional / Max 1MB)</p>
                 </div>
               </div>
 
@@ -159,7 +159,7 @@
                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
                     </div>
                     <label class="form-label font-bold text-base block mb-2">Scan KTP Orang Tua (Wali)</label>
-                    <p class="text-xs text-muted-foreground mb-4">Mendukung file JPG, PNG. Maksimum 2MB.</p>
+                    <p class="text-xs text-muted-foreground mb-4">Mendukung file JPG, PNG. Maksimum 1MB.</p>
                   </div>
                   <div class="mt-auto">
                     <input type="file" class="hidden" id="ktp-upload" accept="image/jpeg,image/png,image/jpg" @change="handleFile('foto_ktp', $event)" />
@@ -181,7 +181,7 @@
                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
                     <label class="form-label font-bold text-base block mb-2">Pas Foto Diri Santri (3x4)</label>
-                    <p class="text-xs text-muted-foreground mb-4">Asli berwarna terbaru. Latar bebas. Maks 2MB.</p>
+                    <p class="text-xs text-muted-foreground mb-4">Asli berwarna terbaru. Latar bebas. Maks 1MB.</p>
                   </div>
                   <div class="mt-auto">
                     <input type="file" class="hidden" id="pas-foto-upload" accept="image/jpeg,image/png,image/jpg" @change="handleFile('pas_foto', $event)" />
@@ -474,26 +474,27 @@ function handleFile(field, event) {
   const file = event.target.files[0]
   if (!file) return
 
-  const maxSize = 2 * 1024 * 1024 // 2MB
+  const maxSize = 1 * 1024 * 1024 // 1MB
   const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
   const allowedTypes = [...allowedImageTypes, 'application/pdf']
 
   if (field === 'kartu_keluarga') {
     if (!allowedTypes.includes(file.type)) {
-      fileErrors.value[field] = 'Resolusi format (Gambar/PDF) dibutuhkan.'
+      fileErrors.value[field] = 'Format file tidak didukung. Gunakan gambar (JPG, PNG) atau PDF.'
       event.target.value = ''
       return
     }
   } else {
     if (!allowedImageTypes.includes(file.type)) {
-      fileErrors.value[field] = 'Lampirkan file citra Gambar (JPG, PNG, WebP) saja.'
+      fileErrors.value[field] = 'Format file tidak didukung. Gunakan gambar (JPG, PNG, WebP) saja.'
       event.target.value = ''
       return
     }
   }
 
   if (file.size > maxSize) {
-    fileErrors.value[field] = 'Volume data melonjak. Standar sistem maksimum bernilai 2MB per formulir.'
+    const sizeMB = (file.size / 1048576).toFixed(1)
+    fileErrors.value[field] = `Ukuran file terlalu besar (${sizeMB}MB). Maksimum yang diperbolehkan adalah 1MB. Silakan kompres atau pilih file yang lebih kecil.`
     event.target.value = ''
     return
   }

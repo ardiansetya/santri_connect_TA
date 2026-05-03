@@ -47,6 +47,20 @@ const PendaftaranController = {
       return reply.code(400).send({ error: 'Input tidak valid' })
     }
 
+    // Validate file sizes (max 1MB per file)
+    const MAX_FILE_SIZE = 1 * 1024 * 1024 // 1MB
+    for (const [fieldName, fileInfo] of Object.entries(files)) {
+      if (fileInfo.size > MAX_FILE_SIZE) {
+        // Clean up all uploaded files
+        for (const f of Object.values(files)) {
+          const filePath = path.join(UPLOAD_DIR, f.filename)
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
+        }
+        const sizeMB = (fileInfo.size / 1048576).toFixed(1)
+        return reply.code(400).send({ error: `File ${fieldName} terlalu besar (${sizeMB}MB). Maksimum yang diperbolehkan adalah 1MB.` })
+      }
+    }
+
     const required = ['pesantren_id', 'nama_lengkap', 'nik', 'jenis_kelamin']
     for (const field of required) {
       if (!data[field]) return reply.code(400).send({ error: `Field ${field} wajib diisi` })

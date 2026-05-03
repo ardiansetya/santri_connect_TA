@@ -71,6 +71,28 @@
                   </div>
                 </div>
 
+                <div>
+                  <label class="form-label">Fasilitas</label>
+                  <div class="relative">
+                    <select class="form-input appearance-none !pr-10" v-model="filters.fasilitas" @change="fetchData">
+                      <option value="">Semua Fasilitas</option>
+                      <option value="Masjid">Masjid</option>
+                      <option value="Asrama">Asrama</option>
+                      <option value="Perpustakaan">Perpustakaan</option>
+                      <option value="Lab Komputer">Lab Komputer</option>
+                      <option value="Klinik">Klinik</option>
+                      <option value="Kantin">Kantin</option>
+                      <option value="Lapangan Olahraga">Lapangan Olahraga</option>
+                      <option value="WiFi">WiFi</option>
+                      <option value="Aula">Aula</option>
+                      <option value="Koperasi">Koperasi</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Budget Filter Section -->
                 <div class="border-t border-border pt-5 mt-5">
                    <label class="form-label mb-3">Rentang Biaya Bulanan</label>
@@ -304,6 +326,7 @@ const filters = ref({
   province: '',
   kota: '',
   kurikulum: '',
+  fasilitas: '',
   biaya_min: '',
   biaya_max: ''
 })
@@ -331,6 +354,7 @@ function resetFilters() {
     province: '',
     kota: '',
     kurikulum: '',
+    fasilitas: '',
     biaya_min: '',
     biaya_max: ''
   }
@@ -387,6 +411,7 @@ async function fetchData() {
     if (filters.value.province) params.province = filters.value.province
     if (filters.value.kota) params.kota = filters.value.kota
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
+    if (filters.value.fasilitas) params.fasilitas = filters.value.fasilitas
     if (filters.value.biaya_min) params.biaya_min = filters.value.biaya_min
     if (filters.value.biaya_max) params.biaya_max = filters.value.biaya_max
 
@@ -419,6 +444,7 @@ async function changePage(page) {
     if (filters.value.province) params.province = filters.value.province
     if (filters.value.kota) params.kota = filters.value.kota
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
+    if (filters.value.fasilitas) params.fasilitas = filters.value.fasilitas
     if (filters.value.biaya_min) params.biaya_min = filters.value.biaya_min
     if (filters.value.biaya_max) params.biaya_max = filters.value.biaya_max
 

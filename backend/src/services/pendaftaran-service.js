@@ -17,6 +17,13 @@ const PendaftaranService = {
 
     console.log(`[PendaftaranService.create] Found pesantren in ${Date.now() - startTime}ms`);
 
+    // Check for existing active registration at the same pesantren
+    const existing = await Pendaftaran.findActiveByUserAndPesantren(userId, parseInt(data.pesantren_id))
+    if (existing) {
+      const statusMap = { pending: 'menunggu verifikasi', diproses: 'sedang diproses', diterima: 'sudah diterima' }
+      throw new Error(`Anda sudah memiliki pendaftaran yang ${statusMap[existing.status] || 'aktif'} di pesantren ini (${existing.nomor_pendaftaran}). Tidak dapat mendaftar ulang.`)
+    }
+
     // Files are already saved by controller, just get filenames
     const fotoKtp = files.foto_ktp ? files.foto_ktp.filename : null
     const pasFoto = files.pas_foto ? files.pas_foto.filename : null
@@ -61,6 +68,7 @@ const PendaftaranService = {
     const data = await Pendaftaran.findById(pendaftaranId)
     if (!data) throw new Error('Pendaftaran tidak ditemukan')
     if (data.user_id !== userId) throw new Error('Akses ditolak')
+    if (data.status === 'ditolak') throw new Error('Pendaftaran telah ditolak. Pembayaran tidak dapat dilakukan.')
     if (data.payment_status === 'paid') throw new Error('Pendaftaran sudah dibayar')
 
     // If order_id doesn't exist, create it

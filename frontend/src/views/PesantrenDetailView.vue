@@ -215,7 +215,15 @@
                 </div>
                 
                 <div class="p-6 bg-card space-y-4">
-                  <router-link :to="`/pesantren/${pesantren.id}/daftar`" class="block">
+                  <!-- Already registered banner -->
+                  <div v-if="existingRegistration" class="rounded-xl p-4 text-center border-2" :class="existingRegistration.status === 'diterima' ? 'bg-success/10 border-success/30' : 'bg-accent/10 border-accent/30'">
+                    <p class="text-sm font-bold mb-1" :class="existingRegistration.status === 'diterima' ? 'text-success' : 'text-accent'">
+                      {{ existingRegistration.status === 'diterima' ? '✅ Anda Sudah Diterima' : '⏳ Pendaftaran Aktif' }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">No. {{ existingRegistration.nomor_pendaftaran }}</p>
+                  </div>
+                  
+                  <router-link v-if="!existingRegistration" :to="`/pesantren/${pesantren.id}/daftar`" class="block">
                     <button class="btn btn-primary w-full py-3.5 text-base shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group">
                       <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                       Daftar Sekarang
@@ -289,16 +297,19 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCompareStore } from '@/stores/compare'
-import { pesantren as pesantrenService } from '@/services'
+import { pesantren as pesantrenService, pendaftaran } from '@/services'
 import { getUploadUrl } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const compareStore = useCompareStore()
+const authStore = useAuthStore()
 
 const pesantren = ref(null)
 const loading = ref(true)
 const error = ref('')
 const currentIndex = ref(0)
+const existingRegistration = ref(null)
 
 // Carousel images
 const allImages = computed(() => {
@@ -387,5 +398,20 @@ onMounted(async () => {
   // Reset scroll position on mount
   window.scrollTo(0, 0)
   await fetchData()
+  
+  // Check if current user already has an active registration here
+  if (authStore.user && authStore.user.role === 'pendaftar') {
+    try {
+      const { data } = await pendaftaran.getMyRegistrations()
+      const regs = data.data || []
+      const pesantrenId = parseInt(route.params.id)
+      const active = regs.find(r => parseInt(r.pesantren_id) === pesantrenId && ['pending', 'diproses', 'diterima'].includes(r.status))
+      if (active) {
+        existingRegistration.value = active
+      }
+    } catch (e) {
+      // Silently ignore - user may not be logged in
+    }
+  }
 })
 </script>

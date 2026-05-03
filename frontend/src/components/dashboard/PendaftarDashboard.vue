@@ -128,7 +128,7 @@
 
                     <div class="flex gap-2">
                       <button
-                        v-if="p.payment_status === 'unpaid' || p.payment_status === 'failed' || p.payment_status === 'payment_pending'"
+                        v-if="(p.payment_status === 'unpaid' || p.payment_status === 'failed' || p.payment_status === 'payment_pending') && p.status !== 'ditolak'"
                         @click="handlePayment(p)"
                         class="btn btn-primary text-xs px-4 py-2 shadow-sm font-bold whitespace-nowrap hover:-translate-y-0.5 transition-all"
                         :disabled="paymentLoading === p.id"

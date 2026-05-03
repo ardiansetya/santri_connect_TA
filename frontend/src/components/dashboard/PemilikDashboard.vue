@@ -276,10 +276,19 @@
           <div class="p-8 overflow-y-auto flex-1 custom-scrollbar">
             <!-- We rely on same form schema as AdminPesantrenManagement, but inject stylistic updates inline here -->
             <form @submit="onSubmit">
+              <!-- Error Summary -->
+              <div v-if="Object.keys(errors).length > 0" class="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
+                <p class="text-sm font-bold text-destructive flex items-center gap-2 mb-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                  Terdapat {{ Object.keys(errors).length }} kesalahan pada form
+                </p>
+                <p class="text-xs text-destructive/80">Silakan periksa dan perbaiki field yang ditandai merah di bawah.</p>
+              </div>
+
               <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                 <div class="md:col-span-2">
                   <label class="form-label font-bold text-sm mb-1 block">Nama Resmi Pesantren <span class="text-destructive">*</span></label>
-                  <input v-model="nama" v-bind="namaProps" type="text" class="w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" :class="{ 'border-destructive': errors.nama }" />
+                  <input v-model="nama" v-bind="namaProps" type="text" class="w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" :class="{ 'border-destructive': errors.nama }" placeholder="Nama lengkap pesantren" />
                   <p v-if="errors.nama" class="text-destructive text-xs font-bold mt-1">{{ errors.nama }}</p>
                 </div>
                 
@@ -289,16 +298,17 @@
                     <option value="">Pilih Provinsi</option>
                     <option v-for="p in provinces" :key="p.id" :value="p.name">{{ p.name }}</option>
                   </select>
+                  <p v-if="errors.province" class="text-destructive text-xs font-bold mt-1">{{ errors.province }}</p>
                 </div>
                 
                 <div>
-                  <label class="form-label font-bold text-sm mb-1 block">Kota Administrasi <span class="text-destructive">*</span></label>
+                  <label class="form-label font-bold text-sm mb-1 block">Kota / Kabupaten <span class="text-destructive">*</span></label>
                   <div class="relative">
-                    <select v-model="kota" v-bind="kotaProps" class="form-input appearance-none w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none bg-white font-medium shadow-sm transition-all" :class="{ 'border-destructive': errors.kota, 'opacity-60 cursor-not-allowed': !province || loadingRegencies }" :disabled="!province || loadingRegencies">
+                    <select v-model="kota" v-bind="kotaProps" class="form-input appearance-none w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none bg-white font-medium" :class="{ 'border-destructive': errors.kota, 'opacity-60 cursor-not-allowed': !province || loadingRegencies }" :disabled="!province || loadingRegencies">
                       <option value="">{{ loadingRegencies ? 'Memuat Data...' : (province ? 'Pilih Kota/Kabupaten' : 'Pilih Provinsi Terlebih Dahulu') }}</option>
                       <option v-for="r in regencies" :key="r.id" :value="r.name">{{ r.name }}</option>
                     </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground group">
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
                       <svg v-if="loadingRegencies" class="animate-spin h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                       <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
@@ -308,42 +318,108 @@
                 
                 <div class="md:col-span-2">
                   <label class="form-label font-bold text-sm mb-1 block">Detail Alamat Lengkap</label>
-                  <input v-model="alamat" v-bind="alamatProps" type="text" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" />
+                  <input v-model="alamat" v-bind="alamatProps" type="text" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" placeholder="Jl. Raya Utama No. 15..." />
                 </div>
 
-                 <div>
+                <!-- Kontak Section -->
+                <div class="md:col-span-2 pt-4 border-t border-border/60">
+                  <h6 class="font-bold text-sm uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    Informasi Kontak
+                  </h6>
+                </div>
+
+                <div>
+                  <label class="form-label font-bold text-sm mb-1 block">Email Pesantren</label>
+                  <input v-model="email" v-bind="emailProps" type="email" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" :class="{ 'border-destructive': errors.email }" placeholder="pesantren@domain.com" />
+                  <p v-if="errors.email" class="text-destructive text-xs font-bold mt-1">{{ errors.email }}</p>
+                </div>
+
+                <div>
+                  <label class="form-label font-bold text-sm mb-1 block">Nomor Telepon</label>
+                  <input v-model="telepon" v-bind="teleponProps" type="text" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none font-mono" :class="{ 'border-destructive': errors.telepon }" placeholder="081234567890" />
+                  <p v-if="errors.telepon" class="text-destructive text-xs font-bold mt-1">{{ errors.telepon }}</p>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="form-label font-bold text-sm mb-1 block">Website</label>
+                  <input v-model="website" v-bind="websiteProps" type="text" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" :class="{ 'border-destructive': errors.website }" placeholder="https://pesantren.example.com" />
+                  <p v-if="errors.website" class="text-destructive text-xs font-bold mt-1">{{ errors.website }}</p>
+                </div>
+
+                <!-- Statistik Section -->
+                <div class="md:col-span-2 pt-4 border-t border-border/60">
+                  <h6 class="font-bold text-sm uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Data Statistik
+                  </h6>
+                </div>
+
+                <div>
                   <label class="form-label font-bold text-sm mb-1 block">Sistem Kurikulum</label>
                   <select v-model="kurikulum" v-bind="kurikulumProps" class="form-input appearance-none w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none bg-white">
-                    <option value="">Tanpa Setup</option>
+                    <option value="">Pilih Kurikulum</option>
                     <option value="modern">Pesantren Modern</option>
                     <option value="salaf">Pesantren Salaf</option>
                     <option value="campuran">Hibrida/Campuran</option>
                   </select>
                 </div>
-                
-                 <div>
-                  <label class="form-label font-bold text-sm mb-1 block">Kapasiti Santri Aktif</label>
-                  <input v-model="jumlah_santri" v-bind="jumlah_santriProps" type="number" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none font-mono" />
+
+                <div>
+                  <label class="form-label font-bold text-sm mb-1 block">Tahun Berdiri</label>
+                  <input v-model="tahun_berdiri" v-bind="tahun_berdiriProps" type="number" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" :class="{ 'border-destructive': errors.tahun_berdiri }" placeholder="Contoh: 1995" min="1800" :max="currentYear" />
+                  <p v-if="errors.tahun_berdiri" class="text-destructive text-xs font-bold mt-1">{{ errors.tahun_berdiri }}</p>
+                </div>
+
+                <div>
+                  <label class="form-label font-bold text-sm mb-1 block">Jumlah Santri</label>
+                  <input v-model="jumlah_santri" v-bind="jumlah_santriProps" type="number" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none font-mono" :class="{ 'border-destructive': errors.jumlah_santri }" min="0" placeholder="0" />
+                  <p v-if="errors.jumlah_santri" class="text-destructive text-xs font-bold mt-1">{{ errors.jumlah_santri }}</p>
+                </div>
+
+                <div>
+                  <label class="form-label font-bold text-sm mb-1 block">Jumlah Pengajar</label>
+                  <input v-model="jumlah_pengajar" v-bind="jumlah_pengajarProps" type="number" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none font-mono" :class="{ 'border-destructive': errors.jumlah_pengajar }" min="0" placeholder="0" />
+                  <p v-if="errors.jumlah_pengajar" class="text-destructive text-xs font-bold mt-1">{{ errors.jumlah_pengajar }}</p>
+                </div>
+
+                <!-- Keuangan Section -->
+                <div class="md:col-span-2 space-y-4 pt-4 border-t border-border/60">
+                  <h6 class="font-bold text-sm uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Biaya (Rp)
+                  </h6>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="form-label text-sm mb-1 block font-semibold">Uang Masuk Pendaftaran</label>
+                      <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">Rp</span>
+                        <input :value="biayaPendaftaranDisplay" @input="onBiayaPendaftaranInput" type="text" inputmode="numeric" class="form-input w-full pl-12 pr-4 py-2 border-2 rounded-xl border-border focus:border-accent" :class="{ 'border-destructive': errors.biaya_pendaftaran }" placeholder="0" />
+                      </div>
+                      <p v-if="errors.biaya_pendaftaran" class="text-destructive text-xs font-bold mt-1">{{ errors.biaya_pendaftaran }}</p>
+                    </div>
+                    <div>
+                      <label class="form-label text-sm mb-1 block font-semibold">SPP Bulanan</label>
+                      <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">Rp</span>
+                        <input :value="biayaBulananDisplay" @input="onBiayaBulananInput" type="text" inputmode="numeric" class="form-input w-full pl-12 pr-4 py-2 border-2 rounded-xl border-border focus:border-accent" :class="{ 'border-destructive': errors.biaya_bulanan }" placeholder="0" />
+                      </div>
+                      <p v-if="errors.biaya_bulanan" class="text-destructive text-xs font-bold mt-1">{{ errors.biaya_bulanan }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fasilitas Section -->
+                <div class="md:col-span-2 pt-4 border-t border-border/60">
+                  <label class="form-label font-bold text-sm mb-2 block">Fasilitas Pesantren</label>
+                  <p class="text-xs text-muted-foreground mb-3">Pisahkan dengan koma. Contoh: Masjid, Asrama, Perpustakaan, Lab Komputer</p>
+                  <input v-model="fasilitasInput" type="text" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" placeholder="Masjid, Asrama, Perpustakaan, Lab Komputer..." />
                 </div>
                  
-                 <div class="md:col-span-2 space-y-4 pt-4 border-t border-border/60">
-                    <h6 class="font-bold text-sm uppercase tracking-widest text-muted-foreground">Kalkulasi Keuangan (Rp)</h6>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label class="form-label text-sm mb-1 block font-semibold">Uang Masuk Pendaftaran</label>
-                        <input v-model="biaya_pendaftaran" v-bind="biaya_pendaftaranProps" type="number" class="form-input w-full px-4 py-2 border-2 rounded-xl border-border focus:border-accent" min="0" />
-                      </div>
-                      <div>
-                        <label class="form-label text-sm mb-1 block font-semibold">Tanggungan Syahriah (Bulan)</label>
-                        <input v-model="biaya_bulanan" v-bind="biaya_bulananProps" type="number" class="form-input w-full px-4 py-2 border-2 rounded-xl border-border focus:border-accent" min="0" />
-                      </div>
-                    </div>
-                 </div>
-                 
-                 <div class="md:col-span-2">
-                   <label class="form-label font-bold text-sm mb-1 block">Penjelasan Narasi Singkat</label>
-                   <textarea v-model="deskripsi" v-bind="deskripsiProps" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent resize-none" rows="3"></textarea>
-                 </div>
+                <div class="md:col-span-2">
+                  <label class="form-label font-bold text-sm mb-1 block">Deskripsi / Profil Singkat</label>
+                  <textarea v-model="deskripsi" v-bind="deskripsiProps" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent resize-none" rows="3" placeholder="Tuliskan profil singkat pesantren..."></textarea>
+                </div>
                  
                  <!-- Media Upload UI -->
                  <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -731,16 +807,32 @@ const showDeleteConfirm = ref(false)
 const deleteTarget = ref(null)
 
 const currentYear = new Date().getFullYear()
+const phoneRegex = /^(\+62|62|0)[0-9]{8,13}$/
 const schema = yup.object({
-  nama: yup.string().required('Legalitas nama wajib diisi'),
-  province: yup.string().required('Provinsi regional wajib.'),
-  kota: yup.string().required('Kota wajib diisi'),
+  nama: yup.string().required('Nama pesantren wajib diisi').min(3, 'Nama minimal 3 karakter'),
+  province: yup.string().required('Provinsi wajib dipilih'),
+  kota: yup.string().required('Kota/Kabupaten wajib diisi'),
   alamat: yup.string().notRequired(),
   kurikulum: yup.string().notRequired(),
-  tahun_berdiri: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired(),
-  jumlah_santri: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired(),
-  biaya_pendaftaran: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired(),
-  biaya_bulanan: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired(),
+  tahun_berdiri: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired()
+    .test('year-range', `Tahun harus antara 1800 - ${new Date().getFullYear()}`, (val) => {
+      if (val === null || val === undefined) return true
+      return val >= 1800 && val <= new Date().getFullYear()
+    }),
+  jumlah_santri: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired().min(0, 'Jumlah tidak boleh negatif'),
+  jumlah_pengajar: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired().min(0, 'Jumlah tidak boleh negatif'),
+  biaya_pendaftaran: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired().min(0, 'Biaya tidak boleh negatif'),
+  biaya_bulanan: yup.number().nullable().transform((v) => (v === '' ? null : v)).notRequired().min(0, 'Biaya tidak boleh negatif'),
+  email: yup.string().nullable().transform((v) => (v === '' ? null : v)).email('Format email tidak valid (contoh: pesantren@domain.com)').notRequired(),
+  telepon: yup.string().notRequired().test('phone-format', 'Nomor telepon harus 8-15 digit (contoh: 081234567890)', (val) => {
+    if (!val) return true
+    return phoneRegex.test(val)
+  }),
+  website: yup.string().nullable().transform((v) => (v === '' ? null : v)).notRequired()
+    .test('url-format', 'URL harus diawali http:// atau https://', (val) => {
+      if (!val) return true
+      return /^https?:\/\/.+/.test(val)
+    }),
   deskripsi: yup.string().notRequired()
 })
 
@@ -748,8 +840,9 @@ const { defineField, handleSubmit, errors, isSubmitting, resetForm, setValues } 
   validationSchema: schema,
   initialValues: {
     nama: '', province: '', kota: '', alamat: '', kurikulum: '',
-    tahun_berdiri: null, jumlah_santri: null,
-    biaya_pendaftaran: null, biaya_bulanan: null, deskripsi: ''
+    tahun_berdiri: null, jumlah_santri: null, jumlah_pengajar: null,
+    biaya_pendaftaran: null, biaya_bulanan: null,
+    email: '', telepon: '', website: '', deskripsi: ''
   }
 })
 
@@ -760,9 +853,37 @@ const [alamat, alamatProps] = defineField('alamat')
 const [kurikulum, kurikulumProps] = defineField('kurikulum')
 const [tahun_berdiri, tahun_berdiriProps] = defineField('tahun_berdiri')
 const [jumlah_santri, jumlah_santriProps] = defineField('jumlah_santri')
+const [jumlah_pengajar, jumlah_pengajarProps] = defineField('jumlah_pengajar')
 const [biaya_pendaftaran, biaya_pendaftaranProps] = defineField('biaya_pendaftaran')
 const [biaya_bulanan, biaya_bulananProps] = defineField('biaya_bulanan')
+const [email, emailProps] = defineField('email')
+const [telepon, teleponProps] = defineField('telepon')
+const [website, websiteProps] = defineField('website')
 const [deskripsi, deskripsiProps] = defineField('deskripsi')
+const fasilitasInput = ref('')
+
+// Rupiah formatter helpers
+const biayaPendaftaranDisplay = ref('')
+const biayaBulananDisplay = ref('')
+
+function formatRupiahInput(val) {
+  if (!val && val !== 0) return ''
+  return String(val).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+function parseRupiahInput(str) {
+  const num = parseInt(String(str).replace(/\./g, ''), 10)
+  return isNaN(num) ? null : num
+}
+function onBiayaPendaftaranInput(e) {
+  const raw = e.target.value.replace(/\./g, '').replace(/\D/g, '')
+  biaya_pendaftaran.value = raw ? parseInt(raw, 10) : null
+  biayaPendaftaranDisplay.value = formatRupiahInput(raw)
+}
+function onBiayaBulananInput(e) {
+  const raw = e.target.value.replace(/\./g, '').replace(/\D/g, '')
+  biaya_bulanan.value = raw ? parseInt(raw, 10) : null
+  biayaBulananDisplay.value = formatRupiahInput(raw)
+}
 
 // Watch province to fetch regencies
 watch(province, async (newProvince) => {
@@ -814,8 +935,8 @@ function handleFileUpload(fieldName, event) {
        let error = ''
        for (const file of selectedFiles) {
           if (!allowedTypes.includes(file.type)) error = 'Terdapat format ekstensi illegal.'
-          const maxSize = 2 * 1024 * 1024 // Increased to 2MB as common for galleries
-          if (file.size > maxSize) error = 'Terdapat file melebih ambang Max 2MB.'
+           const maxSize = 1 * 1024 * 1024 // 1MB
+           if (file.size > maxSize) error = 'Terdapat file yang melebihi batas maksimum 1MB. Silakan kompres gambar terlebih dahulu.'
        }
        
        if (existing_foto_galeri.value.length + files.value.foto_galeri.length + selectedFiles.length > 5) {
@@ -863,9 +984,14 @@ function openForm(p) {
       nama: p.nama || '', province: p.province || '', kota: p.kota || '',
       alamat: p.alamat || '', kurikulum: p.kurikulum || '',
       tahun_berdiri: p.tahun_berdiri || null, jumlah_santri: p.jumlah_santri || null,
+      jumlah_pengajar: p.jumlah_pengajar || null,
       biaya_pendaftaran: p.biaya_pendaftaran || null, biaya_bulanan: p.biaya_bulanan || null,
+      email: p.email || '', telepon: p.telepon || '', website: p.website || '',
       deskripsi: p.deskripsi || ''
     })
+    biayaPendaftaranDisplay.value = formatRupiahInput(p.biaya_pendaftaran)
+    biayaBulananDisplay.value = formatRupiahInput(p.biaya_bulanan)
+    fasilitasInput.value = Array.isArray(p.fasilitas) ? p.fasilitas.join(', ') : (typeof p.fasilitas === 'string' ? p.fasilitas : '')
     
     // Parse existing gallery from pesantren data
     existing_foto_utama.value = p.foto_utama || null
@@ -883,6 +1009,9 @@ function openForm(p) {
     }
   } else {
     resetForm()
+    biayaPendaftaranDisplay.value = ''
+    biayaBulananDisplay.value = ''
+    fasilitasInput.value = ''
   }
   showForm.value = true
 }
@@ -903,9 +1032,15 @@ const onSubmit = handleSubmit(async (values) => {
    serverError.value = ''
    try {
      const formData = new FormData()
-     Object.entries(values).forEach(([key, value]) => {
-       if (value !== null && value !== undefined && value !== '') formData.append(key, value)
-     })
+      Object.entries(values).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') formData.append(key, value)
+      })
+
+      // Send fasilitas as JSON array
+      if (fasilitasInput.value.trim()) {
+        const fasilitas = fasilitasInput.value.split(',').map(f => f.trim()).filter(Boolean)
+        formData.append('fasilitas', JSON.stringify(fasilitas))
+      }
      
      // Send existing gallery filenames
      if (editingId.value) {

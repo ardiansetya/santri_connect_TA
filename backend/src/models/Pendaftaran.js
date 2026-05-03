@@ -45,6 +45,16 @@ const Pendaftaran = {
     return rows.length > 0
   },
 
+  async findActiveByUserAndPesantren(userId, pesantrenId) {
+    const [rows] = await require('../config/db').getPool().query(
+      `SELECT id, status, nomor_pendaftaran FROM pendaftaran 
+       WHERE user_id = ? AND pesantren_id = ? AND status IN ('pending', 'diproses', 'diterima')
+       LIMIT 1`,
+      [userId, pesantrenId]
+    )
+    return rows[0] || null
+  },
+
   async countAll() {
     const [rows] = await require('../config/db').getPool().query('SELECT COUNT(*) as total FROM pendaftaran')
     return rows[0].total

@@ -119,9 +119,20 @@
                       </div>
                       
                       <h3 class="font-heading font-black text-xl text-center text-primary-dark mb-1 leading-tight line-clamp-1">{{ p.nama }}</h3>
-                      <div class="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mb-4">
+                      <div class="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mb-2">
                         <svg class="w-3 h-3 text-accent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
                         {{ p.kota }}
+                      </div>
+                      <!-- Auto-highlight Badges -->
+                      <div class="flex flex-wrap justify-center gap-1.5 mb-3 min-h-[24px]">
+                        <span v-if="cheapestId === p.id" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm animate-fade-in">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                          Termurah
+                        </span>
+                        <span v-if="mostFacilitiesId === p.id" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200 shadow-sm animate-fade-in">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                          Terlengkap
+                        </span>
                       </div>
                       
                       <router-link :to="`/pesantren/${p.id}`" class="btn btn-outline border-primary/40 text-primary w-full mt-auto text-xs font-bold tracking-widest uppercase py-2.5 transition-all hover:bg-primary hover:text-white hover:border-primary">
@@ -209,7 +220,7 @@
                     </div>
                   </td>
                   <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
-                    <div class="inline-block px-4 py-2 bg-success/[0.02] border-2 border-success/20 rounded-xl">
+                    <div class="inline-block px-4 py-2 bg-success/[0.02] border-2 rounded-xl" :class="cheapestId === p.id ? 'border-emerald-400 bg-emerald-50 ring-2 ring-emerald-200' : 'border-success/20'">
                       <span class="font-black text-success text-lg">{{ formatCurrency(p.biaya_bulanan) }}</span>
                     </div>
                   </td>
@@ -236,9 +247,9 @@
                        Fasilitas
                     </div>
                   </td>
-                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 align-top">
+                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 align-top" :class="mostFacilitiesId === p.id ? 'bg-blue-50/50' : ''">
                     <div v-if="p.fasilitas && p.fasilitas.length" class="flex flex-wrap gap-2 justify-center">
-                      <span v-for="f in p.fasilitas" :key="f" class="px-3 py-1.5 bg-muted/20 text-foreground text-[11px] font-bold rounded-lg border border-border shadow-sm transition-transform hover:scale-105">
+                      <span v-for="f in p.fasilitas" :key="f" class="px-3 py-1.5 text-foreground text-[11px] font-bold rounded-lg border shadow-sm transition-transform hover:scale-105" :class="mostFacilitiesId === p.id ? 'bg-blue-50 border-blue-200' : 'bg-muted/20 border-border'">
                         {{ f }}
                       </span>
                     </div>
@@ -255,7 +266,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useCompareStore } from '../stores/compare'
 import { pesantren as pesantrenApi } from '../services'
 import { getUploadUrl } from '../services/api' // Added getUploadUrl for images
@@ -265,6 +276,21 @@ const compareStore = useCompareStore()
 const pesantrenData = ref([])
 const loading = ref(false)
 const error = ref('')
+
+// Auto-highlight: Termurah & Terlengkap
+const cheapestId = computed(() => {
+  if (pesantrenData.value.length < 2) return null
+  const withBiaya = pesantrenData.value.filter(p => p.biaya_pendaftaran != null && p.biaya_pendaftaran > 0)
+  if (withBiaya.length < 2) return null
+  return withBiaya.reduce((min, p) => p.biaya_pendaftaran < min.biaya_pendaftaran ? p : min).id
+})
+
+const mostFacilitiesId = computed(() => {
+  if (pesantrenData.value.length < 2) return null
+  const withFas = pesantrenData.value.filter(p => p.fasilitas && p.fasilitas.length > 0)
+  if (withFas.length < 2) return null
+  return withFas.reduce((max, p) => (p.fasilitas?.length || 0) > (max.fasilitas?.length || 0) ? p : max).id
+})
 
 function formatNumber(num) {
   if (!num) return '-'
