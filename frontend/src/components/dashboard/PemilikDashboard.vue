@@ -394,7 +394,7 @@
                       <label class="form-label text-sm mb-1 block font-semibold">Uang Masuk Pendaftaran</label>
                       <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">Rp</span>
-                        <input :value="biayaPendaftaranDisplay" @input="onBiayaPendaftaranInput" type="text" inputmode="numeric" class="form-input w-full pl-12 pr-4 py-2 border-2 rounded-xl border-border focus:border-accent" :class="{ 'border-destructive': errors.biaya_pendaftaran }" placeholder="0" />
+                        <input :value="biayaPendaftaranDisplay" @input="onBiayaPendaftaranInput" type="text" inputmode="numeric" class="form-input w-full pr-4 py-2 border-2 rounded-xl border-border focus:border-accent" style="padding-left: 2.75rem" :class="{ 'border-destructive': errors.biaya_pendaftaran }" placeholder="0" />
                       </div>
                       <p v-if="errors.biaya_pendaftaran" class="text-destructive text-xs font-bold mt-1">{{ errors.biaya_pendaftaran }}</p>
                     </div>
@@ -402,7 +402,7 @@
                       <label class="form-label text-sm mb-1 block font-semibold">SPP Bulanan</label>
                       <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">Rp</span>
-                        <input :value="biayaBulananDisplay" @input="onBiayaBulananInput" type="text" inputmode="numeric" class="form-input w-full pl-12 pr-4 py-2 border-2 rounded-xl border-border focus:border-accent" :class="{ 'border-destructive': errors.biaya_bulanan }" placeholder="0" />
+                        <input :value="biayaBulananDisplay" @input="onBiayaBulananInput" type="text" inputmode="numeric" class="form-input w-full pr-4 py-2 border-2 rounded-xl border-border focus:border-accent" style="padding-left: 2.75rem" :class="{ 'border-destructive': errors.biaya_bulanan }" placeholder="0" />
                       </div>
                       <p v-if="errors.biaya_bulanan" class="text-destructive text-xs font-bold mt-1">{{ errors.biaya_bulanan }}</p>
                     </div>
@@ -412,8 +412,16 @@
                 <!-- Fasilitas Section -->
                 <div class="md:col-span-2 pt-4 border-t border-border/60">
                   <label class="form-label font-bold text-sm mb-2 block">Fasilitas Pesantren</label>
-                  <p class="text-xs text-muted-foreground mb-3">Pisahkan dengan koma. Contoh: Masjid, Asrama, Perpustakaan, Lab Komputer</p>
-                  <input v-model="fasilitasInput" type="text" class="form-input w-full px-4 py-3 border-2 rounded-xl border-border focus:border-accent outline-none" placeholder="Masjid, Asrama, Perpustakaan, Lab Komputer..." />
+                  <p class="text-xs text-muted-foreground mb-3">Pilih fasilitas yang tersedia di pesantren ini.</p>
+                  <div class="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-56 overflow-y-auto p-2 border border-border/50 rounded-xl bg-muted/10">
+                    <label v-for="f in fasilitasOptions" :key="f" class="flex items-center gap-2.5 p-2.5 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-border hover:shadow-sm">
+                      <input :value="f" v-model="selectedFasilitas" type="checkbox" class="w-4 h-4 text-accent border-border rounded focus:ring-accent/20 cursor-pointer" />
+                      <span class="text-sm font-medium text-foreground select-none">{{ f }}</span>
+                    </label>
+                  </div>
+                  <div v-if="selectedFasilitas.length > 0" class="mt-2 text-xs font-bold text-accent">
+                    {{ selectedFasilitas.length }} fasilitas dipilih
+                  </div>
                 </div>
                  
                 <div class="md:col-span-2">
@@ -860,7 +868,18 @@ const [email, emailProps] = defineField('email')
 const [telepon, teleponProps] = defineField('telepon')
 const [website, websiteProps] = defineField('website')
 const [deskripsi, deskripsiProps] = defineField('deskripsi')
-const fasilitasInput = ref('')
+const fasilitasOptions = [
+  'Masjid', 'Asrama', 'Perpustakaan', 'Lab Komputer', 'WiFi',
+  'Klinik', 'Lapangan Olahraga', 'Kantin', 'Kolam Renang',
+  'Aula', 'AC', 'Koperasi', 'Pertanian', 'Peternakan'
+]
+const selectedFasilitas = ref([])
+
+function parseFasilitas(val) {
+  if (!val) return []
+  if (Array.isArray(val)) return val
+  try { return JSON.parse(val) } catch { return [] }
+}
 
 // Rupiah formatter helpers
 const biayaPendaftaranDisplay = ref('')
@@ -991,7 +1010,7 @@ function openForm(p) {
     })
     biayaPendaftaranDisplay.value = formatRupiahInput(p.biaya_pendaftaran)
     biayaBulananDisplay.value = formatRupiahInput(p.biaya_bulanan)
-    fasilitasInput.value = Array.isArray(p.fasilitas) ? p.fasilitas.join(', ') : (typeof p.fasilitas === 'string' ? p.fasilitas : '')
+    selectedFasilitas.value = parseFasilitas(p.fasilitas)
     
     // Parse existing gallery from pesantren data
     existing_foto_utama.value = p.foto_utama || null
@@ -1011,7 +1030,7 @@ function openForm(p) {
     resetForm()
     biayaPendaftaranDisplay.value = ''
     biayaBulananDisplay.value = ''
-    fasilitasInput.value = ''
+    selectedFasilitas.value = []
   }
   showForm.value = true
 }
@@ -1036,10 +1055,8 @@ const onSubmit = handleSubmit(async (values) => {
         if (value !== null && value !== undefined && value !== '') formData.append(key, value)
       })
 
-      // Send fasilitas as JSON array
-      if (fasilitasInput.value.trim()) {
-        const fasilitas = fasilitasInput.value.split(',').map(f => f.trim()).filter(Boolean)
-        formData.append('fasilitas', JSON.stringify(fasilitas))
+      if (selectedFasilitas.value.length > 0) {
+        formData.append('fasilitas', JSON.stringify(selectedFasilitas.value))
       }
      
      // Send existing gallery filenames

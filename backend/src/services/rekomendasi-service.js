@@ -41,8 +41,9 @@ const RekomendasiService = {
       }
 
       // 3. Facilities Score
-      let pFasilitas = p.fasilitas
+      let pFasilitas = p.fasilitas || []
       if (typeof pFasilitas === 'string') { try { pFasilitas = JSON.parse(pFasilitas) } catch { pFasilitas = [] } }
+      if (!Array.isArray(pFasilitas)) pFasilitas = []
 
       const matchedFasilitas = Array.isArray(fasilitas) && fasilitas.length > 0 
         ? fasilitas.filter(f => pFasilitas.includes(f))

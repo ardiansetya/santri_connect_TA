@@ -441,9 +441,9 @@ const loading = ref(false)
 const searched = ref(false)
 
 const fasilitasOptions = [
-  'Masjid Agung', 'Asrama Ber-AC', 'Asrama Kipas', 'Lab Komputer', 'Perpustakaan Lengkap',
-  'Lapangan Olahraga', 'Kantin Higenis', 'Klinik Kesehatan', 'Kolam Renang',
-  'Ruang Kelas Representatif', 'Ruang Multimedia', 'Aula Pertemuan', 'Laundry Khusus', 'Koperasi Pondok'
+  'Masjid', 'Asrama', 'Perpustakaan', 'Lab Komputer', 'WiFi',
+  'Klinik', 'Lapangan Olahraga', 'Kantin', 'Kolam Renang',
+  'Aula', 'AC', 'Koperasi', 'Pertanian', 'Peternakan'
 ]
 
 function formatCurrency(amount) {

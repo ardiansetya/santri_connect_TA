@@ -184,7 +184,7 @@
                   <label class="form-label block mb-1 font-bold text-sm">Biaya Pendaftaran / Infaq Masuk</label>
                   <div class="relative">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">Rp</span>
-                    <input v-model="biaya_pendaftaran" v-bind="biaya_pendaftaranProps" type="number" class="w-full pl-12 pr-4 py-3 border-2 rounded-xl border-border focus:border-primary outline-none transition-all" :class="{ 'border-destructive focus:border-destructive': errors.biaya_pendaftaran }" min="0" placeholder="0" />
+                    <input v-model="biaya_pendaftaran" v-bind="biaya_pendaftaranProps" type="number" class="w-full pr-4 py-3 border-2 rounded-xl border-border focus:border-primary outline-none transition-all" style="padding-left: 2.75rem" :class="{ 'border-destructive focus:border-destructive': errors.biaya_pendaftaran }" min="0" placeholder="0" />
                   </div>
                   <p v-if="errors.biaya_pendaftaran" class="text-destructive text-xs font-bold mt-1.5">{{ errors.biaya_pendaftaran }}</p>
                 </div>
@@ -193,15 +193,24 @@
                    <label class="form-label block mb-1 font-bold text-sm">Biaya SPP (Bulanan)</label>
                   <div class="relative">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">Rp</span>
-                    <input v-model="biaya_bulanan" v-bind="biaya_bulananProps" type="number" class="w-full pl-12 pr-4 py-3 border-2 rounded-xl border-border focus:border-primary outline-none transition-all" :class="{ 'border-destructive focus:border-destructive': errors.biaya_bulanan }" min="0" placeholder="0" />
+                    <input v-model="biaya_bulanan" v-bind="biaya_bulananProps" type="number" class="w-full pr-4 py-3 border-2 rounded-xl border-border focus:border-primary outline-none transition-all" style="padding-left: 2.75rem" :class="{ 'border-destructive focus:border-destructive': errors.biaya_bulanan }" min="0" placeholder="0" />
                   </div>
                   <p v-if="errors.biaya_bulanan" class="text-destructive text-xs font-bold mt-1.5">{{ errors.biaya_bulanan }}</p>
                 </div>
                 
                 <!-- Fasilitas -->
                 <div class="md:col-span-2">
-                  <label class="form-label block mb-1 font-bold text-sm">Inventaris Fasilitas (Pisahkan Koma)</label>
-                  <input v-model="fasilitasInput" type="text" class="w-full px-4 py-3 border-2 rounded-xl border-border focus:border-primary outline-none transition-all" placeholder="Misal: Keamanan 24 Jam, Masjid Besar, Asrama Terpisah..." />
+                  <label class="form-label block mb-1 font-bold text-sm">Fasilitas Pesantren</label>
+                  <p class="text-xs text-muted-foreground mb-3">Pilih fasilitas yang tersedia di pesantren ini.</p>
+                  <div class="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-56 overflow-y-auto p-2 border border-border/50 rounded-xl bg-muted/10">
+                    <label v-for="f in fasilitasOptions" :key="f" class="flex items-center gap-2.5 p-2.5 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-border hover:shadow-sm">
+                      <input :value="f" v-model="selectedFasilitas" type="checkbox" class="w-4 h-4 text-primary border-border rounded focus:ring-primary/20 cursor-pointer" />
+                      <span class="text-sm font-medium text-foreground select-none">{{ f }}</span>
+                    </label>
+                  </div>
+                  <div v-if="selectedFasilitas.length > 0" class="mt-2 text-xs font-bold text-primary">
+                    {{ selectedFasilitas.length }} fasilitas dipilih
+                  </div>
                 </div>
 
                 <!-- Deskripsi -->
@@ -331,7 +340,18 @@ const loading = ref(true)
 const showForm = ref(false)
 const editingId = ref(null)
 const provinces = ref([])
-const fasilitasInput = ref('')
+const fasilitasOptions = [
+  'Masjid', 'Asrama', 'Perpustakaan', 'Lab Komputer', 'WiFi',
+  'Klinik', 'Lapangan Olahraga', 'Kantin', 'Kolam Renang',
+  'Aula', 'AC', 'Koperasi', 'Pertanian', 'Peternakan'
+]
+const selectedFasilitas = ref([])
+
+function parseFasilitas(val) {
+  if (!val) return []
+  if (Array.isArray(val)) return val
+  try { return JSON.parse(val) } catch { return [] }
+}
 const serverError = ref('')
 
 const showDeleteConfirm = ref(false)
@@ -418,10 +438,10 @@ function openForm(p) {
       telepon: p.telepon || '',
       deskripsi: p.deskripsi || ''
     })
-    fasilitasInput.value = Array.isArray(p.fasilitas) ? p.fasilitas.join(', ') : ''
+    selectedFasilitas.value = parseFasilitas(p.fasilitas)
   } else {
     resetForm()
-    fasilitasInput.value = ''
+    selectedFasilitas.value = []
   }
   showForm.value = true
 }
@@ -448,9 +468,8 @@ const onSubmit = handleSubmit(async (values) => {
        }
      })
 
-     if (fasilitasInput.value.trim()) {
-       const fasilitas = fasilitasInput.value.split(',').map(f => f.trim()).filter(Boolean)
-       formData.append('fasilitas', JSON.stringify(fasilitas))
+     if (selectedFasilitas.value.length > 0) {
+       formData.append('fasilitas', JSON.stringify(selectedFasilitas.value))
      }
 
      if (files.value.foto_utama) {

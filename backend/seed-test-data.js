@@ -52,12 +52,18 @@ async function seedTestData() {
   await conn.query(`
     INSERT IGNORE INTO pesantren (
       id, user_id, nama, province, kota, alamat, kurikulum,
-      jumlah_santri, biaya_pendaftaran, biaya_bulanan,
-      fasilitas, created_at, updated_at
+      tahun_berdiri, jumlah_santri, jumlah_pengajar,
+      biaya_pendaftaran, biaya_bulanan,
+      fasilitas, email, telepon, website, deskripsi,
+      foto_utama, foto_galeri, created_at, updated_at
     ) VALUES (
-      1, 2, 'Pesantren Test Alpha', 'JAWA BARAT', 'KOTA BANDUNG',
-      'Jl. Test No. 1', 'modern', 100, 500000, 300000,
-      '["Masjid", "Asrama", "Perpustakaan"]', NOW(), NOW()
+      1, 2, 'Pesantren Test Alpha', 'Jawa Barat', 'Kabupaten Bandung',
+      'Jl. Test No. 1', 'modern', 2000, 100, 20,
+      500000, 300000,
+      '["Masjid", "Asrama", "Perpustakaan"]',
+      'alpha@test.com', '08111111111', NULL,
+      'Pesantren test pertama untuk pengujian sistem.',
+      NULL, NULL, NOW(), NOW()
     )
   `)
   console.log('  ✓ Pesantren ID 1: Pesantren Test Alpha')
@@ -66,12 +72,18 @@ async function seedTestData() {
   await conn.query(`
     INSERT IGNORE INTO pesantren (
       id, user_id, nama, province, kota, alamat, kurikulum,
-      jumlah_santri, biaya_pendaftaran, biaya_bulanan,
-      fasilitas, created_at, updated_at
+      tahun_berdiri, jumlah_santri, jumlah_pengajar,
+      biaya_pendaftaran, biaya_bulanan,
+      fasilitas, email, telepon, website, deskripsi,
+      foto_utama, foto_galeri, created_at, updated_at
     ) VALUES (
-      2, 2, 'Pesantren Test Beta', 'JAWA TENGAH', 'KOTA SEMARANG',
-      'Jl. Test No. 2', 'salaf', 150, 400000, 250000,
-      '["Masjid", "Laboratorium"]', NOW(), NOW()
+      2, 2, 'Pesantren Test Beta', 'Jawa Tengah', 'Kota Semarang',
+      'Jl. Test No. 2', 'salaf', 1995, 150, 25,
+      400000, 250000,
+      '["Masjid", "Laboratorium"]',
+      'beta@test.com', '08222222222', NULL,
+      'Pesantren test kedua untuk pengujian perbandingan.',
+      NULL, NULL, NOW(), NOW()
     )
   `)
   console.log('  ✓ Pesantren ID 2: Pesantren Test Beta')
@@ -80,12 +92,18 @@ async function seedTestData() {
   await conn.query(`
     INSERT IGNORE INTO pesantren (
       id, user_id, nama, province, kota, alamat, kurikulum,
-      jumlah_santri, biaya_pendaftaran, biaya_bulanan,
-      fasilitas, created_at, updated_at
+      tahun_berdiri, jumlah_santri, jumlah_pengajar,
+      biaya_pendaftaran, biaya_bulanan,
+      fasilitas, email, telepon, website, deskripsi,
+      foto_utama, foto_galeri, created_at, updated_at
     ) VALUES (
-      3, 2, 'Pesantren Test Gamma', 'DKI JAKARTA', 'JAKARTA SELATAN',
-      'Jl. Test No. 3', 'campuran', 200, 600000, 350000,
-      '["Masjid", "Sport Center"]', NOW(), NOW()
+      3, 2, 'Pesantren Test Gamma', 'DKI Jakarta', 'Kota Jakarta Selatan',
+      'Jl. Test No. 3', 'campuran', 2005, 200, 30,
+      600000, 350000,
+      '["Masjid", "Sport Center", "WiFi"]',
+      'gamma@test.com', '08333333333', NULL,
+      'Pesantren test ketiga untuk pengujian fitur rekomendasi.',
+      NULL, NULL, NOW(), NOW()
     )
   `)
   console.log('  ✓ Pesantren ID 3: Pesantren Test Gamma')
