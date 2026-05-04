@@ -62,38 +62,59 @@ santri_connect/
 
 ---
 
-## 🚀 Instalasi & Setup
+## 🚀 Instalasi & Setup (Lokal)
 
-Ikuti langkah berikut untuk menjalankan project di mesin lokal Anda:
+Ikuti panduan langkah demi langkah berikut untuk menjalankan **Santri Connect** di mesin lokal Anda. Pastikan Node.js (v22+) dan MySQL sudah terinstall.
 
-### **1. Persiapan Database**
-Buat database baru di MySQL:
-```sql
-CREATE DATABASE santri_connect;
-```
-
-### **2. Setup Backend**
+### **1. Setup Database & Konfigurasi Lingkungan (Backend)**
+Buka terminal dan arahkan ke direktori `backend`:
 ```bash
 cd backend
 npm install
-cp .env.example .env
-# Masukkan konfigurasi DB dan Midtrans Key di .env
-node run-migration.js # Inialisasi tabel (Opsional, pastikan script tersedia)
-npm run dev
 ```
 
-### **3. Setup Frontend**
+Salin file `.env` dan sesuaikan kredensial MySQL Anda (serta kunci Midtrans):
+```bash
+cp .env.example .env
+```
+
+**Inisialisasi & Seeding Database:**
+Kami telah menyediakan *script* otomatis untuk membuat tabel dan mengisi data awal (pesantren, fasilitas, akun dummy) agar aplikasi langsung bisa digunakan:
+```bash
+npm run db:init
+```
+> **Catatan:** Perintah ini akan menghapus data lama (jika ada) dan melakukan reset bersih pada database `santri_connect`.
+
+### **2. Menjalankan Server Backend**
+Setelah database siap, jalankan server pengembangan:
+```bash
+npm run dev
+```
+*Server akan berjalan di `http://localhost:3000`*
+
+### **3. Setup Lingkungan Frontend**
+Buka terminal baru dan arahkan ke direktori `frontend`:
 ```bash
 cd frontend
 npm install
 cp .env.example .env
-# Sesuaikan VITE_API_URL dan VITE_MIDTRANS_CLIENT_KEY
+```
+*(Pastikan `VITE_API_URL=http://localhost:3000` di dalam `.env` frontend)*
+
+Jalankan server aplikasi frontend:
+```bash
 npm run dev
 ```
+*Aplikasi web akan berjalan di `http://localhost:5173`*
 
-Platform akan berjalan di:
-- **Frontend**: `http://localhost:5173`
-- **Backend**: `http://localhost:3000`
+---
+
+## 🔑 Akun Default (Hasil Seeder)
+Gunakan akun berikut untuk mencoba fitur-fitur di dalam aplikasi (Password untuk semua akun: `password123`):
+
+- **Superadmin:** `admin@santriconnect.id`
+- **Pemilik Pesantren:** `pemilik1@santriconnect.id` atau `pemilik2@santriconnect.id`
+- **Pendaftar / Wali Santri:** `pendaftar1@santriconnect.id`
 
 ---
 

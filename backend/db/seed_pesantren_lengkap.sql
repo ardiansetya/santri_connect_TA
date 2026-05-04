@@ -1,26 +1,46 @@
 -- ========================================
--- INSERT DATA LENGKAP PESANTREN
--- Format sesuai dengan create pesantren pemilik
+-- MASTER SEEDER: SANTRI CONNECT
+-- Membersihkan dan mengisi semua data awal
 -- ========================================
 
--- Pastikan user tersedia
-INSERT IGNORE INTO users (id, username, email, password, role) VALUES
+-- 1. Nonaktifkan pengecekan Foreign Key untuk proses TRUNCATE yang aman
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 2. Bersihkan semua tabel
+TRUNCATE TABLE pendaftaran;
+TRUNCATE TABLE pendaftar_profile;
+TRUNCATE TABLE pesantren;
+TRUNCATE TABLE users;
+
+-- 3. Aktifkan kembali pengecekan Foreign Key
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ========================================
+-- INSERT USERS
+-- ========================================
+INSERT INTO users (id, username, email, password, role) VALUES
 (1, 'admin', 'admin@santriconnect.id', '$2b$10$X7Z5qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qK', 'superadmin'),
 (2, 'pemilik1', 'pemilik1@santriconnect.id', '$2b$10$X7Z5qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qK', 'pemilik'),
 (3, 'pemilik2', 'pemilik2@santriconnect.id', '$2b$10$X7Z5qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qK', 'pemilik'),
 (4, 'pendaftar1', 'pendaftar1@santriconnect.id', '$2b$10$X7Z5qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qK', 'pendaftar');
 
 -- ========================================
--- INSERT DATA PESANTREN
--- Kolom: user_id, nama, province, kota, alamat,
---        tahun_berdiri, jumlah_santri, jumlah_pengajar,
---        biaya_pendaftaran, biaya_bulanan,
---        fasilitas (JSON), kurikulum,
---        email, telepon, website, deskripsi,
---        foto_utama, foto_galeri
+-- INSERT PENDAFTAR PROFILE
 -- ========================================
+INSERT INTO pendaftar_profile (
+  user_id, nama_lengkap, nik, tempat_lahir, tanggal_lahir, 
+  jenis_kelamin, alamat, no_hp, nama_ayah, nama_ibu, 
+  no_hp_ortu, pekerjaan_ortu
+) VALUES (
+  4, 'Ahmad Fulan', '3273012345678901', 'Bandung', '2008-05-15',
+  'L', 'Jl. Merdeka No. 45, Sumur Bandung, Kota Bandung', '081234567890',
+  'Budi Santoso', 'Siti Aminah', '081987654321', 'PNS'
+);
 
-INSERT IGNORE INTO pesantren (
+-- ========================================
+-- INSERT PESANTREN
+-- ========================================
+INSERT INTO pesantren (
   id, user_id, nama, province, kota, alamat,
   tahun_berdiri, jumlah_santri, jumlah_pengajar,
   biaya_pendaftaran, biaya_bulanan,
@@ -170,21 +190,35 @@ INSERT IGNORE INTO pesantren (
   NULL, NULL
 );
 
--- Reset auto-increment
-ALTER TABLE pesantren AUTO_INCREMENT = 11;
+-- ========================================
+-- INSERT PENDAFTARAN (DUMMY DATA)
+-- ========================================
+INSERT INTO pendaftaran (
+  nomor_pendaftaran, order_id, user_id, pesantren_id, status, payment_status, 
+  payment_amount, nama_lengkap, nik, tempat_lahir, tanggal_lahir, 
+  jenis_kelamin, alamat, no_hp, nama_ayah, nama_ibu, 
+  no_hp_ortu, pekerjaan_ortu
+) VALUES 
+(
+  'REG-20260501-0001', 'ORD-1234567890', 4, 1, 'diproses', 'paid',
+  2500000.00, 'Ahmad Fulan', '3273012345678901', 'Bandung', '2008-05-15',
+  'L', 'Jl. Merdeka No. 45, Sumur Bandung, Kota Bandung', '081234567890',
+  'Budi Santoso', 'Siti Aminah', '081987654321', 'PNS'
+),
+(
+  'REG-20260502-0002', 'ORD-0987654321', 4, 2, 'pending', 'unpaid',
+  3000000.00, 'Ahmad Fulan', '3273012345678901', 'Bandung', '2008-05-15',
+  'L', 'Jl. Merdeka No. 45, Sumur Bandung, Kota Bandung', '081234567890',
+  'Budi Santoso', 'Siti Aminah', '081987654321', 'PNS'
+);
 
 -- ========================================
 -- Verifikasi data yang diinsert
 -- ========================================
-SELECT
-  id,
-  nama,
-  province,
-  kota,
-  kurikulum,
-  jumlah_santri,
-  biaya_pendaftaran,
-  biaya_bulanan,
-  LEFT(deskripsi, 80) AS deskripsi_preview
-FROM pesantren
-ORDER BY id;
+SELECT 'Users' as Table_Name, COUNT(*) as Total_Rows FROM users
+UNION ALL
+SELECT 'Pendaftar Profile', COUNT(*) FROM pendaftar_profile
+UNION ALL
+SELECT 'Pesantren', COUNT(*) FROM pesantren
+UNION ALL
+SELECT 'Pendaftaran', COUNT(*) FROM pendaftaran;
