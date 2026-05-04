@@ -170,7 +170,7 @@
             v-model="pendaftaranFilters.search" 
             type="text" 
             placeholder="Cari Nama / No Pendaftaran..." 
-            class="w-full pl-10 pr-4 py-2 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            class="w-full !pl-10 pr-4 py-2 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           >
         </div>
         <select 
@@ -278,7 +278,7 @@
             v-model="usersFilters.search" 
             type="text" 
             placeholder="Cari Username / Email..." 
-            class="w-full pl-10 pr-4 py-2 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            class="w-full !pl-10 pr-4 py-2 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           >
         </div>
         <select 

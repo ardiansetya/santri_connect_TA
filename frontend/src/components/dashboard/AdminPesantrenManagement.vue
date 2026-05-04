@@ -285,7 +285,7 @@
               </div>
               
               <!-- Submit Footer -->
-              <div class="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row justify-end gap-3 bg-white sticky bottom-0 -mx-8 px-8 pb-2">
+              <div class="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row justify-end gap-3 bg-white sticky -bottom-8 -mx-8 px-8 pb-8 z-20">
                 <button type="button" class="btn btn-outline border-border hover:bg-muted text-foreground font-bold px-8 py-3 rounded-xl transition-all" @click="closeForm">Batalkan Entri</button>
                 <button type="submit" class="btn btn-primary shadow-lg shadow-primary/30 text-white font-bold px-10 py-3 rounded-xl transition-all hover:bg-primary-dark hover:scale-[1.02] active:scale-[0.98]" :disabled="isSubmitting">
                    {{ isSubmitting ? 'Memsinkronkan...' : (editingId ? 'Simpan Perubahan' : 'Finalisasi Integrasi') }}

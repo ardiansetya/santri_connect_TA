@@ -199,7 +199,7 @@
              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pt-0.5 text-muted-foreground">
                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
              </span>
-             <input type="text" class="w-full form-input pl-10 py-2 border border-border rounded-lg text-sm bg-white focus:border-primary" placeholder="Cari Nama / No Pendaftaran..." v-model="searchQuery">
+             <input type="text" class="w-full form-input !pl-10 py-2 border border-border rounded-lg text-sm bg-white focus:border-primary" placeholder="Cari Nama / No Pendaftaran..." v-model="searchQuery">
            </div>
         </div>
 
@@ -510,7 +510,7 @@
               
               <div v-if="serverError" class="mt-4 p-3 bg-destructive/10 text-destructive text-sm font-bold rounded-lg">{{ serverError }}</div>
 
-              <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-border bg-white sticky bottom-0 -mx-8 px-8 pb-2">
+              <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-border bg-white sticky -bottom-8 -mx-8 px-8 pb-8 z-20">
                 <button type="button" class="btn btn-outline border-border hover:bg-muted text-foreground font-bold px-6 py-2.5 rounded-xl transition-all" @click="closeForm">Buang Skenario</button>
                 <button type="submit" class="btn bg-accent text-white px-8 py-2.5 rounded-xl font-bold shadow-md hover:bg-amber-600 hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]" :disabled="isSubmitting">
                    {{ isSubmitting ? 'Mengeksekusi...' : 'Eksekusi Modifikasi' }}
