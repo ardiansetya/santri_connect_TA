@@ -65,6 +65,9 @@ export const publicApi = {
   },
   getFeatured() {
     return api.get('/pesantren', { params: { limit: 4 } })
+  },
+  getTopPesantren() {
+    return api.get('/public/top-pesantren')
   }
 }
 

@@ -175,6 +175,7 @@ const navLinks = [
   { to: '/rekomendasi', label: 'Rekomendasi' },
   { to: '/compare', label: 'Bandingkan' },
   { to: '/track', label: 'Cek Status' },
+  { to: '/panduan', label: 'Panduan' },
 ]
 
 function handleScroll() {

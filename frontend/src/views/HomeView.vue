@@ -87,39 +87,34 @@
       </div>
     </section>
 
-    <!-- Featured Pesantren -->
+    <!-- Top 6 Pesantren Section -->
     <section class="featured-section py-24">
       <div class="container">
-        <div class="flex items-end justify-between mb-10">
-          <div>
-            <span class="section-tag">Pilihan Terbaik</span>
-            <h2 class="section-title">Pesantren Populer</h2>
-            <p class="section-subtitle mt-2">Pilihan pesantren terbaik dari berbagai daerah di Indonesia.</p>
-          </div>
-          <router-link to="/pesantren" class="btn btn-outline hidden sm:flex">Lihat Semua →</router-link>
+        <div class="mx-auto max-w-2xl text-center mb-10">
+          <span class="section-tag">Top 6 Pesantren</span>
+          <h2 class="section-title">Pesantren Unggulan</h2>
+          <p class="section-subtitle mt-2">Temukan pesantren terbaik berdasarkan kategori pilihan Anda.</p>
         </div>
-        <div class="pesantren-grid">
-          <router-link
-            v-for="p in featuredPesantren"
-            :key="p.id"
-            :to="`/pesantren/${p.id}`"
-            class="pesantren-card group"
-          >
+        <div class="flex justify-center mb-10">
+          <div class="top6-tabs">
+            <button v-for="tab in top6Tabs" :key="tab.key" class="top6-tab" :class="{ 'top6-tab-active': activeTop6Tab === tab.key }" @click="activeTop6Tab = tab.key">
+              <span class="top6-tab-icon" v-html="tab.icon"></span>
+              {{ tab.label }}
+            </button>
+          </div>
+        </div>
+        <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <router-link v-for="p in activeTop6List" :key="p.id" :to="`/pesantren/${p.id}`" class="pesantren-card group">
             <div class="relative aspect-video overflow-hidden rounded-t-xl">
-              <img
-                :src="p.foto_utama ? getUploadUrl(p.foto_utama) : 'https://placehold.co/600x400/0D4F4F/D4A843?text=Pesantren&font=playfair-display'"
-                :alt="p.nama"
-                class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
+              <img :src="p.foto_utama ? getUploadUrl(p.foto_utama) : 'https://placehold.co/600x400/0D4F4F/D4A843?text=Pesantren&font=playfair-display'" :alt="p.nama" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
               <div class="pesantren-card-overlay"></div>
-              <span class="pesantren-badge">
-                {{ p.kurikulum || 'Modern' }}
-              </span>
+              <span class="pesantren-badge">{{ p.kurikulum || 'Modern' }}</span>
+              <span v-if="activeTop6Tab === 'termurah'" class="top6-rank-badge bg-emerald-500">💰 Hemat</span>
+              <span v-else-if="activeTop6Tab === 'terbaru'" class="top6-rank-badge bg-blue-500">🆕 Baru</span>
+              <span v-else class="top6-rank-badge bg-amber-500">👥 {{ p.jumlah_santri }} Santri</span>
             </div>
             <div class="p-5">
-              <h3 class="pesantren-card-title">
-                {{ p.nama }}
-              </h3>
+              <h3 class="pesantren-card-title">{{ p.nama }}</h3>
               <div class="mt-2 flex items-center gap-1.5 text-sm text-muted">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 <span class="line-clamp-1">{{ p.kota }}, {{ p.province }}</span>
@@ -131,8 +126,8 @@
             </div>
           </router-link>
         </div>
-        <div class="mt-12 text-center sm:hidden">
-          <router-link to="/pesantren" class="btn btn-outline w-full">Lihat Semua Pesantren</router-link>
+        <div class="mt-10 text-center">
+          <router-link to="/pesantren" class="btn btn-outline">Lihat Semua Pesantren →</router-link>
         </div>
       </div>
     </section>
@@ -174,8 +169,16 @@ import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
 const stats = ref({ total_pesantren: 0, total_provinsi: 0, total_kota: 0 })
-const featuredPesantren = ref([])
+const topPesantren = ref({ termurah: [], terbaru: [], terbanyak_santri: [] })
+const activeTop6Tab = ref('termurah')
 
+const top6Tabs = [
+  { key: 'termurah', label: 'Termurah', icon: '💰' },
+  { key: 'terbaru', label: 'Terbaru', icon: '🆕' },
+  { key: 'terbanyak_santri', label: 'Terbanyak Santri', icon: '👥' }
+]
+
+const activeTop6List = computed(() => topPesantren.value[activeTop6Tab.value] || [])
 
 const statCards = computed(() => [
   { value: stats.value.total_pesantren || '22', label: 'Pesantren Terdaftar' },
@@ -184,40 +187,24 @@ const statCards = computed(() => [
 ])
 
 const features = [
-  {
-    title: 'Pencarian Cerdas',
-    desc: 'Filter berdasarkan kurikulum, fasilitas, dan biaya dengan antarmuka yang intuitif.'
-  },
-  {
-    title: 'Terverifikasi',
-    desc: 'Semua data pesantren telah melalui proses validasi untuk menjamin keaslian informasi.'
-  },
-  {
-    title: 'Bandingkan',
-    desc: 'Bandingkan hingga 3 pesantren sekaligus untuk melihat perbedaan fasilitas dan biaya.'
-  },
-  {
-    title: 'Pendaftaran Mudah',
-    desc: 'Daftar langsung melalui platform tanpa perlu ribet dengan berkas fisik awal.'
-  }
+  { title: 'Pencarian Cerdas', desc: 'Filter berdasarkan kurikulum, fasilitas, dan biaya dengan antarmuka yang intuitif.' },
+  { title: 'Terverifikasi', desc: 'Semua data pesantren telah melalui proses validasi untuk menjamin keaslian informasi.' },
+  { title: 'Bandingkan', desc: 'Bandingkan hingga 3 pesantren sekaligus untuk melihat perbedaan fasilitas dan biaya.' },
+  { title: 'Pendaftaran Mudah', desc: 'Daftar langsung melalui platform tanpa perlu ribet dengan berkas fisik awal.' }
 ]
 
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(value)
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value)
 }
 
 const fetchData = async () => {
   try {
-    const [statsRes, featuredRes] = await Promise.all([
+    const [statsRes, topRes] = await Promise.all([
       publicApi.getStats(),
-      publicApi.getFeatured()
+      publicApi.getTopPesantren()
     ])
     stats.value = statsRes.data?.data || statsRes.data
-    featuredPesantren.value = featuredRes.data?.data || []
+    topPesantren.value = topRes.data?.data || { termurah: [], terbaru: [], terbanyak_santri: [] }
   } catch (error) {
     console.error('Failed to fetch data:', error)
   }
@@ -576,5 +563,51 @@ onMounted(fetchData)
   margin-left: auto;
   margin-right: auto;
   line-height: 1.6;
+}
+
+/* Top 6 Tabs */
+.top6-tabs {
+  display: inline-flex;
+  gap: 0.5rem;
+  padding: 0.375rem;
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid hsl(35 18% 85%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.top6-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: none;
+  background: transparent;
+  color: hsl(30 10% 45%);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: 'DM Sans', sans-serif;
+}
+.top6-tab:hover { color: hsl(25 25% 15%); background: hsl(35 20% 95%); }
+.top6-tab-active {
+  background: hsl(173 78% 18%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px hsl(173 78% 18% / 0.25);
+}
+.top6-tab-icon { font-size: 1rem; }
+.top6-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; }
+.top6-rank-badge {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  color: white;
+  backdrop-filter: blur(4px);
+  font-family: 'DM Sans', sans-serif;
 }
 </style>

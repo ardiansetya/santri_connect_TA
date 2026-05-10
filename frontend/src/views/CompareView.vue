@@ -280,9 +280,9 @@ const error = ref('')
 // Auto-highlight: Termurah & Terlengkap
 const cheapestId = computed(() => {
   if (pesantrenData.value.length < 2) return null
-  const withBiaya = pesantrenData.value.filter(p => p.biaya_pendaftaran != null && p.biaya_pendaftaran > 0)
+  const withBiaya = pesantrenData.value.filter(p => p.biaya_bulanan != null && p.biaya_bulanan > 0)
   if (withBiaya.length < 2) return null
-  return withBiaya.reduce((min, p) => p.biaya_pendaftaran < min.biaya_pendaftaran ? p : min).id
+  return withBiaya.reduce((min, p) => p.biaya_bulanan < min.biaya_bulanan ? p : min).id
 })
 
 const mostFacilitiesId = computed(() => {

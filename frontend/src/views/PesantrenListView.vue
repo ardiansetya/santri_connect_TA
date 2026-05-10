@@ -417,7 +417,7 @@ async function fetchData() {
 
     const { data } = await pesantrenApi.list(params)
     pesantren.value = data.data || []
-    totalRecords.value = data.meta?.total || data.data?.length || 0
+    totalRecords.value = data.meta?.total_data || data.meta?.total || data.data?.length || 0
   } catch {
     pesantren.value = []
     totalRecords.value = 0

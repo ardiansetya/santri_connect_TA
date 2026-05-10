@@ -46,6 +46,11 @@ const routes = [
     component: () => import('../views/CompareView.vue')
   },
   {
+    path: '/panduan',
+    name: 'panduan',
+    component: () => import('../views/PanduanFaqView.vue')
+  },
+  {
     path: '/track',
     name: 'track-status',
     component: () => import('../views/TrackStatusView.vue')

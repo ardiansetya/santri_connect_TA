@@ -235,6 +235,30 @@ const Pesantren = {
       [limit]
     )
     return rows
+  },
+
+  async findCheapest(limit = 6) {
+    const [rows] = await require('../config/db').getPool().query(
+      'SELECT id, nama, province, kota, biaya_bulanan, jumlah_santri, kurikulum, fasilitas, foto_utama, tahun_berdiri, created_at FROM pesantren WHERE biaya_bulanan IS NOT NULL AND biaya_bulanan > 0 ORDER BY biaya_bulanan ASC LIMIT ?',
+      [limit]
+    )
+    return rows
+  },
+
+  async findNewest(limit = 6) {
+    const [rows] = await require('../config/db').getPool().query(
+      'SELECT id, nama, province, kota, biaya_bulanan, jumlah_santri, kurikulum, fasilitas, foto_utama, tahun_berdiri, created_at FROM pesantren ORDER BY created_at DESC LIMIT ?',
+      [limit]
+    )
+    return rows
+  },
+
+  async findMostStudents(limit = 6) {
+    const [rows] = await require('../config/db').getPool().query(
+      'SELECT id, nama, province, kota, biaya_bulanan, jumlah_santri, kurikulum, fasilitas, foto_utama, tahun_berdiri, created_at FROM pesantren WHERE jumlah_santri IS NOT NULL AND jumlah_santri > 0 ORDER BY jumlah_santri DESC LIMIT ?',
+      [limit]
+    )
+    return rows
   }
 }
 
