@@ -21,7 +21,16 @@ const RekomendasiService = {
     const scored = pesantren.map(p => {
       // 1. Budget Score
       const biaya = parseFloat(p.biaya_bulanan) || 0
-      const budget_score = biaya <= budget ? 1 : Math.max(0, 1 - ((biaya - budget) / budget))
+      let budget_score = 0;
+      if (biaya === budget) {
+        budget_score = 1;
+      } else if (biaya < budget) {
+        // Prioritaskan harga yang paling mendekati budget (penalti kecil untuk yang lebih murah)
+        budget_score = Math.max(0, 1 - ((budget - biaya) / budget) * 0.5);
+      } else {
+        // Penalti normal untuk yang melebihi budget
+        budget_score = Math.max(0, 1 - ((biaya - budget) / budget));
+      }
       
       // 2. Location Score
       let location_score = 0;

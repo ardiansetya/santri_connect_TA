@@ -95,26 +95,16 @@
 
                 <!-- Budget Filter Section -->
                 <div class="border-t border-border pt-5 mt-5">
-                   <label class="form-label mb-3">Rentang Biaya Bulanan</label>
-                   <div class="grid grid-cols-2 gap-2 mb-3">
+                   <label class="form-label mb-3">Maksimal Biaya Bulanan</label>
+                   <div class="mb-3">
                       <div class="relative group/input">
-                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground group-focus-within/input:text-primary transition-colors">MIN</span>
+                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground group-focus-within/input:text-primary transition-colors">Rp</span>
                          <input 
-                           type="number" 
-                           v-model.number="filters.biaya_min" 
-                           placeholder="0" 
-                           class="form-input !pl-10 !py-2 text-xs focus:ring-1 focus:ring-primary/20" 
-                           @change="fetchData"
-                         />
-                      </div>
-                      <div class="relative group/input">
-                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground group-focus-within/input:text-primary transition-colors">MAX</span>
-                         <input 
-                           type="number" 
-                           v-model.number="filters.biaya_max" 
+                           type="text" 
+                           :value="formattedBiayaMax"
+                           @input="onBiayaMaxInput"
                            placeholder="Tanpa Batas" 
-                           class="form-input !pl-10 !py-2 text-xs focus:ring-1 focus:ring-primary/20" 
-                           @change="fetchData"
+                           class="form-input !pl-8 !py-2.5 text-sm focus:ring-1 focus:ring-primary/20 w-full" 
                          />
                       </div>
                    </div>
@@ -122,28 +112,28 @@
                    <!-- Presets -->
                    <div class="flex flex-wrap gap-1.5">
                       <button 
-                        @click="setBudgetPreset(0, 500000)" 
+                        @click="setBudgetPreset(500000)" 
                         type="button"
                         class="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-surface hover:bg-primary/5 hover:border-primary/30 transition-all border border-border flex-1 text-center shadow-sm"
-                        :class="filters.biaya_min === 0 && filters.biaya_max === 500000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
+                        :class="filters.biaya_max === 500000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
                       >
                         &lt; 500rb
                       </button>
                       <button 
-                        @click="setBudgetPreset(500000, 1500000)" 
+                        @click="setBudgetPreset(1500000)" 
                         type="button"
                         class="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-surface hover:bg-primary/5 hover:border-primary/30 transition-all border border-border flex-1 text-center shadow-sm"
-                        :class="filters.biaya_min === 500000 && filters.biaya_max === 1500000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
+                        :class="filters.biaya_max === 1500000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
                       >
-                        500k - 1.5jt
+                        &lt; 1.5jt
                       </button>
                       <button 
-                        @click="setBudgetPreset(1500000, '')" 
+                        @click="setBudgetPreset(3000000)" 
                         type="button"
                         class="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-surface hover:bg-primary/5 hover:border-primary/30 transition-all border border-border flex-1 text-center shadow-sm"
-                        :class="filters.biaya_min === 1500000 && !filters.biaya_max ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
+                        :class="filters.biaya_max === 3000000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
                       >
-                        &gt; 1.5jt
+                        &lt; 3jt
                       </button>
                    </div>
                 </div>
@@ -327,11 +317,27 @@ const filters = ref({
   kota: '',
   kurikulum: '',
   fasilitas: '',
-  biaya_min: '',
   biaya_max: ''
 })
 
 const totalPages = computed(() => Math.ceil(totalRecords.value / limit.value))
+
+const formattedBiayaMax = computed(() => {
+  if (!filters.value.biaya_max) return ''
+  return new Intl.NumberFormat('id-ID').format(filters.value.biaya_max)
+})
+
+let searchTimeout = null
+function onBiayaMaxInput(e) {
+  const rawValue = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '')
+  filters.value.biaya_max = rawValue ? parseInt(rawValue, 10) : ''
+  e.target.value = rawValue ? new Intl.NumberFormat('id-ID').format(parseInt(rawValue, 10)) : ''
+  
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    fetchData()
+  }, 500)
+}
 
 function formatCurrencyShort(amount) {
   if (!amount) return 'Hubungi Pesantren'
@@ -355,7 +361,6 @@ function resetFilters() {
     kota: '',
     kurikulum: '',
     fasilitas: '',
-    biaya_min: '',
     biaya_max: ''
   }
   sortField.value = ''
@@ -364,8 +369,7 @@ function resetFilters() {
   fetchData()
 }
 
-function setBudgetPreset(min, max) {
-  filters.value.biaya_min = min || ''
+function setBudgetPreset(max) {
   filters.value.biaya_max = max || ''
   fetchData()
 }
@@ -412,7 +416,6 @@ async function fetchData() {
     if (filters.value.kota) params.kota = filters.value.kota
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
     if (filters.value.fasilitas) params.fasilitas = filters.value.fasilitas
-    if (filters.value.biaya_min) params.biaya_min = filters.value.biaya_min
     if (filters.value.biaya_max) params.biaya_max = filters.value.biaya_max
 
     const { data } = await pesantrenApi.list(params)
@@ -445,7 +448,6 @@ async function changePage(page) {
     if (filters.value.kota) params.kota = filters.value.kota
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
     if (filters.value.fasilitas) params.fasilitas = filters.value.fasilitas
-    if (filters.value.biaya_min) params.biaya_min = filters.value.biaya_min
     if (filters.value.biaya_max) params.biaya_max = filters.value.biaya_max
 
     const { data } = await pesantrenApi.list(params)

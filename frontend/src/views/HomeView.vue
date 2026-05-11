@@ -120,7 +120,10 @@
                 <span class="line-clamp-1">{{ p.kota }}, {{ p.province }}</span>
               </div>
               <div class="mt-4 flex items-center justify-between">
-                <span class="pesantren-price">{{ p.biaya_bulanan ? formatCurrency(p.biaya_bulanan) : '-' }}</span>
+                <span class="pesantren-price">
+                  {{ p.biaya_bulanan ? formatCurrency(p.biaya_bulanan) : '-' }}
+                  <span v-if="p.biaya_bulanan" class="text-xs font-normal text-muted-foreground opacity-70">/bulan</span>
+                </span>
                 <span class="pesantren-view-link">Lihat →</span>
               </div>
             </div>

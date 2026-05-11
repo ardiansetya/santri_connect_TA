@@ -125,11 +125,11 @@
                       </div>
                       <!-- Auto-highlight Badges -->
                       <div class="flex flex-wrap justify-center gap-1.5 mb-3 min-h-[24px]">
-                        <span v-if="cheapestId === p.id" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm animate-fade-in">
+                        <span v-if="cheapestIds.includes(p.id)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm animate-fade-in">
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                           Termurah
                         </span>
-                        <span v-if="mostFacilitiesId === p.id" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200 shadow-sm animate-fade-in">
+                        <span v-if="mostFacilitiesIds.includes(p.id)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200 shadow-sm animate-fade-in">
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                           Terlengkap
                         </span>
@@ -220,7 +220,7 @@
                     </div>
                   </td>
                   <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
-                    <div class="inline-block px-4 py-2 bg-success/[0.02] border-2 rounded-xl" :class="cheapestId === p.id ? 'border-emerald-400 bg-emerald-50 ring-2 ring-emerald-200' : 'border-success/20'">
+                    <div class="inline-block px-4 py-2 bg-success/[0.02] border-2 rounded-xl" :class="cheapestIds.includes(p.id) ? 'border-emerald-400 bg-emerald-50 ring-2 ring-emerald-200' : 'border-success/20'">
                       <span class="font-black text-success text-lg">{{ formatCurrency(p.biaya_bulanan) }}</span>
                     </div>
                   </td>
@@ -231,7 +231,7 @@
                   <td class="p-5 font-bold text-muted-foreground bg-muted/20 md:bg-white/90 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] sticky left-0 z-10 block md:table-cell uppercase tracking-widest text-[10px] md:text-xs backdrop-blur-sm">
                     <div class="flex items-center gap-2">
                        <span class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">📝</span>
-                       Uang Pangkal
+                       Uang Pendaftaran
                     </div>
                   </td>
                   <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
@@ -247,9 +247,9 @@
                        Fasilitas
                     </div>
                   </td>
-                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 align-top" :class="mostFacilitiesId === p.id ? 'bg-blue-50/50' : ''">
+                  <td v-for="p in pesantrenData" :key="p.id" class="p-5 align-top" :class="mostFacilitiesIds.includes(p.id) ? 'bg-blue-50/50' : ''">
                     <div v-if="p.fasilitas && p.fasilitas.length" class="flex flex-wrap gap-2 justify-center">
-                      <span v-for="f in p.fasilitas" :key="f" class="px-3 py-1.5 text-foreground text-[11px] font-bold rounded-lg border shadow-sm transition-transform hover:scale-105" :class="mostFacilitiesId === p.id ? 'bg-blue-50 border-blue-200' : 'bg-muted/20 border-border'">
+                      <span v-for="f in p.fasilitas" :key="f" class="px-3 py-1.5 text-foreground text-[11px] font-bold rounded-lg border shadow-sm transition-transform hover:scale-105" :class="mostFacilitiesIds.includes(p.id) ? 'bg-blue-50 border-blue-200' : 'bg-muted/20 border-border'">
                         {{ f }}
                       </span>
                     </div>
@@ -278,18 +278,23 @@ const loading = ref(false)
 const error = ref('')
 
 // Auto-highlight: Termurah & Terlengkap
-const cheapestId = computed(() => {
-  if (pesantrenData.value.length < 2) return null
-  const withBiaya = pesantrenData.value.filter(p => p.biaya_bulanan != null && p.biaya_bulanan > 0)
-  if (withBiaya.length < 2) return null
-  return withBiaya.reduce((min, p) => p.biaya_bulanan < min.biaya_bulanan ? p : min).id
+const cheapestIds = computed(() => {
+  if (pesantrenData.value.length < 2) return []
+  const withBiaya = pesantrenData.value.filter(p => {
+    const biaya = parseFloat(p.biaya_bulanan)
+    return !isNaN(biaya) && biaya > 0
+  })
+  if (withBiaya.length < 2) return []
+  const minBiaya = Math.min(...withBiaya.map(p => parseFloat(p.biaya_bulanan)))
+  return withBiaya.filter(p => parseFloat(p.biaya_bulanan) === minBiaya).map(p => p.id)
 })
 
-const mostFacilitiesId = computed(() => {
-  if (pesantrenData.value.length < 2) return null
+const mostFacilitiesIds = computed(() => {
+  if (pesantrenData.value.length < 2) return []
   const withFas = pesantrenData.value.filter(p => p.fasilitas && p.fasilitas.length > 0)
-  if (withFas.length < 2) return null
-  return withFas.reduce((max, p) => (p.fasilitas?.length || 0) > (max.fasilitas?.length || 0) ? p : max).id
+  if (withFas.length < 2) return []
+  const maxFas = Math.max(...withFas.map(p => p.fasilitas.length))
+  return withFas.filter(p => p.fasilitas.length === maxFas).map(p => p.id)
 })
 
 function formatNumber(num) {

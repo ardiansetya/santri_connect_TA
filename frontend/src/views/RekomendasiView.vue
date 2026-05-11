@@ -38,12 +38,13 @@
                     <div class="relative">
                       <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">Rp</span>
                       <input
-                        v-model.number="form.budget"
-                        type="number"
+                        id="budget-input"
+                        type="text"
+                        :value="formattedBudget"
+                        @input="onBudgetInput"
                         class="form-input !pl-12 pr-4 bg-background border-2 focus:border-primary transition-all shadow-sm"
                         required
-                        min="0"
-                        placeholder="Contoh: 1500000"
+                        placeholder="Contoh: 1.500.000"
                       />
                     </div>
                     <div v-if="form.budget" class="mt-3 p-3 bg-primary/5 rounded-lg border border-primary/20 flex justify-between items-center animate-fade-in">
@@ -395,7 +396,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useCompareStore } from '../stores/compare'
 import { pesantren as pesantrenApi, wilayah } from '../services'
 import { getUploadUrl } from '../services/api'
@@ -433,6 +434,17 @@ const form = ref({
   }
 })
 
+const formattedBudget = computed(() => {
+  if (!form.value.budget) return ''
+  return new Intl.NumberFormat('id-ID').format(form.value.budget)
+})
+
+function onBudgetInput(e) {
+  const rawValue = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '')
+  form.value.budget = rawValue ? parseInt(rawValue, 10) : null
+  e.target.value = rawValue ? new Intl.NumberFormat('id-ID').format(parseInt(rawValue, 10)) : ''
+}
+
 const provinces = ref([])
 const cities = ref([])
 const loadingCities = ref(false)
@@ -461,7 +473,7 @@ function toggleCompare(id) {
 }
 
 function autoFocusBudget() {
-  const budgetInput = document.querySelector('input[type="number"]')
+  const budgetInput = document.getElementById('budget-input')
   if (budgetInput) {
     budgetInput.focus()
     window.scrollTo({ top: 0, behavior: 'smooth' })
