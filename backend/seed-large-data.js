@@ -64,23 +64,39 @@ async function run() {
   }
 
   // 2. Generate 100 Pesantren
-  console.log('Membuat 100 data pesantren dengan wilayah valid...')
+  console.log('Membuat 100 data pesantren dengan wilayah valid dan data lengkap...')
+  const BANKS = ['Bank Syariah Indonesia (BSI)', 'Bank Muamalat', 'BNI', 'BRI', 'Mandiri']
+  const FOTO_UTAMA_LIST = [
+    'https://images.unsplash.com/photo-1541018939203-36eeab6d9f21?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1590076215667-873917822941?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1566023307764-4e2b02787869?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1574246604907-db69e30ddb97?auto=format&fit=crop&w=800&q=80'
+  ]
+
   let pesantrenIds = []
   for (let i = 1; i <= 100; i++) {
     const prov = getRandomItem(provNames)
     const kota = getRandomItem(citiesMap[prov])
-    const biayaBulanan = (Math.floor(Math.random() * 25) + 5) * 100000
-    const biayaPendaftaran = (Math.floor(Math.random() * 20) + 1) * 100000
+    
+    // Fee logic: Monthly fee always smaller than registration fee
+    const biayaPendaftaran = (Math.floor(Math.random() * 20) + 15) * 100000 // 1.5M - 3.4M
+    const biayaBulanan = (Math.floor(Math.random() * 10) + 3) * 100000 // 300k - 1.2M
+    
     const tahunBerdiri = 1950 + Math.floor(Math.random() * 70)
     const jumlahSantri = 50 + Math.floor(Math.random() * 2000)
+    const slug = `darul-${i}-${kota.toLowerCase().replace(/\s+/g, '-')}`.substring(0, 30)
 
     const [res] = await conn.query(`
       INSERT INTO pesantren (
         user_id, nama, province, kota, alamat, kurikulum,
         tahun_berdiri, jumlah_santri, jumlah_pengajar,
         biaya_pendaftaran, biaya_bulanan, fasilitas,
-        deskripsi, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        email, telepon, website, deskripsi,
+        foto_utama, foto_galeri,
+        nama_bank, nomor_rekening, atas_nama_rekening,
+        created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     `, [
       pemilikId,
       `Pesantren Darul ${i} ${kota.substring(0, 8)}`,
@@ -94,7 +110,15 @@ async function run() {
       biayaPendaftaran,
       biayaBulanan,
       getRandomFasilitas(),
-      `Ini adalah deskripsi otomatis untuk pesantren Darul ${i} yang berlokasi di ${kota}, ${prov}.`
+      `admin.${slug}@pesantren.test`,
+      `08${Math.floor(Math.random() * 8999999999) + 1000000000}`,
+      `www.pesantrendarul${i}.com`,
+      `Pesantren Darul ${i} merupakan lembaga pendidikan Islam yang berdedikasi tinggi di ${kota}. Kami memiliki fokus pada kurikulum ${getRandomItem(KURIKULUM)} dengan fasilitas lengkap untuk mendukung proses belajar mengajar santri.`,
+      getRandomItem(FOTO_UTAMA_LIST),
+      JSON.stringify([getRandomItem(FOTO_UTAMA_LIST), getRandomItem(FOTO_UTAMA_LIST)]),
+      getRandomItem(BANKS),
+      Math.floor(Math.random() * 9000000000) + 1000000000,
+      `Yayasan Darul ${i}`,
     ])
     pesantrenIds.push(res.insertId)
   }

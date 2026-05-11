@@ -86,7 +86,7 @@
               <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div class="flex-1">
                   <div class="flex flex-wrap items-center gap-3 mb-3">
-                    <span class="badge badge-primary px-3 py-1 uppercase tracking-wider text-xs shadow-sm bg-primary text-white">
+                    <span :class="getCurriculumBadgeClass(pesantren.kurikulum)" class="badge px-3 py-1.5 uppercase tracking-wider text-[10px] font-bold shadow-sm ring-1 ring-white/20">
                       {{ pesantren.kurikulum || 'Umum' }}
                     </span>
                     <span v-if="pesantren.tahun_berdiri" class="text-sm font-medium text-muted-foreground flex items-center gap-1">
@@ -366,6 +366,20 @@ function formatCurrencyShort(amount) {
 function capitalize(str) {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+function getCurriculumBadgeClass(kurikulum) {
+  const k = (kurikulum || '').toLowerCase()
+  switch (k) {
+    case 'modern':
+      return 'bg-[#0d4f4f] text-white' // Forced Deep Teal
+    case 'salaf':
+      return 'bg-[#059669] text-white' // Forced Emerald 600
+    case 'campuran':
+      return 'bg-[#d97706] text-white' // Forced Amber 600
+    default:
+      return 'bg-slate-600 text-white'
+  }
 }
 
 function toggleCompare() {

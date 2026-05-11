@@ -227,7 +227,7 @@
                     class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <span class="absolute left-3 top-3 px-3 py-1 bg-primary/90 backdrop-blur-sm text-white text-xs font-bold uppercase tracking-wider rounded-full">
+                  <span :class="getCurriculumBadgeClass(p.kurikulum)" class="absolute left-3 top-3 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full shadow-lg ring-1 ring-white/20">
                     {{ p.kurikulum || 'Modern' }}
                   </span>
                 </router-link>
@@ -347,6 +347,20 @@ function formatCurrencyShort(amount) {
     return 'Rp ' + (amount / 1000000).toFixed(1).replace('.0', '') + 'jt/bln'
   }
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount) + '/bln'
+}
+
+function getCurriculumBadgeClass(kurikulum) {
+  const k = (kurikulum || '').toLowerCase()
+  switch (k) {
+    case 'modern':
+      return 'bg-[#0d4f4f] text-white'
+    case 'salaf':
+      return 'bg-[#059669] text-white'
+    case 'campuran':
+      return 'bg-[#d97706] text-white'
+    default:
+      return 'bg-slate-600 text-white'
+  }
 }
 
 function toggleCompare(id) {

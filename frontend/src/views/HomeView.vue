@@ -108,7 +108,7 @@
             <div class="relative aspect-video overflow-hidden rounded-t-xl">
               <img :src="p.foto_utama ? getUploadUrl(p.foto_utama) : 'https://placehold.co/600x400/0D4F4F/D4A843?text=Pesantren&font=playfair-display'" :alt="p.nama" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
               <div class="pesantren-card-overlay"></div>
-              <span class="pesantren-badge">{{ p.kurikulum || 'Modern' }}</span>
+              <span :class="getCurriculumBadgeClass(p.kurikulum)" class="pesantren-badge shadow-md">{{ p.kurikulum || 'Modern' }}</span>
               <span v-if="activeTop6Tab === 'termurah'" class="top6-rank-badge bg-emerald-500">💰 Hemat</span>
               <span v-else-if="activeTop6Tab === 'terbaru'" class="top6-rank-badge bg-blue-500">🆕 Baru</span>
               <span v-else class="top6-rank-badge bg-amber-500">👥 {{ p.jumlah_santri }} Santri</span>
@@ -198,6 +198,20 @@ const features = [
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value)
+}
+
+function getCurriculumBadgeClass(kurikulum) {
+  const k = (kurikulum || '').toLowerCase()
+  switch (k) {
+    case 'modern':
+      return '!bg-[#0d4f4f] !text-white'
+    case 'salaf':
+      return '!bg-[#059669] !text-white'
+    case 'campuran':
+      return '!bg-[#d97706] !text-white'
+    default:
+      return '!bg-slate-600 !text-white'
+  }
 }
 
 const fetchData = async () => {
