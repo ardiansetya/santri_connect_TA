@@ -173,30 +173,6 @@
               </div>
             </div>
 
-            <!-- Bank Information (If available) -->
-            <div v-if="pesantren.rekening && (pesantren.rekening.nama_bank || pesantren.rekening.nomor_rekening)" class="mt-8 bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-6 border border-primary/20">
-              <h2 class="font-heading text-xl font-bold flex items-center gap-2 mb-4 text-primary">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                Informasi Rekening Resmi
-              </h2>
-              <div class="grid sm:grid-cols-3 gap-4">
-                <div class="bg-white/60 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-white">
-                  <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Bank</p>
-                  <p class="font-bold text-lg text-foreground">{{ pesantren.rekening.nama_bank || '-' }}</p>
-                </div>
-                <div class="bg-white/60 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-white">
-                  <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Nomor Rekening</p>
-                  <div class="flex items-center gap-2">
-                    <p class="font-bold text-lg text-foreground font-mono tracking-wider">{{ pesantren.rekening.nomor_rekening || '-' }}</p>
-                  </div>
-                </div>
-                <div class="bg-white/60 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-white">
-                  <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Atas Nama</p>
-                  <p class="font-bold text-lg text-foreground">{{ pesantren.rekening.atas_nama || '-' }}</p>
-                </div>
-              </div>
-              <p class="text-xs text-muted-foreground mt-4 flex items-center gap-1.5"><svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Pastikan transfer hanya ke rekening resmi di atas untuk pendaftaran.</p>
-            </div>
           </div>
 
           <!-- Sticky Sidebar -->
@@ -250,12 +226,12 @@
                   Hubungi Pesantren
                 </h3>
                 <div class="space-y-4">
-                  <a v-if="pesantren.telepon" :href="`tel:${pesantren.telepon}`" class="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors group">
+                  <a v-if="pesantren.telepon" :href="`https://wa.me/${pesantren.telepon.replace(/\D/g, '').replace(/^0/, '62')}`" target="_blank" class="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors group">
                     <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                     </div>
                     <div>
-                      <p class="text-xs text-muted-foreground uppercase font-bold tracking-wider">Telepon</p>
+                      <p class="text-xs text-muted-foreground uppercase font-bold tracking-wider">WhatsApp</p>
                       <p class="font-medium text-foreground">{{ pesantren.telepon }}</p>
                     </div>
                   </a>
