@@ -19,10 +19,18 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- INSERT USERS
 -- ========================================
 INSERT INTO users (id, username, email, password, role) VALUES
-(1, 'admin', 'admin@santriconnect.id', '$2b$10$X7Z5qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qK', 'superadmin'),
-(2, 'pemilik1', 'pemilik1@santriconnect.id', '$2b$10$X7Z5qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qK', 'pemilik'),
-(3, 'pemilik2', 'pemilik2@santriconnect.id', '$2b$10$X7Z5qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qK', 'pemilik'),
-(4, 'pendaftar1', 'pendaftar1@santriconnect.id', '$2b$10$X7Z5qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qKxJ9qK', 'pendaftar');
+(1, 'admin', 'admin@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'superadmin'),
+(2, 'pemilik1', 'pemilik1@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(3, 'pemilik2', 'pemilik2@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(4, 'pemilik3', 'pemilik3@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(5, 'pemilik4', 'pemilik4@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(6, 'pemilik5', 'pemilik5@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(7, 'pemilik6', 'pemilik6@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(8, 'pemilik7', 'pemilik7@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(9, 'pemilik8', 'pemilik8@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(10, 'pemilik9', 'pemilik9@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(11, 'pemilik10', 'pemilik10@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pemilik'),
+(12, 'pendaftar1', 'pendaftar1@santriconnect.id', '$2b$10$eomtHDIih4kxKZmzgn2SnODJxnYpVd/57ss3L4.jUX3jKKUEfwi8C', 'pendaftar');
 
 -- ========================================
 -- INSERT PENDAFTAR PROFILE
@@ -32,7 +40,7 @@ INSERT INTO pendaftar_profile (
   jenis_kelamin, alamat, no_hp, nama_ayah, nama_ibu, 
   no_hp_ortu, pekerjaan_ortu
 ) VALUES (
-  4, 'Ahmad Fulan', '3273012345678901', 'Bandung', '2008-05-15',
+  12, 'Ahmad Fulan', '3273012345678901', 'Bandung', '2008-05-15',
   'L', 'Jl. Merdeka No. 45, Sumur Bandung, Kota Bandung', '081234567890',
   'Budi Santoso', 'Siti Aminah', '081987654321', 'PNS'
 );
@@ -65,7 +73,7 @@ INSERT INTO pesantren (
 ),
 -- 2. Pondok Pesantren Al-Hikmah - Surabaya
 (
-  2, 2,
+  2, 3,
   'Pondok Pesantren Al-Hikmah',
   'Jawa Timur', 'Kota Surabaya',
   'Jl. Ahmad Yani No. 456, Gayungan, Surabaya, Jawa Timur 60234',
@@ -79,7 +87,7 @@ INSERT INTO pesantren (
 ),
 -- 3. Pondok Pesantren Nurul Islam - Semarang
 (
-  3, 3,
+  3, 4,
   'Pondok Pesantren Nurul Islam',
   'Jawa Tengah', 'Kota Semarang',
   'Jl. Kaligawe Raya No. 789, Genuk, Semarang, Jawa Tengah 50117',
@@ -93,7 +101,7 @@ INSERT INTO pesantren (
 ),
 -- 4. Pondok Pesantren Ibnu Abbas - Jakarta Timur
 (
-  4, 3,
+  4, 5,
   'Pondok Pesantren Ibnu Abbas',
   'DKI Jakarta', 'Kota Jakarta Timur',
   'Jl. Condet Raya No. 321, Kramat Jati, Jakarta Timur 13530',
@@ -107,7 +115,7 @@ INSERT INTO pesantren (
 ),
 -- 5. Pondok Pesantren Miftahul Ulum - Malang
 (
-  5, 2,
+  5, 6,
   'Pondok Pesantren Miftahul Ulum',
   'Jawa Timur', 'Kabupaten Malang',
   'Jl. Gadingkulon No. 555, Dau, Malang, Jawa Timur 65151',
@@ -121,7 +129,7 @@ INSERT INTO pesantren (
 ),
 -- 6. Pondok Pesantren Hidayatullah - Depok
 (
-  6, 3,
+  6, 7,
   'Pondok Pesantren Hidayatullah',
   'Jawa Barat', 'Kota Depok',
   'Jl. Raya Cibinong No. 100, Cimanggis, Depok, Jawa Barat 16451',
@@ -135,7 +143,7 @@ INSERT INTO pesantren (
 ),
 -- 7. Pondok Pesantren Al-Anwar - Rembang
 (
-  7, 2,
+  7, 8,
   'Pondok Pesantren Al-Anwar',
   'Jawa Tengah', 'Kabupaten Rembang',
   'Jl. Raya Sarang No. 01, Sarang, Rembang, Jawa Tengah 59274',
@@ -149,7 +157,7 @@ INSERT INTO pesantren (
 ),
 -- 8. Pondok Pesantren Modern Darussalam Gontor - Ponorogo
 (
-  8, 3,
+  8, 9,
   'Pondok Modern Islam Assalaam',
   'Jawa Tengah', 'Kota Surakarta',
   'Jl. Gumpang RT 03/06, Gumpang, Kartasura, Sukoharjo, Jawa Tengah 57169',
@@ -163,7 +171,7 @@ INSERT INTO pesantren (
 ),
 -- 9. Pondok Pesantren Sidogiri - Pasuruan
 (
-  9, 2,
+  9, 10,
   'Pondok Pesantren Sidogiri',
   'Jawa Timur', 'Kabupaten Pasuruan',
   'Jl. Sidogiri No. 1, Kraton, Pasuruan, Jawa Timur 67151',
@@ -177,7 +185,7 @@ INSERT INTO pesantren (
 ),
 -- 10. Pondok Pesantren Tebuireng - Jombang
 (
-  10, 3,
+  10, 11,
   'Pondok Pesantren Tebuireng',
   'Jawa Timur', 'Kabupaten Jombang',
   'Jl. Irian Jaya No. 10, Cukir, Diwek, Jombang, Jawa Timur 61471',
@@ -200,13 +208,13 @@ INSERT INTO pendaftaran (
   no_hp_ortu, pekerjaan_ortu
 ) VALUES 
 (
-  'REG-20260501-0001', 'ORD-1234567890', 4, 1, 'diproses', 'paid',
+  'REG-20260501-0001', 'ORD-1234567890', 12, 1, 'diproses', 'paid',
   2500000.00, 'Ahmad Fulan', '3273012345678901', 'Bandung', '2008-05-15',
   'L', 'Jl. Merdeka No. 45, Sumur Bandung, Kota Bandung', '081234567890',
   'Budi Santoso', 'Siti Aminah', '081987654321', 'PNS'
 ),
 (
-  'REG-20260502-0002', 'ORD-0987654321', 4, 2, 'pending', 'unpaid',
+  'REG-20260502-0002', 'ORD-0987654321', 12, 2, 'pending', 'unpaid',
   3000000.00, 'Ahmad Fulan', '3273012345678901', 'Bandung', '2008-05-15',
   'L', 'Jl. Merdeka No. 45, Sumur Bandung, Kota Bandung', '081234567890',
   'Budi Santoso', 'Siti Aminah', '081987654321', 'PNS'

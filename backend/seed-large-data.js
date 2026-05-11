@@ -49,22 +49,8 @@ async function run() {
 
   const provNames = Object.keys(citiesMap)
 
-  // 1. Ambil atau Buat Pemilik Pesantren
-  console.log('Mempersiapkan user pemilik...')
-  let [pemilikRows] = await conn.query('SELECT id FROM users WHERE role = "pemilik" LIMIT 1')
-  let pemilikId = pemilikRows.length ? pemilikRows[0].id : null
-
-  if (!pemilikId) {
-    const hashed = await bcrypt.hash('password123', 10)
-    const [res] = await conn.query(
-      'INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())',
-      ['pemilik_seeder', 'pemilik_seeder@test.com', hashed, 'pemilik']
-    )
-    pemilikId = res.insertId
-  }
-
-  // 2. Generate 100 Pesantren
-  console.log('Membuat 100 data pesantren dengan wilayah valid dan data lengkap...')
+  // 2. Generate 100 Pesantren & 100 Owners
+  console.log('Membuat 100 data pesantren beserta 100 pemilik unik...')
   const BANKS = ['Bank Syariah Indonesia (BSI)', 'Bank Muamalat', 'BNI', 'BRI', 'Mandiri']
   const FOTO_UTAMA_LIST = [
     'https://images.unsplash.com/photo-1541018939203-36eeab6d9f21?auto=format&fit=crop&w=800&q=80',
@@ -74,11 +60,20 @@ async function run() {
     'https://images.unsplash.com/photo-1574246604907-db69e30ddb97?auto=format&fit=crop&w=800&q=80'
   ]
 
+  const ownerHashed = await bcrypt.hash('password123', 10)
   let pesantrenIds = []
   for (let i = 1; i <= 100; i++) {
     const prov = getRandomItem(provNames)
     const kota = getRandomItem(citiesMap[prov])
     
+    // Create unique owner for this pesantren
+    const ownerEmail = `pemilik.pesantren${i}@test.com`
+    const [ownerRes] = await conn.query(
+      'INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())',
+      [`pemilik_darul_${i}`, ownerEmail, ownerHashed, 'pemilik']
+    )
+    const currentPemilikId = ownerRes.insertId
+
     // Fee logic: Monthly fee always smaller than registration fee
     const biayaPendaftaran = (Math.floor(Math.random() * 20) + 15) * 100000 // 1.5M - 3.4M
     const biayaBulanan = (Math.floor(Math.random() * 10) + 3) * 100000 // 300k - 1.2M
@@ -98,7 +93,7 @@ async function run() {
         created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     `, [
-      pemilikId,
+      currentPemilikId,
       `Pesantren Darul ${i} ${kota.substring(0, 8)}`,
       prov,
       kota,
@@ -122,7 +117,7 @@ async function run() {
     ])
     pesantrenIds.push(res.insertId)
   }
-  console.log('✓ 100 Pesantren berhasil dibuat.')
+  console.log('✓ 100 Pesantren & 100 Pemilik berhasil dibuat.')
 
   // 3. Generate 20 Users Pendaftar
   console.log('Membuat 20 user pendaftar...')

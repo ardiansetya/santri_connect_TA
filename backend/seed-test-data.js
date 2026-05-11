@@ -17,38 +17,40 @@ async function seedTestData() {
   
   const hashedPassword = await bcrypt.hash('password123', 10)
   
-  // User ID 1 - Superadmin (for /me test)
+  // User ID 1 - Superadmin
   await conn.query(`
     INSERT IGNORE INTO users (id, username, email, password, role, created_at)
     VALUES (1, 'superadmin_test', 'superadmin@test.com', ?, 'superadmin', NOW())
   `, [hashedPassword])
   console.log('  ✓ User ID 1: superadmin (superadmin@test.com)')
   
-  // User ID 2 - Pemilik
-  await conn.query(`
-    INSERT IGNORE INTO users (id, username, email, password, role, created_at)
-    VALUES (2, 'pemilik_test', 'pemilik@test.com', ?, 'pemilik', NOW())
-  `, [hashedPassword])
-  console.log('  ✓ User ID 2: pemilik (pemilik@test.com)')
+  // User ID 2, 3, 4 - Pemiliks
+  for (let i = 1; i <= 3; i++) {
+    await conn.query(`
+      INSERT IGNORE INTO users (id, username, email, password, role, created_at)
+      VALUES (?, ?, ?, ?, 'pemilik', NOW())
+    `, [i + 1, `pemilik${i}_test`, `pemilik${i}@test.com`, hashedPassword])
+    console.log(`  ✓ User ID ${i + 1}: pemilik${i} (pemilik${i}@test.com)`)
+  }
 
-  // User ID 3 - Pendaftar  
+  // User ID 5 - Pendaftar  
   await conn.query(`
     INSERT IGNORE INTO users (id, username, email, password, role, created_at)
-    VALUES (3, 'pendaftar_test', 'pendaftar@test.com', ?, 'pendaftar', NOW())
+    VALUES (5, 'pendaftar_test', 'pendaftar@test.com', ?, 'pendaftar', NOW())
   `, [hashedPassword])
-  console.log('  ✓ User ID 3: pendaftar (pendaftar@test.com)')
-
-  // User ID 4 - Another pendaftar for registration tests
+  console.log('  ✓ User ID 5: pendaftar (pendaftar@test.com)')
+  
+  // User ID 6 - Another pendaftar
   await conn.query(`
     INSERT IGNORE INTO users (id, username, email, password, role, created_at)
-    VALUES (4, 'pendaftar2_test', 'pendaftar2@test.com', ?, 'pendaftar', NOW())
+    VALUES (6, 'pendaftar2_test', 'pendaftar2@test.com', ?, 'pendaftar', NOW())
   `, [hashedPassword])
-  console.log('  ✓ User ID 4: pendaftar2 (pendaftar2@test.com)')
+  console.log('  ✓ User ID 6: pendaftar2 (pendaftar2@test.com)')
 
   // Create test pesantren
   console.log('\nCreating test pesantren...')
   
-  // Pesantren ID 1 - Owned by pemilik (user ID 2)
+  // Pesantren ID 1 - Owned by pemilik1 (user ID 2)
   await conn.query(`
     INSERT IGNORE INTO pesantren (
       id, user_id, nama, province, kota, alamat, kurikulum,
@@ -66,9 +68,9 @@ async function seedTestData() {
       NULL, NULL, NOW(), NOW()
     )
   `)
-  console.log('  ✓ Pesantren ID 1: Pesantren Test Alpha')
+  console.log('  ✓ Pesantren ID 1: Pesantren Test Alpha (Owner: pemilik1)')
 
-  // Pesantren ID 2 - For compare tests
+  // Pesantren ID 2 - Owned by pemilik2 (user ID 3)
   await conn.query(`
     INSERT IGNORE INTO pesantren (
       id, user_id, nama, province, kota, alamat, kurikulum,
@@ -77,7 +79,7 @@ async function seedTestData() {
       fasilitas, email, telepon, website, deskripsi,
       foto_utama, foto_galeri, created_at, updated_at
     ) VALUES (
-      2, 2, 'Pesantren Test Beta', 'Jawa Tengah', 'Kota Semarang',
+      2, 3, 'Pesantren Test Beta', 'Jawa Tengah', 'Kota Semarang',
       'Jl. Test No. 2', 'salaf', 1995, 150, 25,
       400000, 250000,
       '["Masjid", "Laboratorium"]',
@@ -86,9 +88,9 @@ async function seedTestData() {
       NULL, NULL, NOW(), NOW()
     )
   `)
-  console.log('  ✓ Pesantren ID 2: Pesantren Test Beta')
+  console.log('  ✓ Pesantren ID 2: Pesantren Test Beta (Owner: pemilik2)')
 
-  // Pesantren ID 3 - For compare tests
+  // Pesantren ID 3 - Owned by pemilik3 (user ID 4)
   await conn.query(`
     INSERT IGNORE INTO pesantren (
       id, user_id, nama, province, kota, alamat, kurikulum,
@@ -97,7 +99,7 @@ async function seedTestData() {
       fasilitas, email, telepon, website, deskripsi,
       foto_utama, foto_galeri, created_at, updated_at
     ) VALUES (
-      3, 2, 'Pesantren Test Gamma', 'DKI Jakarta', 'Kota Jakarta Selatan',
+      3, 4, 'Pesantren Test Gamma', 'DKI Jakarta', 'Kota Jakarta Selatan',
       'Jl. Test No. 3', 'campuran', 2005, 200, 30,
       600000, 350000,
       '["Masjid", "Sport Center", "WiFi"]',
@@ -106,18 +108,20 @@ async function seedTestData() {
       NULL, NULL, NOW(), NOW()
     )
   `)
-  console.log('  ✓ Pesantren ID 3: Pesantren Test Gamma')
+  console.log('  ✓ Pesantren ID 3: Pesantren Test Gamma (Owner: pemilik3)')
 
   // Reset auto-increment to avoid conflicts
-  await conn.query('ALTER TABLE users AUTO_INCREMENT = 5')
+  await conn.query('ALTER TABLE users AUTO_INCREMENT = 7')
   await conn.query('ALTER TABLE pesantren AUTO_INCREMENT = 4')
 
   console.log('\n✅ Test data seeded successfully!\n')
-  console.log('Test Accounts:')
-  console.log('  Superadmin: Use existing superadmin account')
-  console.log('  Pemilik:    pemilik@test.com / password123 (ID: 2)')
-  console.log('  Pendaftar:  pendaftar@test.com / password123 (ID: 3)')
-  console.log('  Pendaftar2: pendaftar2@test.com / password123 (ID: 4)\n')
+  console.log('Test Accounts (Password: password123):')
+  console.log('  Superadmin: superadmin@test.com')
+  console.log('  Pemilik 1:  pemilik1@test.com (ID: 2)')
+  console.log('  Pemilik 2:  pemilik2@test.com (ID: 3)')
+  console.log('  Pemilik 3:  pemilik3@test.com (ID: 4)')
+  console.log('  Pendaftar:  pendaftar@test.com (ID: 5)')
+  console.log('  Pendaftar 2: pendaftar2@test.com (ID: 6)\n')
 
   await conn.end()
 }
