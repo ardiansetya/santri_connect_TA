@@ -343,7 +343,7 @@ const provinces = ref([])
 const fasilitasOptions = [
   'Masjid', 'Asrama', 'Perpustakaan', 'Lab Komputer', 'WiFi',
   'Klinik', 'Lapangan Olahraga', 'Kantin', 'Kolam Renang',
-  'Aula', 'AC', 'Koperasi', 'Pertanian', 'Peternakan'
+  'Aula', 'AC', 'Koperasi'
 ]
 const selectedFasilitas = ref([])
 

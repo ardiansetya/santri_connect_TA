@@ -80,11 +80,13 @@
                       <option value="Asrama">Asrama</option>
                       <option value="Perpustakaan">Perpustakaan</option>
                       <option value="Lab Komputer">Lab Komputer</option>
-                      <option value="Klinik">Klinik</option>
-                      <option value="Kantin">Kantin</option>
-                      <option value="Lapangan Olahraga">Lapangan Olahraga</option>
                       <option value="WiFi">WiFi</option>
+                      <option value="Klinik">Klinik</option>
+                      <option value="Lapangan Olahraga">Lapangan Olahraga</option>
+                      <option value="Kantin">Kantin</option>
+                      <option value="Kolam Renang">Kolam Renang</option>
                       <option value="Aula">Aula</option>
+                      <option value="AC">AC</option>
                       <option value="Koperasi">Koperasi</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
