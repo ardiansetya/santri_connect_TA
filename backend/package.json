@@ -12,7 +12,8 @@
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.js\"",
     "db:init": "node run-migration.js",
-    "migrate": "npm run db:init"
+    "migrate": "npm run db:init",
+    "seed:large": "node seed-large-data.js"
   },
   "repository": {
     "type": "git",
