@@ -30,7 +30,7 @@
           <p class="auth-card__subtitle">Masukkan email dan password Anda</p>
         </div>
 
-        <form class="auth-form" @submit="onSubmit">
+        <form class="auth-form" @submit.prevent="onSubmit">
           <div class="form-group">
             <label class="form-label" for="email">Email</label>
             <input

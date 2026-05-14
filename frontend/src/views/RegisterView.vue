@@ -34,7 +34,7 @@
           <p class="auth-card__subtitle">Pilih role dan isi data Anda</p>
         </div>
 
-        <form class="auth-form" @submit="onSubmit">
+        <form class="auth-form" @submit.prevent="onSubmit">
           <!-- Role Selection -->
           <div class="role-selection">
             <label

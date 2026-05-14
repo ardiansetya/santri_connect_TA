@@ -78,10 +78,16 @@ Salin file `.env` dan sesuaikan kredensial MySQL Anda (serta kunci Midtrans):
 cp .env.example .env
 ```
 
-**Inisialisasi & Seeding Database:**
-Kami telah menyediakan *script* otomatis untuk membuat tabel dan mengisi data awal (pesantren, fasilitas, akun dummy) agar aplikasi langsung bisa digunakan:
+**Inisialisasi Database:**
+Kami telah menyediakan *script* otomatis untuk membuat tabel dan mengisi data dasar:
 ```bash
 npm run db:init
+```
+
+**Seeding Data Skala Besar (Opsional tapi Direkomendasikan):**
+Untuk mengisi aplikasi dengan 100 pesantren dan ribuan data pendaftar simulasi:
+```bash
+npm run seed:large
 ```
 > **Catatan:** Perintah ini akan menghapus data lama (jika ada) dan melakukan reset bersih pada database `santri_connect`.
 
@@ -110,11 +116,18 @@ npm run dev
 ---
 
 ## 🔑 Akun Default (Hasil Seeder)
-Gunakan akun berikut untuk mencoba fitur-fitur di dalam aplikasi (Password untuk semua akun: `password123`):
 
-- **Superadmin:** `admin@santriconnect.id`
-- **Pemilik Pesantren:** `pemilik1@santriconnect.id` atau `pemilik2@santriconnect.id`
-- **Pendaftar / Wali Santri:** `pendaftar1@santriconnect.id`
+Jika Anda menjalankan `npm run seed:large`, gunakan kredensial berikut:
+
+- **Superadmin:**
+  - **Email:** `admin@santriconnect.com`
+  - **Password:** `admin123`
+- **Pendaftar / Santri:**
+  - **Username:** `santri_1_1` (pola: `santri_{pesantren_id}_{index}`)
+  - **Password:** `pendaftar123`
+- **Pemilik Pesantren:**
+  - **Email:** `pemilik.pesantren1@test.com` (pola: `pemilik.pesantren{id}@test.com`)
+  - **Password:** `password123`
 
 ---
 
@@ -132,3 +145,4 @@ Project ini dikembangkan untuk kebutuhan akademik dan profesional. Hak Cipta &co
 ---
 
 **Santri Connect** - *Menghubungkan Hati, Mempermudah Langkah Menuju Ilmu.*
+

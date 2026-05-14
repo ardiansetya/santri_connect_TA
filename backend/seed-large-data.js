@@ -31,10 +31,17 @@ async function run() {
   })
 
   console.log('Membersihkan data seeder sebelumnya...')
-  await conn.query(`DELETE FROM pendaftaran WHERE alamat LIKE 'Jalan Rumah Santri%'`)
+  await conn.query(`DELETE FROM pendaftaran WHERE nomor_pendaftaran LIKE 'REG-%'`)
   await conn.query(`DELETE FROM pesantren WHERE nama LIKE 'Pesantren Darul %'`)
-  await conn.query(`DELETE FROM users WHERE username LIKE 'santribaru_%'`)
+  await conn.query(`DELETE FROM users WHERE username LIKE 'santri_%' OR username LIKE 'santribaru_%' OR username LIKE 'pemilik_darul_%' OR username = 'admin'`)
   
+  console.log('Membuat akun admin...')
+  const adminHashed = await bcrypt.hash('admin123', 10)
+  await conn.query(
+    'INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())',
+    ['admin', 'admin@santriconnect.com', adminHashed, 'superadmin']
+  )
+
   console.log('Mengambil data Wilayah dari API Emsifa...')
   const provinces = await fetchJson('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json')
   
@@ -61,6 +68,9 @@ async function run() {
   ]
 
   const ownerHashed = await bcrypt.hash('password123', 10)
+  const hashedPendaftar = await bcrypt.hash('pendaftar123', 10)
+  const STATUSES = ['pending', 'diproses', 'diterima', 'ditolak']
+
   let pesantrenIds = []
   for (let i = 1; i <= 100; i++) {
     const prov = getRandomItem(provNames)
@@ -115,66 +125,44 @@ async function run() {
       Math.floor(Math.random() * 9000000000) + 1000000000,
       `Yayasan Darul ${i}`,
     ])
-    pesantrenIds.push(res.insertId)
-  }
-  console.log('✓ 100 Pesantren & 100 Pemilik berhasil dibuat.')
+    const pesantrenId = res.insertId
+    pesantrenIds.push(pesantrenId)
 
-  // 3. Generate 20 Users Pendaftar
-  console.log('Membuat 20 user pendaftar...')
-  let pendaftarIds = []
-  const hashedPendaftar = await bcrypt.hash('pendaftar123', 10)
-  for (let i = 1; i <= 20; i++) {
-    const email = `calonsantri${Date.now()}_${i}@test.com`
-    const [res] = await conn.query(
-      'INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())',
-      [`santribaru_${i}`, email, hashedPendaftar, 'pendaftar']
-    )
-    pendaftarIds.push(res.insertId)
+    // Create 10-15 pendaftar for this pesantren
+    const pendaftarCount = Math.floor(Math.random() * 6) + 10 // 10-15
+    for (let j = 1; j <= pendaftarCount; j++) {
+      const username = `santri_${pesantrenId}_${j}`
+      const email = `santri_${pesantrenId}_${j}@test.com`
+      
+      const [userRes] = await conn.query(
+        'INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())',
+        [username, email, hashedPendaftar, 'pendaftar']
+      )
+      const userId = userRes.insertId
+      
+      const nomor = `REG-${pesantrenId}-${j}-${Date.now().toString().slice(-4)}`
+      const status = getRandomItem(STATUSES)
+      const paymentStatus = status === 'pending' ? 'unpaid' : 'paid'
+      
+      await conn.query(`
+        INSERT INTO pendaftaran (
+          nomor_pendaftaran, user_id, pesantren_id, status, payment_status, payment_amount,
+          nama_lengkap, nik, tempat_lahir, tanggal_lahir, jenis_kelamin,
+          alamat, no_hp, nama_ayah, nama_ibu, no_hp_ortu, pekerjaan_ortu,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+      `, [
+        nomor, userId, pesantrenId, status, paymentStatus, biayaPendaftaran,
+        `Santri ${i} ${j}`,
+        `320101${Math.floor(Math.random() * 10000000000)}`,
+        kota, '2010-05-10', Math.random() > 0.5 ? 'L' : 'P',
+        `Alamat Santri ${j} untuk Pesantren ${i}`, `08${Math.floor(Math.random() * 8999999999) + 1000000000}`,
+        `Ayah Santri ${j}`, `Ibu Santri ${j}`, `08${Math.floor(Math.random() * 8999999999) + 1000000000}`,
+        'Wiraswasta'
+      ])
+    }
   }
-  console.log('✓ 20 User Pendaftar berhasil dibuat.')
-
-  // 4. Generate 20 Pendaftaran
-  console.log('Membuat 20 entri pendaftaran...')
-  const STATUSES = ['pending', 'diproses', 'diterima', 'ditolak']
-  
-  for (let i = 0; i < 20; i++) {
-    const userId = pendaftarIds[i]
-    const pesantrenId = getRandomItem(pesantrenIds)
-    const nomor = `REG-${Date.now()}-${Math.floor(Math.random() * 1000)}`
-    
-    const [pes] = await conn.query('SELECT biaya_pendaftaran, kota FROM pesantren WHERE id = ?', [pesantrenId])
-    const paymentAmount = pes[0].biaya_pendaftaran
-    const status = getRandomItem(STATUSES)
-    const paymentStatus = status === 'pending' ? 'unpaid' : 'paid'
-
-    await conn.query(`
-      INSERT INTO pendaftaran (
-        nomor_pendaftaran, user_id, pesantren_id, status, payment_status, payment_amount,
-        nama_lengkap, nik, tempat_lahir, tanggal_lahir, jenis_kelamin,
-        alamat, no_hp, nama_ayah, nama_ibu, no_hp_ortu, pekerjaan_ortu,
-        created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-    `, [
-      nomor,
-      userId,
-      pesantrenId,
-      status,
-      paymentStatus,
-      paymentAmount,
-      `Calon Santri ${i+1}`,
-      `320101${Math.floor(Math.random() * 10000000000)}`,
-      pes[0].kota,
-      '2010-05-10',
-      Math.random() > 0.5 ? 'L' : 'P',
-      `Jalan Rumah Santri No. ${i+1}`,
-      `0812345678${i}`,
-      `Ayah ${i+1}`,
-      `Ibu ${i+1}`,
-      `0819876543${i}`,
-      'Wiraswasta'
-    ])
-  }
-  console.log('✓ 20 Pendaftaran berhasil dibuat.')
+  console.log(`✓ 100 Pesantren, 100 Pemilik, dan ~1250 Pendaftar berhasil dibuat.`)
 
   await conn.end()
   console.log('\n✅ Proses seeding skala besar SELESAI!')
