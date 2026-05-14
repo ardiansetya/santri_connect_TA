@@ -1,9 +1,9 @@
 const Pesantren = require('../models/Pesantren')
 
 const RekomendasiService = {
-  async getRekomendasi({ budget, provinsi, kota, kurikulum, fasilitas, bobot }) {
+  async getRekomendasi({ budget, budget_pendaftaran, provinsi, kota, kurikulum, fasilitas, bobot }) {
     const [pesantren] = await require('../config/db').getPool().query(
-      'SELECT id, nama, province, kota, biaya_bulanan, fasilitas, kurikulum, foto_utama FROM pesantren'
+      'SELECT id, nama, province, kota, biaya_bulanan, biaya_pendaftaran, fasilitas, kurikulum, foto_utama FROM pesantren'
     )
 
     // Normalize weights (4 criteria)
@@ -25,11 +25,22 @@ const RekomendasiService = {
       if (biaya === budget) {
         budget_score = 1;
       } else if (biaya < budget) {
-        // Prioritaskan harga yang paling mendekati budget (penalti kecil untuk yang lebih murah)
         budget_score = Math.max(0, 1 - ((budget - biaya) / budget) * 0.5);
       } else {
-        // Penalti normal untuk yang melebihi budget
         budget_score = Math.max(0, 1 - ((biaya - budget) / budget));
+      }
+
+      if (budget_pendaftaran) {
+        const biayaDaftar = parseFloat(p.biaya_pendaftaran) || 0
+        let pendaftaran_score = 0;
+        if (biayaDaftar === budget_pendaftaran) {
+          pendaftaran_score = 1;
+        } else if (biayaDaftar < budget_pendaftaran) {
+          pendaftaran_score = Math.max(0, 1 - ((budget_pendaftaran - biayaDaftar) / budget_pendaftaran) * 0.5);
+        } else {
+          pendaftaran_score = Math.max(0, 1 - ((biayaDaftar - budget_pendaftaran) / budget_pendaftaran));
+        }
+        budget_score = (budget_score + pendaftaran_score) / 2;
       }
       
       // 2. Location Score

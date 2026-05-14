@@ -53,6 +53,22 @@
                     </div>
                   </div>
 
+                  <!-- Budget Pendaftaran Input -->
+                  <div>
+                    <label class="form-label">Budget Pendaftaran (Maksimal)</label>
+                    <div class="relative">
+                      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">Rp</span>
+                      <input
+                        id="budget-pendaftaran-input"
+                        type="text"
+                        :value="formattedBudgetPendaftaran"
+                        @input="onBudgetPendaftaranInput"
+                        class="form-input !pl-12 pr-4 bg-background border-2 focus:border-primary transition-all shadow-sm"
+                        placeholder="Contoh: 3.500.000 (Opsional)"
+                      />
+                    </div>
+                  </div>
+
                   <!-- Province Select -->
                   <div>
                     <label class="form-label">Tentukan Provinsi</label>
@@ -429,6 +445,7 @@ function applyBobotPreset(key) {
 
 const form = ref({
   budget: null,
+  budget_pendaftaran: null,
   provinsi: '',
   kota: '',
   kurikulum: '',
@@ -449,6 +466,17 @@ const formattedBudget = computed(() => {
 function onBudgetInput(e) {
   const rawValue = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '')
   form.value.budget = rawValue ? parseInt(rawValue, 10) : null
+  e.target.value = rawValue ? new Intl.NumberFormat('id-ID').format(parseInt(rawValue, 10)) : ''
+}
+
+const formattedBudgetPendaftaran = computed(() => {
+  if (!form.value.budget_pendaftaran) return ''
+  return new Intl.NumberFormat('id-ID').format(form.value.budget_pendaftaran)
+})
+
+function onBudgetPendaftaranInput(e) {
+  const rawValue = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '')
+  form.value.budget_pendaftaran = rawValue ? parseInt(rawValue, 10) : null
   e.target.value = rawValue ? new Intl.NumberFormat('id-ID').format(parseInt(rawValue, 10)) : ''
 }
 

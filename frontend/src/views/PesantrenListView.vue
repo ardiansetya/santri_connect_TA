@@ -141,6 +141,22 @@
                 </div>
 
                 <div class="border-t border-border pt-5 mt-5">
+                   <label class="form-label mb-3">Maksimal Biaya Pendaftaran</label>
+                   <div class="mb-3">
+                      <div class="relative group/input">
+                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground group-focus-within/input:text-primary transition-colors">Rp</span>
+                         <input 
+                           type="text" 
+                           :value="formattedBiayaPendaftaranMax"
+                           @input="onBiayaPendaftaranMaxInput"
+                           placeholder="Tanpa Batas" 
+                           class="form-input !pl-8 !py-2.5 text-sm focus:ring-1 focus:ring-primary/20 w-full" 
+                         />
+                      </div>
+                   </div>
+                </div>
+
+                <div class="border-t border-border pt-5 mt-5">
                   <label class="form-label">Urutkan Berdasarkan</label>
                   <div class="relative mb-3">
                     <select class="form-input appearance-none !pr-10" v-model="sortField" @change="fetchData">
@@ -327,7 +343,8 @@ const filters = ref({
   kota: '',
   kurikulum: '',
   fasilitas: '',
-  biaya_max: ''
+  biaya_max: '',
+  biaya_pendaftaran_max: ''
 })
 
 const totalPages = computed(() => Math.ceil(totalRecords.value / limit.value))
@@ -337,10 +354,26 @@ const formattedBiayaMax = computed(() => {
   return new Intl.NumberFormat('id-ID').format(filters.value.biaya_max)
 })
 
+const formattedBiayaPendaftaranMax = computed(() => {
+  if (!filters.value.biaya_pendaftaran_max) return ''
+  return new Intl.NumberFormat('id-ID').format(filters.value.biaya_pendaftaran_max)
+})
+
 let searchTimeout = null
 function onBiayaMaxInput(e) {
   const rawValue = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '')
   filters.value.biaya_max = rawValue ? parseInt(rawValue, 10) : ''
+  e.target.value = rawValue ? new Intl.NumberFormat('id-ID').format(parseInt(rawValue, 10)) : ''
+  
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    fetchData()
+  }, 500)
+}
+
+function onBiayaPendaftaranMaxInput(e) {
+  const rawValue = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '')
+  filters.value.biaya_pendaftaran_max = rawValue ? parseInt(rawValue, 10) : ''
   e.target.value = rawValue ? new Intl.NumberFormat('id-ID').format(parseInt(rawValue, 10)) : ''
   
   clearTimeout(searchTimeout)
@@ -385,7 +418,8 @@ function resetFilters() {
     kota: '',
     kurikulum: '',
     fasilitas: '',
-    biaya_max: ''
+    biaya_max: '',
+    biaya_pendaftaran_max: ''
   }
   sortField.value = ''
   sortOrder.value = 'asc'
@@ -441,6 +475,7 @@ async function fetchData() {
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
     if (filters.value.fasilitas) params.fasilitas = filters.value.fasilitas
     if (filters.value.biaya_max) params.biaya_max = filters.value.biaya_max
+    if (filters.value.biaya_pendaftaran_max) params.biaya_pendaftaran_max = filters.value.biaya_pendaftaran_max
 
     const { data } = await pesantrenApi.list(params)
     pesantren.value = data.data || []
@@ -473,6 +508,7 @@ async function changePage(page) {
     if (filters.value.kurikulum) params.kurikulum = filters.value.kurikulum
     if (filters.value.fasilitas) params.fasilitas = filters.value.fasilitas
     if (filters.value.biaya_max) params.biaya_max = filters.value.biaya_max
+    if (filters.value.biaya_pendaftaran_max) params.biaya_pendaftaran_max = filters.value.biaya_pendaftaran_max
 
     const { data } = await pesantrenApi.list(params)
     pesantren.value = data.data || []

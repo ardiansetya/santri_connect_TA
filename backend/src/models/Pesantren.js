@@ -7,8 +7,8 @@ const Pesantren = {
     return rows[0]
   },
 
-  async findAll({ search, provinsi, province, kota, biaya_min, biaya_max, fasilitas, kurikulum, page, limit, sort, order }) {
-    let query = 'SELECT id, nama, province, kota, biaya_bulanan, jumlah_santri, kurikulum, fasilitas, foto_utama FROM pesantren WHERE 1=1'
+  async findAll({ search, provinsi, province, kota, biaya_min, biaya_max, biaya_pendaftaran_max, fasilitas, kurikulum, page, limit, sort, order }) {
+    let query = 'SELECT id, nama, province, kota, biaya_bulanan, biaya_pendaftaran, jumlah_santri, kurikulum, fasilitas, foto_utama FROM pesantren WHERE 1=1'
     let countQuery = 'SELECT COUNT(*) as total FROM pesantren WHERE 1=1'
     const params = []
     const countParams = []
@@ -43,6 +43,12 @@ const Pesantren = {
       countQuery += ' AND biaya_bulanan <= ?'
       params.push(parseInt(biaya_max))
       countParams.push(parseInt(biaya_max))
+    }
+    if (biaya_pendaftaran_max) {
+      query += ' AND biaya_pendaftaran <= ?'
+      countQuery += ' AND biaya_pendaftaran <= ?'
+      params.push(parseInt(biaya_pendaftaran_max))
+      countParams.push(parseInt(biaya_pendaftaran_max))
     }
     if (fasilitas) {
       query += ' AND JSON_CONTAINS(fasilitas, ?)'
