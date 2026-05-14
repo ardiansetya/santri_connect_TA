@@ -123,7 +123,7 @@ Jika Anda menjalankan `npm run seed:large`, gunakan kredensial berikut:
   - **Email:** `admin@santriconnect.com`
   - **Password:** `admin123`
 - **Pendaftar / Santri:**
-  - **Username:** `santri_1_1` (pola: `santri_{pesantren_id}_{index}`)
+  - **Email:** `santri_1_1@test.com` (pola: `santri_{pesantren_id}_{index}@test.com`)
   - **Password:** `pendaftar123`
 - **Pemilik Pesantren:**
   - **Email:** `pemilik.pesantren1@test.com` (pola: `pemilik.pesantren{id}@test.com`)
