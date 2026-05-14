@@ -50,7 +50,14 @@ api.interceptors.response.use(
   error => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      
+      // Do not hard-redirect if the request was an auth attempt or if already on login/register page
+      const isAuthEndpoint = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register')
+      const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register'
+      
+      if (!isAuthEndpoint && !isAuthPage) {
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }
