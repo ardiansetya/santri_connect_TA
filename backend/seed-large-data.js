@@ -45,11 +45,10 @@ async function run() {
   console.log('Mengambil data Wilayah dari API Emsifa...')
   const provinces = await fetchJson('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json')
   
-  // Pilih 5 provinsi secara acak agar tidak terlalu banyak request API
-  const selectedProvinces = provinces.sort(() => 0.5 - Math.random()).slice(0, 5)
+  // Ambil semua provinsi agar tiap provinsi terwakili minimal 1 pesantren
   const citiesMap = {}
   
-  for (const prov of selectedProvinces) {
+  for (const prov of provinces) {
     const cities = await fetchJson(`https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${prov.id}.json`)
     citiesMap[prov.name] = cities.map(c => c.name)
   }
@@ -64,8 +63,16 @@ async function run() {
   const STATUSES = ['pending', 'diproses', 'diterima', 'ditolak']
 
   let pesantrenIds = []
+  
+  // Pastikan setiap provinsi ada minimal 1 pesantren
+  let targetProvinces = [...provNames]
+  while (targetProvinces.length < 100) {
+    targetProvinces.push(getRandomItem(provNames))
+  }
+  targetProvinces = targetProvinces.sort(() => 0.5 - Math.random())
+
   for (let i = 1; i <= 100; i++) {
-    const prov = getRandomItem(provNames)
+    const prov = targetProvinces[i - 1]
     const kota = getRandomItem(citiesMap[prov])
     
     // Create unique owner for this pesantren

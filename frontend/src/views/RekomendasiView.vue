@@ -300,6 +300,11 @@
 
                        <div class="flex flex-wrap items-center gap-x-6 gap-y-3 mb-4">
                           <div>
+                             <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Pendaftaran</p>
+                             <p class="font-bold text-foreground">{{ formatCurrency(item.pesantren?.biaya_pendaftaran) }}</p>
+                          </div>
+                          <div class="hidden sm:block h-8 w-px bg-border"></div>
+                          <div>
                              <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Biaya Bulanan</p>
                              <p class="font-bold text-success">{{ formatCurrency(item.pesantren?.biaya_bulanan) }}</p>
                           </div>

@@ -244,21 +244,27 @@
                     <span class="line-clamp-1">{{ p.kota }}, {{ p.province }}</span>
                   </div>
                   
-                  <div class="mt-auto pt-4 border-t border-border flex items-center justify-between">
-                    <div>
-                      <p class="text-xs text-muted-foreground mb-0.5">Biaya Bulanan</p>
-                      <p class="font-bold text-primary">{{ formatCurrencyShort(p.biaya_bulanan) }}</p>
+                  <div class="flex flex-col gap-3 mt-auto pt-4 border-t border-border">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Pendaftaran</p>
+                        <p class="font-bold text-foreground text-sm">{{ formatCurrencyShort(p.biaya_pendaftaran) }}</p>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Biaya Bulanan</p>
+                        <p class="font-bold text-primary text-sm">{{ formatCurrencyShort(p.biaya_bulanan) }}</p>
+                      </div>
                     </div>
                     
                     <!-- Compare Toggle -->
                     <button
                       @click.prevent="toggleCompare(p.id)"
-                      class="w-10 h-10 rounded-full flex items-center justify-center transition-all border shrink-0"
-                      :class="compareStore.isSelected(p.id) ? 'bg-accent border-accent text-white shadow-md' : 'bg-surface border-border text-muted-foreground hover:border-accent hover:text-accent'"
-                      :title="compareStore.isSelected(p.id) ? 'Telah ditambahkan ke perbandingan' : 'Tambahkan ke perbandingan'"
+                      class="w-full py-2 rounded-lg flex items-center justify-center gap-2 transition-all border shrink-0 text-xs font-bold uppercase tracking-wider"
+                      :class="compareStore.isSelected(p.id) ? 'bg-accent border-accent text-white shadow-sm' : 'bg-surface border-border text-muted-foreground hover:border-accent hover:text-accent'"
                     >
-                      <svg v-if="compareStore.isSelected(p.id)" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                      <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                      <svg v-if="compareStore.isSelected(p.id)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                      {{ compareStore.isSelected(p.id) ? 'Tersimpan' : 'Bandingkan' }}
                     </button>
                   </div>
                 </div>
