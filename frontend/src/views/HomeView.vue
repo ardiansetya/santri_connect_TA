@@ -106,7 +106,7 @@
         <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           <router-link v-for="p in activeTop6List" :key="p.id" :to="`/pesantren/${p.id}`" class="pesantren-card group">
             <div class="relative aspect-video overflow-hidden rounded-t-xl">
-              <img :src="p.foto_utama ? getUploadUrl(p.foto_utama) : 'https://placehold.co/600x400/0D4F4F/D4A843?text=Pesantren&font=playfair-display'" :alt="p.nama" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+              <img :src="p.foto_utama ? getUploadUrl(p.foto_utama) : 'https://placehold.co/600x400/0D4F4F/D4A843?text=Pesantren&font=playfair-display'" :alt="p.nama" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"/>
               <div class="pesantren-card-overlay"></div>
               <span :class="getCurriculumBadgeClass(p.kurikulum)" class="pesantren-badge shadow-md">{{ p.kurikulum || 'Modern' }}</span>
               <span v-if="activeTop6Tab === 'termurah'" class="top6-rank-badge bg-emerald-500">💰 Hemat</span>

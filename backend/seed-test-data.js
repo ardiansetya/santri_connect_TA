@@ -65,7 +65,9 @@ async function seedTestData() {
       '["Masjid", "Asrama", "Perpustakaan"]',
       'alpha@test.com', '08111111111', NULL,
       'Pesantren test pertama untuk pengujian sistem.',
-      NULL, NULL, NOW(), NOW()
+      'https://loremflickr.com/800/600/mosque,islamic?lock=101', 
+      '["https://loremflickr.com/800/600/muslim,student?lock=101"]', 
+      NOW(), NOW()
     )
   `)
   console.log('  ✓ Pesantren ID 1: Pesantren Test Alpha (Owner: pemilik1)')
@@ -85,7 +87,9 @@ async function seedTestData() {
       '["Masjid", "Laboratorium"]',
       'beta@test.com', '08222222222', NULL,
       'Pesantren test kedua untuk pengujian perbandingan.',
-      NULL, NULL, NOW(), NOW()
+      'https://loremflickr.com/800/600/mosque,islamic?lock=102', 
+      '["https://loremflickr.com/800/600/muslim,student?lock=102"]', 
+      NOW(), NOW()
     )
   `)
   console.log('  ✓ Pesantren ID 2: Pesantren Test Beta (Owner: pemilik2)')
@@ -105,7 +109,9 @@ async function seedTestData() {
       '["Masjid", "Sport Center", "WiFi"]',
       'gamma@test.com', '08333333333', NULL,
       'Pesantren test ketiga untuk pengujian fitur rekomendasi.',
-      NULL, NULL, NOW(), NOW()
+      'https://loremflickr.com/800/600/mosque,islamic?lock=103', 
+      '["https://loremflickr.com/800/600/muslim,student?lock=103"]', 
+      NOW(), NOW()
     )
   `)
   console.log('  ✓ Pesantren ID 3: Pesantren Test Gamma (Owner: pemilik3)')

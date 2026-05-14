@@ -224,6 +224,8 @@
                   <img
                     :src="p.foto_utama ? getUploadUrl(p.foto_utama) : 'https://placehold.co/600x400/0D4F4F/D4A843?text=Pesantren&font=playfair-display'"
                     :alt="p.nama"
+                    loading="lazy"
+                    decoding="async"
                     class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

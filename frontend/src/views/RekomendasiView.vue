@@ -243,6 +243,8 @@
                   <div class="md:w-1/3 relative shrink-0 overflow-hidden bg-muted/20 min-h-[180px]">
                     <img 
                       :src="item.pesantren?.foto_utama ? getUploadUrl(item.pesantren.foto_utama) : 'https://placehold.co/600x600/0D4F4F/D4A843?text=Pesantren&font=playfair-display'"
+                      loading="lazy"
+                      decoding="async"
                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     

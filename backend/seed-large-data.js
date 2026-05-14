@@ -59,14 +59,6 @@ async function run() {
   // 2. Generate 100 Pesantren & 100 Owners
   console.log('Membuat 100 data pesantren beserta 100 pemilik unik...')
   const BANKS = ['Bank Syariah Indonesia (BSI)', 'Bank Muamalat', 'BNI', 'BRI', 'Mandiri']
-  const FOTO_UTAMA_LIST = [
-    'https://images.unsplash.com/photo-1541018939203-36eeab6d9f21?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1590076215667-873917822941?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1566023307764-4e2b02787869?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1574246604907-db69e30ddb97?auto=format&fit=crop&w=800&q=80'
-  ]
-
   const ownerHashed = await bcrypt.hash('password123', 10)
   const hashedPendaftar = await bcrypt.hash('pendaftar123', 10)
   const STATUSES = ['pending', 'diproses', 'diterima', 'ditolak']
@@ -91,6 +83,12 @@ async function run() {
     const tahunBerdiri = 1950 + Math.floor(Math.random() * 70)
     const jumlahSantri = 50 + Math.floor(Math.random() * 2000)
     const slug = `darul-${i}-${kota.toLowerCase().replace(/\s+/g, '-')}`.substring(0, 30)
+
+    const foto_utama = `https://loremflickr.com/800/600/mosque,islamic,building?lock=${i}`
+    const foto_galeri = JSON.stringify([
+      `https://loremflickr.com/800/600/muslim,student?lock=${i}`,
+      `https://loremflickr.com/800/600/quran,arabic?lock=${i}`
+    ])
 
     const [res] = await conn.query(`
       INSERT INTO pesantren (
@@ -119,8 +117,8 @@ async function run() {
       `08${Math.floor(Math.random() * 8999999999) + 1000000000}`,
       `www.pesantrendarul${i}.com`,
       `Pesantren Darul ${i} merupakan lembaga pendidikan Islam yang berdedikasi tinggi di ${kota}. Kami memiliki fokus pada kurikulum ${getRandomItem(KURIKULUM)} dengan fasilitas lengkap untuk mendukung proses belajar mengajar santri.`,
-      getRandomItem(FOTO_UTAMA_LIST),
-      JSON.stringify([getRandomItem(FOTO_UTAMA_LIST), getRandomItem(FOTO_UTAMA_LIST)]),
+      foto_utama,
+      foto_galeri,
       getRandomItem(BANKS),
       Math.floor(Math.random() * 9000000000) + 1000000000,
       `Yayasan Darul ${i}`,

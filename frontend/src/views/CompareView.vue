@@ -113,6 +113,8 @@
                           v-if="p.foto_utama" 
                           :src="getUploadUrl(p.foto_utama)" 
                           :alt="p.nama" 
+                          loading="lazy"
+                          decoding="async"
                           class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
                         <div v-else class="w-full h-full flex items-center justify-center bg-primary/5 text-primary/20 text-4xl italic">SC</div>
@@ -125,9 +127,13 @@
                       </div>
                       <!-- Auto-highlight Badges -->
                       <div class="flex flex-wrap justify-center gap-1.5 mb-3 min-h-[24px]">
-                        <span v-if="cheapestIds.includes(p.id)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm animate-fade-in">
+                        <span v-if="cheapestMonthlyIds.includes(p.id)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm animate-fade-in">
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                          Termurah
+                          SPP Termurah
+                        </span>
+                        <span v-if="cheapestRegistrationIds.includes(p.id)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-teal-100 text-teal-700 border border-teal-200 shadow-sm animate-fade-in">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                          Daftar Termurah
                         </span>
                         <span v-if="mostFacilitiesIds.includes(p.id)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200 shadow-sm animate-fade-in">
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -220,7 +226,7 @@
                     </div>
                   </td>
                   <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
-                    <div class="inline-block px-4 py-2 bg-success/[0.02] border-2 rounded-xl" :class="cheapestIds.includes(p.id) ? 'border-emerald-400 bg-emerald-50 ring-2 ring-emerald-200' : 'border-success/20'">
+                    <div class="inline-block px-4 py-2 bg-success/[0.02] border-2 rounded-xl" :class="cheapestMonthlyIds.includes(p.id) ? 'border-emerald-400 bg-emerald-50 ring-2 ring-emerald-200' : 'border-success/20'">
                       <span class="font-black text-success text-lg">{{ formatCurrency(p.biaya_bulanan) }}</span>
                     </div>
                   </td>
@@ -235,7 +241,9 @@
                     </div>
                   </td>
                   <td v-for="p in pesantrenData" :key="p.id" class="p-5 text-center">
-                    <span class="font-bold text-foreground text-md">{{ formatCurrency(p.biaya_pendaftaran) }}</span>
+                    <div class="inline-block px-4 py-2 border-2 rounded-xl" :class="cheapestRegistrationIds.includes(p.id) ? 'border-teal-400 bg-teal-50 ring-2 ring-teal-200' : 'border-slate-200'">
+                      <span class="font-bold text-foreground text-md">{{ formatCurrency(p.biaya_pendaftaran) }}</span>
+                    </div>
                   </td>
                 </tr>
                 
@@ -278,7 +286,7 @@ const loading = ref(false)
 const error = ref('')
 
 // Auto-highlight: Termurah & Terlengkap
-const cheapestIds = computed(() => {
+const cheapestMonthlyIds = computed(() => {
   if (pesantrenData.value.length < 2) return []
   const withBiaya = pesantrenData.value.filter(p => {
     const biaya = parseFloat(p.biaya_bulanan)
@@ -287,6 +295,17 @@ const cheapestIds = computed(() => {
   if (withBiaya.length < 2) return []
   const minBiaya = Math.min(...withBiaya.map(p => parseFloat(p.biaya_bulanan)))
   return withBiaya.filter(p => parseFloat(p.biaya_bulanan) === minBiaya).map(p => p.id)
+})
+
+const cheapestRegistrationIds = computed(() => {
+  if (pesantrenData.value.length < 2) return []
+  const withBiaya = pesantrenData.value.filter(p => {
+    const biaya = parseFloat(p.biaya_pendaftaran)
+    return !isNaN(biaya) && biaya > 0
+  })
+  if (withBiaya.length < 2) return []
+  const minBiaya = Math.min(...withBiaya.map(p => parseFloat(p.biaya_pendaftaran)))
+  return withBiaya.filter(p => parseFloat(p.biaya_pendaftaran) === minBiaya).map(p => p.id)
 })
 
 const mostFacilitiesIds = computed(() => {
