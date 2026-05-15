@@ -65,8 +65,8 @@ async function seedTestData() {
       '["Masjid", "Asrama", "Perpustakaan"]',
       'alpha@test.com', '08111111111', NULL,
       'Pesantren test pertama untuk pengujian sistem.',
-      'https://loremflickr.com/800/600/mosque,islamic?lock=101', 
-      '["https://loremflickr.com/800/600/muslim,student?lock=101"]', 
+      'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa', 
+      '["https://images.unsplash.com/photo-1518391846015-55a9cf003585", "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f"]', 
       NOW(), NOW()
     )
   `)
@@ -87,8 +87,8 @@ async function seedTestData() {
       '["Masjid", "Laboratorium"]',
       'beta@test.com', '08222222222', NULL,
       'Pesantren test kedua untuk pengujian perbandingan.',
-      'https://loremflickr.com/800/600/mosque,islamic?lock=102', 
-      '["https://loremflickr.com/800/600/muslim,student?lock=102"]', 
+      'https://images.unsplash.com/photo-1542612013-149090623e86', 
+      '["https://images.unsplash.com/photo-1564121211835-e88c852648a2", "https://images.unsplash.com/photo-1585036156171-384164a8c675"]', 
       NOW(), NOW()
     )
   `)
@@ -109,8 +109,8 @@ async function seedTestData() {
       '["Masjid", "Sport Center", "WiFi"]',
       'gamma@test.com', '08333333333', NULL,
       'Pesantren test ketiga untuk pengujian fitur rekomendasi.',
-      'https://loremflickr.com/800/600/mosque,islamic?lock=103', 
-      '["https://loremflickr.com/800/600/muslim,student?lock=103"]', 
+      'https://images.unsplash.com/photo-1519817650390-64a93db51149', 
+      '["https://images.unsplash.com/photo-1597933534024-bcbb649d0e80", "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74"]', 
       NOW(), NOW()
     )
   `)

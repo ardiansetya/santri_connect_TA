@@ -71,7 +71,7 @@ const Pesantren = {
     }
     
     // Modern sorting
-    const validSortFields = ['nama', 'tahun_berdiri', 'jumlah_santri', 'biaya_bulanan', 'created_at']
+    const validSortFields = ['nama', 'tahun_berdiri', 'jumlah_santri', 'biaya_bulanan', 'biaya_pendaftaran', 'created_at']
     const sortField = validSortFields.includes(sort) ? sort : 'created_at'
     const sortOrder = (order && order.toUpperCase() === 'DESC') ? 'DESC' : 'ASC'
     

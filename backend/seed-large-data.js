@@ -5,6 +5,26 @@ const bcrypt = require('bcrypt')
 const KURIKULUM = ['modern', 'salaf', 'campuran']
 const FASILITAS_ALL = ['Masjid', 'Asrama', 'Perpustakaan', 'Lab Komputer', 'WiFi', 'Klinik', 'Lapangan Olahraga', 'Kantin', 'Kolam Renang', 'Aula', 'AC', 'Koperasi']
 
+const CURATED_PHOTOS = [
+  'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa', // Sheikh Zayed Grand Mosque
+  'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f', // Blue Mosque
+  'https://images.unsplash.com/photo-1519817650390-64a93db51149', // Islamic Architecture
+  'https://images.unsplash.com/photo-1585036156171-384164a8c675', // Mosque Dome
+  'https://plus.unsplash.com/premium_photo-1670745800247-271e8977da41',
+  'https://plus.unsplash.com/premium_photo-1764695516001-06ec3e3aded9',
+  'https://plus.unsplash.com/premium_photo-1697730160077-11c64c37550f',
+  'https://plus.unsplash.com/premium_photo-1699526398206-b519c41778ab',
+  'https://plus.unsplash.com/premium_photo-1770059205799-e079ddca35a3',
+  'https://plus.unsplash.com/premium_photo-1678373455601-04f440d5f074',
+  'https://plus.unsplash.com/premium_photo-1697730020118-46dffe1c5b8c',
+  'https://plus.unsplash.com/premium_photo-1697729912281-c2b2da54d027',
+]
+
+const CURATED_KEYWORDS = [
+  'mosque', 'islamic,building', 'madrasa', 'arabic,architecture', 'spiritual',
+  'muslim,culture', 'education,building', 'classic,mosque', 'modern,islamic', 'peaceful,building'
+]
+
 function getRandomItem(arr) {
   return arr[Math.floor(Math.random() * arr.length)]
 }
@@ -22,7 +42,7 @@ async function fetchJson(url) {
 
 async function run() {
   console.log('🌱 Memulai proses seeding data skala besar (Validasi API Wilayah)...')
-  
+
   const conn = await mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -34,7 +54,7 @@ async function run() {
   await conn.query(`DELETE FROM pendaftaran WHERE nomor_pendaftaran LIKE 'REG-%'`)
   await conn.query(`DELETE FROM pesantren WHERE nama LIKE 'Pesantren Darul %'`)
   await conn.query(`DELETE FROM users WHERE username LIKE 'santri_%' OR username LIKE 'santribaru_%' OR username LIKE 'pemilik_darul_%' OR username = 'admin'`)
-  
+
   console.log('Membuat akun admin...')
   const adminHashed = await bcrypt.hash('admin123', 10)
   await conn.query(
@@ -44,10 +64,10 @@ async function run() {
 
   console.log('Mengambil data Wilayah dari API Emsifa...')
   const provinces = await fetchJson('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json')
-  
+
   // Ambil semua provinsi agar tiap provinsi terwakili minimal 1 pesantren
   const citiesMap = {}
-  
+
   for (const prov of provinces) {
     const cities = await fetchJson(`https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${prov.id}.json`)
     citiesMap[prov.name] = cities.map(c => c.name)
@@ -63,7 +83,7 @@ async function run() {
   const STATUSES = ['pending', 'diproses', 'diterima', 'ditolak']
 
   let pesantrenIds = []
-  
+
   // Pastikan setiap provinsi ada minimal 1 pesantren
   let targetProvinces = [...provNames]
   while (targetProvinces.length < 100) {
@@ -74,7 +94,7 @@ async function run() {
   for (let i = 1; i <= 100; i++) {
     const prov = targetProvinces[i - 1]
     const kota = getRandomItem(citiesMap[prov])
-    
+
     // Create unique owner for this pesantren
     const ownerEmail = `pemilik.pesantren${i}@test.com`
     const [ownerRes] = await conn.query(
@@ -86,15 +106,16 @@ async function run() {
     // Fee logic: Monthly fee always smaller than registration fee
     const biayaPendaftaran = (Math.floor(Math.random() * 20) + 15) * 100000 // 1.5M - 3.4M
     const biayaBulanan = (Math.floor(Math.random() * 10) + 3) * 100000 // 300k - 1.2M
-    
+
     const tahunBerdiri = 1950 + Math.floor(Math.random() * 70)
     const jumlahSantri = 50 + Math.floor(Math.random() * 2000)
     const slug = `darul-${i}-${kota.toLowerCase().replace(/\s+/g, '-')}`.substring(0, 30)
 
-    const foto_utama = `https://loremflickr.com/800/600/mosque,islamic,building?lock=${i}`
+    const foto_utama = CURATED_PHOTOS[(i - 1) % CURATED_PHOTOS.length]
+
     const foto_galeri = JSON.stringify([
-      `https://loremflickr.com/800/600/muslim,student?lock=${i}`,
-      `https://loremflickr.com/800/600/quran,arabic?lock=${i}`
+      CURATED_PHOTOS[(i + 5) % CURATED_PHOTOS.length],
+      CURATED_PHOTOS[(i + 12) % CURATED_PHOTOS.length]
     ])
 
     const [res] = await conn.query(`
@@ -138,17 +159,17 @@ async function run() {
     for (let j = 1; j <= pendaftarCount; j++) {
       const username = `santri_${pesantrenId}_${j}`
       const email = `santri_${pesantrenId}_${j}@test.com`
-      
+
       const [userRes] = await conn.query(
         'INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())',
         [username, email, hashedPendaftar, 'pendaftar']
       )
       const userId = userRes.insertId
-      
+
       const nomor = `REG-${pesantrenId}-${j}-${Date.now().toString().slice(-4)}`
       const status = getRandomItem(STATUSES)
       const paymentStatus = status === 'pending' ? 'unpaid' : 'paid'
-      
+
       await conn.query(`
         INSERT INTO pendaftaran (
           nomor_pendaftaran, user_id, pesantren_id, status, payment_status, payment_amount,
@@ -169,8 +190,20 @@ async function run() {
   }
   console.log(`✓ 100 Pesantren, 100 Pemilik, dan ~1250 Pendaftar berhasil dibuat.`)
 
+
+  console.log('Menerapkan foto masjid ke SEMUA pesantren di database...')
+  const [allPesantren] = await conn.query('SELECT id FROM pesantren')
+  for (const p of allPesantren) {
+    const foto_utama = CURATED_PHOTOS[p.id % CURATED_PHOTOS.length]
+    const foto_galeri = JSON.stringify([
+      CURATED_PHOTOS[(p.id + 3) % CURATED_PHOTOS.length],
+      CURATED_PHOTOS[(p.id + 7) % CURATED_PHOTOS.length]
+    ])
+    await conn.query('UPDATE pesantren SET foto_utama = ?, foto_galeri = ? WHERE id = ?', [foto_utama, foto_galeri, p.id])
+  }
+
   await conn.end()
-  console.log('\n✅ Proses seeding skala besar SELESAI!')
+  console.log('✅ SELESAI: Semua pesantren kini menggunakan gambar masjid/pesantren yang relevan!')
 }
 
 run().catch(console.error)

@@ -154,6 +154,34 @@
                          />
                       </div>
                    </div>
+                   
+                   <!-- Registration Presets -->
+                   <div class="flex flex-wrap gap-1.5">
+                      <button 
+                        @click="setRegistrationPreset(1000000)" 
+                        type="button"
+                        class="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-surface hover:bg-primary/5 hover:border-primary/30 transition-all border border-border flex-1 text-center shadow-sm"
+                        :class="filters.biaya_pendaftaran_max === 1000000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
+                      >
+                        &lt; 1jt
+                      </button>
+                      <button 
+                        @click="setRegistrationPreset(3000000)" 
+                        type="button"
+                        class="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-surface hover:bg-primary/5 hover:border-primary/30 transition-all border border-border flex-1 text-center shadow-sm"
+                        :class="filters.biaya_pendaftaran_max === 3000000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
+                      >
+                        &lt; 3jt
+                      </button>
+                      <button 
+                        @click="setRegistrationPreset(5000000)" 
+                        type="button"
+                        class="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-surface hover:bg-primary/5 hover:border-primary/30 transition-all border border-border flex-1 text-center shadow-sm"
+                        :class="filters.biaya_pendaftaran_max === 5000000 ? 'border-primary text-primary bg-primary/5' : 'text-muted-foreground'"
+                      >
+                        &lt; 5jt
+                      </button>
+                   </div>
                 </div>
 
                 <div class="border-t border-border pt-5 mt-5">
@@ -165,6 +193,7 @@
                       <option value="tahun_berdiri">Tahun Berdiri</option>
                       <option value="jumlah_santri">Jumlah Santri</option>
                       <option value="biaya_bulanan">Biaya Bulanan</option>
+                      <option value="biaya_pendaftaran">Uang Pendaftaran</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground">
                       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -263,12 +292,12 @@
                   <div class="flex flex-col gap-3 mt-auto pt-4 border-t border-border">
                     <div class="flex items-center justify-between">
                       <div>
-                        <p class="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Pendaftaran</p>
-                        <p class="font-bold text-foreground text-sm">{{ formatCurrencyShort(p.biaya_pendaftaran) }}</p>
+                        <p class="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Uang Pendaftaran</p>
+                        <p class="font-bold text-foreground text-sm">{{ formatPrice(p.biaya_pendaftaran) }}</p>
                       </div>
                       <div class="text-right">
-                        <p class="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Biaya Bulanan</p>
-                        <p class="font-bold text-primary text-sm">{{ formatCurrencyShort(p.biaya_bulanan) }}</p>
+                        <p class="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">SPP Bulanan</p>
+                        <p class="font-bold text-primary text-sm">{{ formatSpp(p.biaya_bulanan) }}</p>
                       </div>
                     </div>
                     
@@ -382,8 +411,16 @@ function onBiayaPendaftaranMaxInput(e) {
   }, 500)
 }
 
-function formatCurrencyShort(amount) {
-  if (!amount) return 'Hubungi Pesantren'
+function formatPrice(amount) {
+  if (!amount) return 'Gratis'
+  if (amount >= 1000000) {
+    return 'Rp ' + (amount / 1000000).toFixed(1).replace('.0', '') + 'jt'
+  }
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount)
+}
+
+function formatSpp(amount) {
+  if (!amount) return 'Gratis'
   if (amount >= 1000000) {
     return 'Rp ' + (amount / 1000000).toFixed(1).replace('.0', '') + 'jt/bln'
   }
@@ -429,6 +466,11 @@ function resetFilters() {
 
 function setBudgetPreset(max) {
   filters.value.biaya_max = max || ''
+  fetchData()
+}
+
+function setRegistrationPreset(max) {
+  filters.value.biaya_pendaftaran_max = max || ''
   fetchData()
 }
 

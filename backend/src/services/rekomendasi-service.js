@@ -93,6 +93,7 @@ const RekomendasiService = {
           province: p.province,
           kota: p.kota,
           biaya_bulanan: p.biaya_bulanan,
+          biaya_pendaftaran: p.biaya_pendaftaran,
           kurikulum: p.kurikulum,
           foto_utama: p.foto_utama
         }

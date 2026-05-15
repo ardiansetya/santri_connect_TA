@@ -316,13 +316,13 @@
 
                        <div class="flex flex-wrap items-center gap-x-6 gap-y-3 mb-4">
                           <div>
-                             <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Pendaftaran</p>
+                             <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Uang Pendaftaran</p>
                              <p class="font-bold text-foreground">{{ formatCurrency(item.pesantren?.biaya_pendaftaran) }}</p>
                           </div>
                           <div class="hidden sm:block h-8 w-px bg-border"></div>
                           <div>
-                             <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">Biaya Bulanan</p>
-                             <p class="font-bold text-success">{{ formatCurrency(item.pesantren?.biaya_bulanan) }}</p>
+                             <p class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">SPP Bulanan</p>
+                             <p class="font-bold text-success">{{ formatCurrency(item.pesantren?.biaya_bulanan) }}/bln</p>
                           </div>
                           <div class="hidden sm:block h-8 w-px bg-border"></div>
                           <div class="flex-1 min-w-[120px]">
@@ -345,7 +345,7 @@
                        <div class="flex-1 px-5 py-3 flex items-center justify-between gap-6 border-b sm:border-b-0 sm:border-r border-border">
                           <div class="flex flex-col gap-1.5 flex-1 min-w-0">
                              <div class="flex justify-between text-[8px] font-extrabold uppercase tracking-widest text-muted-foreground">
-                                <span>Budget</span>
+                                <span>Kesesuaian Biaya</span>
                                 <span class="text-success">{{ Math.round((item.budget_score || 0) * 100) }}%</span>
                              </div>
                              <div class="w-full bg-border rounded-full h-1">
